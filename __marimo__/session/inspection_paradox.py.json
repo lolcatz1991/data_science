@@ -1,0 +1,503 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.25.2",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "ede56dae1b56c6c5cb545c32c394dc0b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "9673c532ce784cc6f0799724b752e23c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"statistical-paradoxes-are-everywhere-the-inspection-paradox\">Statistical paradoxes are everywhere: the inspection paradox</h1>\n<span class=\"paragraph\"><em>An interactive companion to marimo's video <strong>\"Statistical Paradoxes Are Everywhere\"</strong>.</em></span>\n<blockquote>\n<span class=\"paragraph\">A teacher and every student in the same room write down <strong>the same number</strong>: how many students are in this class.\nRepeat this for every class in the school. Then average the teachers' notes and average the students' notes.\n<strong>The two averages disagree, by a lot.</strong></span>\n</blockquote>\n<span class=\"paragraph\">This is the <strong>inspection paradox</strong>. When the <em>way you sample</em> depends on the <em>thing you measure</em>,\nyour average quietly changes. In this notebook you'll replay three riddles from the video in simulation, which is the\n<strong>mental replay</strong> technique the video recommends, and then try a bonus riddle about your bus being \"always late\".</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "a55b78b6b2609f74b81a1ef0a4b2f455",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='vblA-0' random-id='ad35cfba-c389-74aa-1003-7466d3d23e97'><marimo-radio data-initial-value='null' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eBefore you scroll: whose average class size is bigger?&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;Teachers&#x27; average is higher&quot;,&quot;They&#x27;re about the same&quot;,&quot;Students&#x27; average is higher&quot;]' data-inline='false' data-disabled='false'></marimo-radio></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "38d1ef540708c545d71af9f025b973bb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>Lock in an answer above. Section 1 will show you who was right.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "3816700c7b3ef8b297359c272c534bc8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"riddle-1-the-teacher-and-the-students\">Riddle 1 \u00b7 The teacher and the students</h2>\n<span class=\"paragraph\">Each class contributes <strong>one</strong> teacher's note, but <strong>n</strong> students' notes, and every one of those notes says <em>n</em>.\nA class of 100 gets 100 votes from its students and still only one from its teacher.\nA class of 1 gets one vote either way.</span>\n<span class=\"paragraph\">Averaging over teachers gives the plain mean. Averaging over students gives a <strong>size-biased</strong> mean:</span>\n<marimo-tex class=\"arithmatex\">||[\\bar n_{\\text{teacher}} = E[n] \\qquad\\qquad \\bar n_{\\text{student}} = \\frac{\\sum n\\cdot n}{\\sum n} = \\frac{E[n^2]}{E[n]} = E[n] + \\frac{\\operatorname{Var}(n)}{E[n]}||]</marimo-tex><span class=\"paragraph\">The gap is exactly <marimo-tex class=\"arithmatex\">||(\\operatorname{Var}(n)/E[n]||)</marimo-tex>. If every class had the same size, there would be <strong>no paradox</strong>.</span>\n<span class=\"paragraph\">Press <strong>\u25b6 play</strong> to watch classes form one by one. Then press <strong>\u23e9</strong> to run it fast.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "ef16a027f77ff5e2ea7ac0814e8eb8cf",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='PKri-0' random-id='c11c063c-8024-0fee-73d7-a0142ac9f2ad'><marimo-slider data-initial-value='10' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eAverage class size (teacher&#x27;s view)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='4' data-stop='40' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='PKri-1' random-id='4d7dd705-3723-8acb-db6f-de1f7851c183'><marimo-slider data-initial-value='0.8' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eHow unequal are class sizes? (coefficient of variation)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0.0' data-stop='1.5' data-step='0.05' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "4e878dcb4057a208de408a226820350c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "94b765fed90e28e387a2bf74b95723d3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "d0c8afcaab30c04a22283232f3d97af1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='BYtC-0' random-id='d26d0258-1571-1e1c-5ba5-7ec0275a1ef1'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;62e67a3b5609480f97b02d814692a3b6&quot;}' data-label='null' data-model-id='&quot;62e67a3b5609480f97b02d814692a3b6&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "03703bdfb2f64d539f3a0385b070a9a4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 1'><marimo-stat data-value='&quot;10.1&quot;' data-label='&quot;Teachers&#x27; average&quot;' data-caption='&quot;the true mean class size&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><div style='flex: 1'><marimo-stat data-value='&quot;16.5&quot;' data-label='&quot;Students&#x27; average&quot;' data-caption='&quot;+63% vs teachers&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><div style='flex: 1'><marimo-stat data-value='&quot;6.4&quot;' data-label='&quot;Var(n) / E[n]&quot;' data-caption='&quot;theory predicts this gap&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div></div><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-53dd12d979c6616229e6264b64c9b51b&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;avg&#92;&quot;: 10.07645,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;avg&#92;&quot;: 16.458946355115145,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      }&#92;n    ],&#92;n    &#92;&quot;data-8e5ee43fc178b609846220e78883d335&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 1,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0643,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 2,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.06535,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 3,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.071,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 4,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.07145,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 5,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.06965,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 6,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0668,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 7,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0625,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 8,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0537,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 9,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0521,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 10,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0468,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 11,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0423,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 12,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.03725,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 13,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0371,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 14,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.03155,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 15,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0276,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 16,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.02545,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 17,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.02185,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 18,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0193,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 19,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.017,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 20,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.01495,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 21,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0122,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 22,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0118,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 23,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00965,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 24,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0098,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 25,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00745,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 26,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0072,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 27,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0055,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 28,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0047,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 29,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00485,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 30,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00385,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 31,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00255,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 32,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0031,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 33,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0024,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 34,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0025,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 35,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00175,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 36,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0008,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 37,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00175,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 38,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0012,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 39,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00105,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 40,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00135,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 41,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0007,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 42,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0008,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 43,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00505,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;teachers&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 1,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.006401130899642612,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 2,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.013011318951528607,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 3,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.021204368298971637,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 4,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.02845168291007556,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 5,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.03466864441369424,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 6,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.03990005077102269,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 7,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.04355357338403799,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 8,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.04276712028750336,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 9,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.04667947556520095,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 10,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.04658987964281092,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 11,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.04632109187564086,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 12,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0444993081203771,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 13,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.04801345929856348,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 14,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.04397168768852475,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 15,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.04121412429940966,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 16,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.04053717733024061,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 17,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.036978228190859226,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 18,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.03458402604254811,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 19,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.03215498103552976,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 20,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.029765756438462534,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 21,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.025504972573692646,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 22,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.02584344605827717,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 23,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.02209534997162796,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 24,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.02341440105125882,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 25,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.01854137838349046,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 26,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.01863595185712437,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 27,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.014783327194353466,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 28,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.013100914873918627,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 29,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.014001851649062726,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 30,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.01149814337338603,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 31,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.007869508516590178,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 32,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.009875461667877871,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 33,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.007884441170321848,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 34,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.008461837114613095,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 35,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.006097500273765318,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 36,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0028670695164806723,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 37,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.006445928860837623,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 38,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.004539526734427731,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 39,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.004076614468745955,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 40,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.00537575534340126,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 41,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.002857114413992892,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 42,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.0033449144358941177,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;class size&#92;&quot;: 43,&#92;n        &#92;&quot;share of notes&#92;&quot;: 0.021617505052214513,&#92;n        &#92;&quot;who is asked&#92;&quot;: &#92;&quot;students&#92;&quot;&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 230,&#92;n  &#92;&quot;layer&#92;&quot;: [&#92;n    {&#92;n      &#92;&quot;data&#92;&quot;: {&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;data-8e5ee43fc178b609846220e78883d335&#92;&quot;&#92;n      },&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;who is asked&#92;&quot;,&#92;n          &#92;&quot;legend&#92;&quot;: {&#92;n            &#92;&quot;orient&#92;&quot;: &#92;&quot;top&#92;&quot;,&#92;n            &#92;&quot;title&#92;&quot;: null&#92;n          },&#92;n          &#92;&quot;scale&#92;&quot;: {&#92;n            &#92;&quot;domain&#92;&quot;: [&#92;n              &#92;&quot;teachers&#92;&quot;,&#92;n              &#92;&quot;students&#92;&quot;&#92;n            ],&#92;n            &#92;&quot;range&#92;&quot;: [&#92;n              &#92;&quot;#e4572e&#92;&quot;,&#92;n              &#92;&quot;#2e86ab&#92;&quot;&#92;n            ]&#92;n          },&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;tooltip&#92;&quot;: [&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;who is asked&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;class size&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;share of notes&#92;&quot;,&#92;n            &#92;&quot;format&#92;&quot;: &#92;&quot;.2%&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          }&#92;n        ],&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;class size&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        },&#92;n        &#92;&quot;y&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;share of notes&#92;&quot;,&#92;n          &#92;&quot;stack&#92;&quot;: null,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;interpolate&#92;&quot;: &#92;&quot;step&#92;&quot;,&#92;n        &#92;&quot;opacity&#92;&quot;: 0.45,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;area&#92;&quot;&#92;n      }&#92;n    },&#92;n    {&#92;n      &#92;&quot;data&#92;&quot;: {&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;data-53dd12d979c6616229e6264b64c9b51b&#92;&quot;&#92;n      },&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;who is asked&#92;&quot;,&#92;n          &#92;&quot;scale&#92;&quot;: {&#92;n            &#92;&quot;domain&#92;&quot;: [&#92;n              &#92;&quot;teachers&#92;&quot;,&#92;n              &#92;&quot;students&#92;&quot;&#92;n            ],&#92;n            &#92;&quot;range&#92;&quot;: [&#92;n              &#92;&quot;#e4572e&#92;&quot;,&#92;n              &#92;&quot;#2e86ab&#92;&quot;&#92;n            ]&#92;n          },&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;avg&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;strokeDash&#92;&quot;: [&#92;n          6,&#92;n          3&#92;n        ],&#92;n        &#92;&quot;strokeWidth&#92;&quot;: 2.5,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;rule&#92;&quot;&#92;n      }&#92;n    }&#92;n  ],&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;20,000 classrooms: the same rooms, two different averages&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: &#92;&quot;container&#92;&quot;&#92;n}&quot;'></marimo-mime-renderer></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "5b1759edd3e4b4e84318a0b93117a624",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this:&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eSet the inequality slider to &#92;u003cstrong&#92;u003e0&#92;u003c/strong&#92;u003e. Every class is the same size and the paradox vanishes.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003ePush the inequality up. The students&#x27; average runs away, even though the teachers&#x27; average stays put.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eIn the animation, find a &#92;u003cem&#92;u003ebig&#92;u003c/em&#92;u003e class and count how many blue notes it adds to the bottom histogram at once.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;n&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTool from the video: do a mental replay.&#92;u003c/strong&#92;u003e Imagine the process that generated each row of your data. Who got to write a note, and how many notes did they get?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "a8e0ea19988c8419ff360d188c0396ce",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"riddle-2-how-many-siblings-do-you-have\">Riddle 2 \u00b7 \"How many siblings do you have?\"</h2>\n<span class=\"paragraph\">Now the teacher keeps their own number to themselves and only asks the students. That seems fair: one student, one answer.</span>\n<span class=\"paragraph\">But it still doesn't tell you how many children families have. Two things go wrong:</span>\n<ul>\n<li>A family with <em>k</em> children sends <strong>k</strong> representatives into the room. This is the size bias from Riddle 1 again.</li>\n<li>A family with <strong>0 children sends no one</strong>. That family is <em>invisible</em> to anyone surveying the room.</li>\n</ul>\n<span class=\"paragraph\">Riddle 1 was distorted by the heavy end. This one is also distorted by an invisible <strong>zero</strong> end.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "3b6148f32c41521ee9e4de18fae3591f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><marimo-ui-element object-id='Hstk-0' random-id='e880cded-b72a-32c2-20da-debf55c04f1f'><marimo-slider data-initial-value='1.8' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eAverage kids per family&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0.3' data-stop='5.0' data-step='0.1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='Hstk-1' random-id='adf3498e-3454-5b52-a7c0-e3449ed569ba'><marimo-dropdown data-initial-value='[&quot;Poisson (kids arrive at random)&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eFamily model&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;Poisson (kids arrive at random)&quot;,&quot;Geometric (many small, a few huge families)&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "507d5663783a575fde399fb83caa5dfd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "41ed10cc4079e4187271ba94e2ef38ad",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 1'><marimo-stat data-value='&quot;1.80&quot;' data-label='&quot;True kids per family&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><div style='flex: 1'><marimo-stat data-value='&quot;2.80&quot;' data-label='&quot;Kids per family, room survey&quot;' data-caption='&quot;= 1.80 siblings + yourself&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><div style='flex: 1'><marimo-stat data-value='&quot;17%&quot;' data-label='&quot;Childless families&quot;' data-caption='&quot;invisible to the room survey&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div></div><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;data&#92;&quot;: {&#92;n    &#92;&quot;name&#92;&quot;: &#92;&quot;data-0751b3947b0fd9ac980e1f24a54088b3&#92;&quot;&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-0751b3947b0fd9ac980e1f24a54088b3&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 0,&#92;n        &#92;&quot;probability&#92;&quot;: 0.16529888823931027,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 0,&#92;n        &#92;&quot;probability&#92;&quot;: 0.0,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 1,&#92;n        &#92;&quot;probability&#92;&quot;: 0.29753799883075854,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 1,&#92;n        &#92;&quot;probability&#92;&quot;: 0.16529888838028067,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 2,&#92;n        &#92;&quot;probability&#92;&quot;: 0.2677841989476827,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 2,&#92;n        &#92;&quot;probability&#92;&quot;: 0.29753799908450523,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 3,&#92;n        &#92;&quot;probability&#92;&quot;: 0.16067051936860963,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 3,&#92;n        &#92;&quot;probability&#92;&quot;: 0.2677841991760547,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 4,&#92;n        &#92;&quot;probability&#92;&quot;: 0.07230173371587431,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 4,&#92;n        &#92;&quot;probability&#92;&quot;: 0.1606705195056328,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 5,&#92;n        &#92;&quot;probability&#92;&quot;: 0.02602862413771476,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 5,&#92;n        &#92;&quot;probability&#92;&quot;: 0.07230173377753478,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 6,&#92;n        &#92;&quot;probability&#92;&quot;: 0.007808587241314427,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 6,&#92;n        &#92;&quot;probability&#92;&quot;: 0.02602862415991252,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 7,&#92;n        &#92;&quot;probability&#92;&quot;: 0.002007922433480853,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 7,&#92;n        &#92;&quot;probability&#92;&quot;: 0.007808587247973757,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 8,&#92;n        &#92;&quot;probability&#92;&quot;: 0.00045178254753319193,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 8,&#92;n        &#92;&quot;probability&#92;&quot;: 0.0020079224351932518,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 9,&#92;n        &#92;&quot;probability&#92;&quot;: 9.035650950663838e-05,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 9,&#92;n        &#92;&quot;probability&#92;&quot;: 0.0004517825479184816,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 10,&#92;n        &#92;&quot;probability&#92;&quot;: 1.626417171119491e-05,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 10,&#92;n        &#92;&quot;probability&#92;&quot;: 9.035650958369633e-05,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 11,&#92;n        &#92;&quot;probability&#92;&quot;: 2.6614099163773485e-06,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 11,&#92;n        &#92;&quot;probability&#92;&quot;: 1.6264171725065336e-05,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 12,&#92;n        &#92;&quot;probability&#92;&quot;: 3.9921148745660235e-07,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 12,&#92;n        &#92;&quot;probability&#92;&quot;: 2.6614099186470555e-06,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 13,&#92;n        &#92;&quot;probability&#92;&quot;: 5.5275436724760324e-08,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 13,&#92;n        &#92;&quot;probability&#92;&quot;: 3.9921148779705835e-07,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 14,&#92;n        &#92;&quot;probability&#92;&quot;: 7.1068418646120425e-09,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 14,&#92;n        &#92;&quot;probability&#92;&quot;: 5.5275436771900394e-08,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 15,&#92;n        &#92;&quot;probability&#92;&quot;: 8.52821023753445e-10,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the parents (truth)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kids in family&#92;&quot;: 15,&#92;n        &#92;&quot;probability&#92;&quot;: 7.1068418706729066e-09,&#92;n        &#92;&quot;survey&#92;&quot;: &#92;&quot;ask the room (students)&#92;&quot;&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;encoding&#92;&quot;: {&#92;n    &#92;&quot;color&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;survey&#92;&quot;,&#92;n      &#92;&quot;legend&#92;&quot;: {&#92;n        &#92;&quot;orient&#92;&quot;: &#92;&quot;top&#92;&quot;,&#92;n        &#92;&quot;title&#92;&quot;: null&#92;n      },&#92;n      &#92;&quot;scale&#92;&quot;: {&#92;n        &#92;&quot;domain&#92;&quot;: [&#92;n          &#92;&quot;ask the parents (truth)&#92;&quot;,&#92;n          &#92;&quot;ask the room (students)&#92;&quot;&#92;n        ],&#92;n        &#92;&quot;range&#92;&quot;: [&#92;n          &#92;&quot;#2e86ab&#92;&quot;,&#92;n          &#92;&quot;#e4572e&#92;&quot;&#92;n        ]&#92;n      },&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    },&#92;n    &#92;&quot;tooltip&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;survey&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;kids in family&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;probability&#92;&quot;,&#92;n        &#92;&quot;format&#92;&quot;: &#92;&quot;.1%&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n      }&#92;n    ],&#92;n    &#92;&quot;x&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;kids in family&#92;&quot;,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;ordinal&#92;&quot;&#92;n    },&#92;n    &#92;&quot;xOffset&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;survey&#92;&quot;,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    },&#92;n    &#92;&quot;y&#92;&quot;: {&#92;n      &#92;&quot;axis&#92;&quot;: {&#92;n        &#92;&quot;format&#92;&quot;: &#92;&quot;%&#92;&quot;&#92;n      },&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;probability&#92;&quot;,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n    }&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 260,&#92;n  &#92;&quot;mark&#92;&quot;: {&#92;n    &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n  },&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;Same population, two surveys&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: &#92;&quot;container&#92;&quot;&#92;n}&quot;'></marimo-mime-renderer></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "e5bd6bec164a6fa1105a82629ff0014b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"challenge-from-the-video-can-you-reverse-it\">\ud83e\udde9 Challenge from the video: can you reverse it?</h3>\n<span class=\"paragraph\">You only get to survey the room (the red bars). Can you reconstruct the parents' distribution (blue)?\nEach family with <marimo-tex class=\"arithmatex\">||(k||)</marimo-tex> kids shows up <marimo-tex class=\"arithmatex\">||(k||)</marimo-tex> times, so dividing by <marimo-tex class=\"arithmatex\">||(k||)</marimo-tex> should undo the weighting:</span>\n<marimo-tex class=\"arithmatex\">||[P_{\\text{family}}(k) \\propto \\frac{P_{\\text{room}}(k)}{k} \\quad (k \\ge 1)||]</marimo-tex><span class=\"paragraph\">Toggle the switch to try it. Then look closely at the <strong>k = 0</strong> bar.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "de3696cfd62e1e782a1e66f9491145f2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='ROlb-0' random-id='3fbb4cc9-98e1-f121-c7a9-424b1b834140'><marimo-switch data-initial-value='false' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eReconstruct the parents&#x27; view from the room survey&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-disabled='false'></marimo-switch></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "2f68fcbed476a1b84af95efa39731d06",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>Switch on to reconstruct.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "464a301c3728102f82882b3fbedb0fa7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"riddle-3-one-day-of-players-vs-everyone-so-far\">Riddle 3 \u00b7 One day of players vs. everyone so far</h2>\n<span class=\"paragraph\">The analytics trap. Imagine an online game (the video uses real <em>World of Warcraft</em> logs). You want to know\n<strong>how many hours per day a typical player plays</strong>. You could look at:</span>\n<ul>\n<li>\ud83d\udd35 <strong>everyone who played during a period</strong> (for example, \"all players so far\"), or</li>\n<li>\ud83d\udd34 <strong>everyone who played on a single survey day</strong>.</li>\n</ul>\n<span class=\"paragraph\">Same game, same players, same metric. Which group plays more hours per day? Make a guess first.</span>\n<span class=\"paragraph\">Our simulated players come in two types, as in the video:\n<strong>tourists</strong> try the game once for a short session and never return, and <strong>regulars</strong> come back day after day.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "a0f4373e2e230c93e527c8bd37c11ed7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='Vxnm-0' random-id='499f1e6f-c885-81c9-0b53-d0bced58fc42'><marimo-radio data-initial-value='null' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eWho plays more hours per day?&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;\ud83d\udd35 the period group&quot;,&quot;about equal&quot;,&quot;\ud83d\udd34 the single-day group&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "6f21792ccb53eea9cd1c1f2ca8aa9356",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='DnEU-0' random-id='72df17f5-2d14-af07-039b-8260f369abe0'><marimo-slider data-initial-value='0.6' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eShare of new players who are tourists&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0.0' data-stop='0.95' data-step='0.05' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='DnEU-1' random-id='593b598c-3396-736c-ef2f-08c7f293d176'><marimo-slider data-initial-value='90' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eRegulars&#x27; average lifetime (days)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='5' data-stop='300' data-step='5' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "40d71ae2126f11ead0853cb3efe7b059",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "e7e880ea85c26f8b7763a41ad0d4c140",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "cdaba6f1a22ca6ce3f1eaf41f11a6322",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Drag the blue handle</strong> (start of the period) and <strong>the red handle</strong> (survey day).</span></span><marimo-ui-element object-id='Pvdt-0' random-id='5d1b5876-8fd0-f13b-dbe4-4a8baba0e400'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;eb757fb658d942998b83318db5d6e722&quot;}' data-label='null' data-model-id='&quot;eb757fb658d942998b83318db5d6e722&quot;'></marimo-anywidget></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "112c322581c005817e7bbd8f7fbb2e21",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 1'><marimo-stat data-value='&quot;1.39 h&quot;' data-label='&quot;\ud83d\udd35 avg hours/day, period group&quot;' data-caption='&quot;18,041 players \u00b7 60% tourists&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><div style='flex: 1'><marimo-stat data-value='&quot;2.94 h&quot;' data-label='&quot;\ud83d\udd34 avg hours/day, single day&quot;' data-caption='&quot;2,210 players \u00b7 2% tourists&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><div style='flex: 1'><marimo-stat data-value='&quot;2.1\u00d7&quot;' data-label='&quot;ratio red / blue&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div></div><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;data&#92;&quot;: {&#92;n    &#92;&quot;name&#92;&quot;: &#92;&quot;data-9f1d581e4ac238e5fefe3ba0b1bd044f&#92;&quot;&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-9f1d581e4ac238e5fefe3ba0b1bd044f&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 0.25,&#92;n        &#92;&quot;lo&#92;&quot;: 0.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.2493209910758827&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 0.5,&#92;n        &#92;&quot;lo&#92;&quot;: 0.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.2260406851061471&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 0.75,&#92;n        &#92;&quot;lo&#92;&quot;: 0.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.1017127653677734&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 1.0,&#92;n        &#92;&quot;lo&#92;&quot;: 0.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.04572917244055207&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 1.25,&#92;n        &#92;&quot;lo&#92;&quot;: 1.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.030874120059863643&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 1.5,&#92;n        &#92;&quot;lo&#92;&quot;: 1.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.02466603846793415&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 1.75,&#92;n        &#92;&quot;lo&#92;&quot;: 1.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.02699406906490771&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 2.0,&#92;n        &#92;&quot;lo&#92;&quot;: 1.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.02638434676570035&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 2.25,&#92;n        &#92;&quot;lo&#92;&quot;: 2.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.026938639764979767&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 2.5,&#92;n        &#92;&quot;lo&#92;&quot;: 2.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.026772351865195942&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 2.75,&#92;n        &#92;&quot;lo&#92;&quot;: 2.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.025386619366997393&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 3.0,&#92;n        &#92;&quot;lo&#92;&quot;: 2.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.02377916966908708&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 3.25,&#92;n        &#92;&quot;lo&#92;&quot;: 3.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.02117399257247381&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 3.5,&#92;n        &#92;&quot;lo&#92;&quot;: 3.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.01940025497477967&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 3.75,&#92;n        &#92;&quot;lo&#92;&quot;: 3.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.017460229477301702&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 4.0,&#92;n        &#92;&quot;lo&#92;&quot;: 3.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.016628789978382574&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 4.25,&#92;n        &#92;&quot;lo&#92;&quot;: 4.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.012637880383570756&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 4.5,&#92;n        &#92;&quot;lo&#92;&quot;: 4.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.01219444598414722&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 4.75,&#92;n        &#92;&quot;lo&#92;&quot;: 4.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.010642425586164846&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 5.0,&#92;n        &#92;&quot;lo&#92;&quot;: 4.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.008924117288398647&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 5.25,&#92;n        &#92;&quot;lo&#92;&quot;: 5.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.006817803891136855&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 5.5,&#92;n        &#92;&quot;lo&#92;&quot;: 5.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.005542929992794191&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 5.75,&#92;n        &#92;&quot;lo&#92;&quot;: 5.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.005210354193226539&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 6.0,&#92;n        &#92;&quot;lo&#92;&quot;: 5.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.005321212793082423&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 6.25,&#92;n        &#92;&quot;lo&#92;&quot;: 6.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.004600631894019178&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 6.5,&#92;n        &#92;&quot;lo&#92;&quot;: 6.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.002937752896180921&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 6.75,&#92;n        &#92;&quot;lo&#92;&quot;: 6.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.003104040795964747&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 7.0,&#92;n        &#92;&quot;lo&#92;&quot;: 6.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.00232803059697356&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 7.25,&#92;n        &#92;&quot;lo&#92;&quot;: 7.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.0016628789978382573&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 7.5,&#92;n        &#92;&quot;lo&#92;&quot;: 7.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.001219444598414722&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 7.75,&#92;n        &#92;&quot;lo&#92;&quot;: 7.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.0013303031982706058&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 8.0,&#92;n        &#92;&quot;lo&#92;&quot;: 7.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.0006651515991353029&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 8.25,&#92;n        &#92;&quot;lo&#92;&quot;: 8.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.0010531566986308964&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 8.5,&#92;n        &#92;&quot;lo&#92;&quot;: 8.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.0008868687988470706&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 8.75,&#92;n        &#92;&quot;lo&#92;&quot;: 8.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.0010531566986308964&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 9.0,&#92;n        &#92;&quot;lo&#92;&quot;: 8.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.0005542929992794192&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 9.25,&#92;n        &#92;&quot;lo&#92;&quot;: 9.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.0002771464996397096&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 9.5,&#92;n        &#92;&quot;lo&#92;&quot;: 9.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.00022171719971176765&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 9.75,&#92;n        &#92;&quot;lo&#92;&quot;: 9.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.00016628789978382572&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 10.0,&#92;n        &#92;&quot;lo&#92;&quot;: 9.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.0013857324981985477&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 0.25,&#92;n        &#92;&quot;lo&#92;&quot;: 0.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.00904977375565611&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 0.5,&#92;n        &#92;&quot;lo&#92;&quot;: 0.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.02398190045248869&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 0.75,&#92;n        &#92;&quot;lo&#92;&quot;: 0.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.02850678733031674&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 1.0,&#92;n        &#92;&quot;lo&#92;&quot;: 0.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.037104072398190045&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 1.25,&#92;n        &#92;&quot;lo&#92;&quot;: 1.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.05475113122171946&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 1.5,&#92;n        &#92;&quot;lo&#92;&quot;: 1.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.05067873303167421&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 1.75,&#92;n        &#92;&quot;lo&#92;&quot;: 1.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.06561085972850679&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 2.0,&#92;n        &#92;&quot;lo&#92;&quot;: 1.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.06063348416289593&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 2.25,&#92;n        &#92;&quot;lo&#92;&quot;: 2.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.06244343891402715&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 2.5,&#92;n        &#92;&quot;lo&#92;&quot;: 2.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.0669683257918552&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 2.75,&#92;n        &#92;&quot;lo&#92;&quot;: 2.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.06380090497737556&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 3.0,&#92;n        &#92;&quot;lo&#92;&quot;: 2.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.05429864253393665&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 3.25,&#92;n        &#92;&quot;lo&#92;&quot;: 3.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.05746606334841629&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 3.5,&#92;n        &#92;&quot;lo&#92;&quot;: 3.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.048868778280542986&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 3.75,&#92;n        &#92;&quot;lo&#92;&quot;: 3.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.04524886877828054&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 4.0,&#92;n        &#92;&quot;lo&#92;&quot;: 3.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.04253393665158371&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 4.25,&#92;n        &#92;&quot;lo&#92;&quot;: 4.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.02850678733031674&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 4.5,&#92;n        &#92;&quot;lo&#92;&quot;: 4.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.038461538461538464&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 4.75,&#92;n        &#92;&quot;lo&#92;&quot;: 4.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.029411764705882353&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 5.0,&#92;n        &#92;&quot;lo&#92;&quot;: 4.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.023529411764705882&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 5.25,&#92;n        &#92;&quot;lo&#92;&quot;: 5.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.015384615384615385&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 5.5,&#92;n        &#92;&quot;lo&#92;&quot;: 5.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.01493212669683258&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 5.75,&#92;n        &#92;&quot;lo&#92;&quot;: 5.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.013122171945701358&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 6.0,&#92;n        &#92;&quot;lo&#92;&quot;: 5.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.011312217194570135&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 6.25,&#92;n        &#92;&quot;lo&#92;&quot;: 6.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.00904977375565611&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 6.5,&#92;n        &#92;&quot;lo&#92;&quot;: 6.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.006787330316742082&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 6.75,&#92;n        &#92;&quot;lo&#92;&quot;: 6.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.007692307692307693&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 7.0,&#92;n        &#92;&quot;lo&#92;&quot;: 6.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.0036199095022624436&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 7.25,&#92;n        &#92;&quot;lo&#92;&quot;: 7.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.0036199095022624436&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 7.5,&#92;n        &#92;&quot;lo&#92;&quot;: 7.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.003167420814479638&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 7.75,&#92;n        &#92;&quot;lo&#92;&quot;: 7.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.0018099547511312218&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 8.0,&#92;n        &#92;&quot;lo&#92;&quot;: 7.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.0009049773755656109&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 8.25,&#92;n        &#92;&quot;lo&#92;&quot;: 8.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.003167420814479638&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 8.5,&#92;n        &#92;&quot;lo&#92;&quot;: 8.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.0036199095022624436&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 8.75,&#92;n        &#92;&quot;lo&#92;&quot;: 8.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.003167420814479638&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 9.0,&#92;n        &#92;&quot;lo&#92;&quot;: 8.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.0013574660633484162&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 9.25,&#92;n        &#92;&quot;lo&#92;&quot;: 9.0,&#92;n        &#92;&quot;share&#92;&quot;: 0.0013574660633484162&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 9.5,&#92;n        &#92;&quot;lo&#92;&quot;: 9.25,&#92;n        &#92;&quot;share&#92;&quot;: 0.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 9.75,&#92;n        &#92;&quot;lo&#92;&quot;: 9.5,&#92;n        &#92;&quot;share&#92;&quot;: 0.00045248868778280545&#92;n      },&#92;n      {&#92;n        &#92;&quot;group&#92;&quot;: &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;,&#92;n        &#92;&quot;hi&#92;&quot;: 10.0,&#92;n        &#92;&quot;lo&#92;&quot;: 9.75,&#92;n        &#92;&quot;share&#92;&quot;: 0.0036199095022624436&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;encoding&#92;&quot;: {&#92;n    &#92;&quot;color&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;group&#92;&quot;,&#92;n      &#92;&quot;legend&#92;&quot;: {&#92;n        &#92;&quot;orient&#92;&quot;: &#92;&quot;top&#92;&quot;,&#92;n        &#92;&quot;title&#92;&quot;: null&#92;n      },&#92;n      &#92;&quot;scale&#92;&quot;: {&#92;n        &#92;&quot;domain&#92;&quot;: [&#92;n          &#92;&quot;\ud83d\udd35 played during day 0\u2013365&#92;&quot;,&#92;n          &#92;&quot;\ud83d\udd34 played on day 365&#92;&quot;&#92;n        ],&#92;n        &#92;&quot;range&#92;&quot;: [&#92;n          &#92;&quot;#2e86ab&#92;&quot;,&#92;n          &#92;&quot;#e4572e&#92;&quot;&#92;n        ]&#92;n      },&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    },&#92;n    &#92;&quot;x&#92;&quot;: {&#92;n      &#92;&quot;bin&#92;&quot;: &#92;&quot;binned&#92;&quot;,&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;lo&#92;&quot;,&#92;n      &#92;&quot;title&#92;&quot;: &#92;&quot;hours played per active day&#92;&quot;,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n    },&#92;n    &#92;&quot;x2&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;hi&#92;&quot;&#92;n    },&#92;n    &#92;&quot;y&#92;&quot;: {&#92;n      &#92;&quot;axis&#92;&quot;: {&#92;n        &#92;&quot;format&#92;&quot;: &#92;&quot;%&#92;&quot;&#92;n      },&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;share&#92;&quot;,&#92;n      &#92;&quot;stack&#92;&quot;: null,&#92;n      &#92;&quot;title&#92;&quot;: &#92;&quot;share of players&#92;&quot;,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n    }&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 240,&#92;n  &#92;&quot;mark&#92;&quot;: {&#92;n    &#92;&quot;opacity&#92;&quot;: 0.5,&#92;n    &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n  },&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: &#92;&quot;container&#92;&quot;&#92;n}&quot;'></marimo-mime-renderer></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "86263df9917efadc4696866c9c27ab16",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eWhy?&#92;u003c/strong&#92;u003e Recreate the video&#x27;s experiment: drag the &#92;u003cstrong&#92;u003eblue handle onto the red one&#92;u003c/strong&#92;u003e. Both groups are now identical (purple). Then widen the period one day at a time.&#92;u003c/span&#92;u003e&#92;n&#92;u003cul&#92;u003e&#92;n&#92;u003cli&#92;u003eA &#92;u003cstrong&#92;u003etourist&#92;u003c/strong&#92;u003e is in your data for exactly one day. Every extra day in the period brings in a fresh batch of them.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eA &#92;u003cstrong&#92;u003eregular&#92;u003c/strong&#92;u003e is in the data almost every day. Widening the period adds hardly any new regulars, because you had already counted them.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ul&#92;u003e&#92;n&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eA long period therefore piles up light users, while a single day is dominated by the heavy users who keep coming back.&#92;n&#92;u003cstrong&#92;u003eIt&#x27;s Riddle 1 again:&#92;u003c/strong&#92;u003e sampling &#92;&quot;who is here today&#92;&quot; weights each player by how many days they play.&#92;u003c/span&#92;u003e&#92;n&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eSet tourists to &#92;u003cstrong&#92;u003e0%&#92;u003c/strong&#92;u003e and most of the gap disappears. Now make regulars&#x27; lives very short and watch what happens.&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "0cb5415504c2d610dbbdb13b70988615",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "3c19cc41348973eb47327ee598b7dcf3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"bonus-why-is-your-bus-always-late\">Bonus \u00b7 Why is your bus always late?</h2>\n<span class=\"paragraph\">This is a classic from Allen Downey's <em>Probably Overthinking It</em>, which the video recommends.\nBuses arrive on average every <strong>10 minutes</strong>. You show up at a random time. How long do you wait?\n\"Half the gap, so 5 minutes\" is only right if the buses are <strong>perfectly regular</strong>.</span>\n<span class=\"paragraph\">You are far more likely to arrive during a <em>long</em> gap, because long gaps cover more of the clock.\nThat's the size bias again, this time in time instead of in people:</span>\n<marimo-tex class=\"arithmatex\">||[E[\\text{wait}] = \\frac{E[g^2]}{2\\,E[g]} = \\frac{E[g]}{2}\\left(1 + \\mathrm{CV}^2\\right)||]</marimo-tex><span class=\"paragraph\"><strong>Click on the timeline to arrive at the stop</strong>, or drop 200 random passengers.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "5f82c3a19e5eaba18ad8e0c8436f43f3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='AjVT-0' random-id='c4b01f72-ef68-cc7b-a62f-c8212275f494'><marimo-slider data-initial-value='1.0' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eBus irregularity (CV of gaps: 0 = perfect schedule, 1 = random, 2 = bunching)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0.0' data-stop='2.0' data-step='0.1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='true'></marimo-slider></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "2b83eb5794f3397851cde02217303358",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "5a7d1afcd4f41c42e07d71d806a37f3f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "c868f5afcd3e748aee3b22a272a8ac1f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='aqbW-0' random-id='9da7e25e-ec94-1759-d872-3224a85b53ca'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;7612d75894ac41dcb40cf4a2e1283e65&quot;}' data-label='null' data-model-id='&quot;7612d75894ac41dcb40cf4a2e1283e65&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "91b7d2a09973911203c4894e69fdbfd4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 1'><marimo-stat data-value='&quot;5.0 min&quot;' data-label='&quot;Naive guess: half the average gap&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><div style='flex: 1'><marimo-stat data-value='&quot;9.1 min&quot;' data-label='&quot;Theory: E[g\u00b2] / 2E[g]&quot;' data-caption='&quot;for this exact schedule&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><div style='flex: 1'><marimo-stat data-value='&quot;\u2013&quot;' data-label='&quot;Your passengers&#x27; average wait&quot;' data-caption='&quot;0 passengers&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><div style='flex: 1'><marimo-stat data-value='&quot;18.1 min&quot;' data-label='&quot;Avg gap experienced by a passenger&quot;' data-caption='&quot;vs 10 min schedule average&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "4c7da92bde68f1e507c6ea7feb0b3431",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"spot-the-paradox\">Spot the paradox</h2>\n<span class=\"paragraph\">The video's real promise: once you know it, <strong>you'll notice it everywhere</strong>. For each scenario, does the inspection paradox bias the number?</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "b4c346c52f4a95e4f237a6a26f2ce7db",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='dNNg-6' random-id='caaa3897-9f66-7374-7b57-e9d0d586fd77'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;yes&quot;,&quot;no&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Your friends have more friends than you do, on average.</span></span></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='dNNg-7' random-id='07a7d131-0bfb-741c-6d82-1a8e92306044'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;yes&quot;,&quot;no&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Surveying current prisoners gives a longer average sentence than the court records.</span></span></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='dNNg-8' random-id='cc065806-9a74-229f-8835-da9343da0e96'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;yes&quot;,&quot;no&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">On the highway, most cars seem to overtake you or be overtaken; few drive your speed.</span></span></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='dNNg-9' random-id='304066e9-ddf1-bf4a-aef9-d8e751ca867f'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;yes&quot;,&quot;no&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">The average of 1,000 fair die rolls is about 3.5.</span></span></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='dNNg-10' random-id='dc516dd2-929b-c35b-1e0e-9ae90991bff6'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;yes&quot;,&quot;no&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Gym members you meet at the gym work out more often than the average member.</span></span></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='dNNg-11' random-id='617806aa-d0f5-16ba-c0f1-1f7dc5d084a8'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;yes&quot;,&quot;no&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Patients in a hospital today have longer stays than the average admission.</span></span></div></div><marimo-ui-element object-id='dNNg-13' random-id='219dd567-1873-e278-2b62-0b69c79273a1'><marimo-switch data-initial-value='false' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eReveal answers&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-disabled='false'></marimo-switch></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "4598204cf7ef9cfd6a352523f53aa820",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>Answer, then flip the switch.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "b59ce44ab869c948b2de5e9cd16eff7b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"recap-how-to-defend-yourself\">Recap: how to defend yourself</h2>\n<table>\n<thead>\n<tr>\n<th>Riddle</th>\n<th>Who gets over-sampled</th>\n<th>Who goes missing</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Teacher vs students</td>\n<td>big classes (n notes each)</td>\n<td>\u2013</td>\n</tr>\n<tr>\n<td>Siblings</td>\n<td>big families</td>\n<td>childless families (zero kids, zero answers)</td>\n</tr>\n<tr>\n<td>Players per day</td>\n<td>heavy, returning users</td>\n<td>one-off tourists pile up in long periods</td>\n</tr>\n<tr>\n<td>Bus stop</td>\n<td>long gaps</td>\n<td>short gaps</td>\n</tr>\n</tbody>\n</table>\n<ol>\n<li><strong>Mental replay</strong>: simulate the process that created each row. Who got to write a note, and how many?</li>\n<li><strong>Check the extremes</strong>: a class of 1 vs. a class of 100. A family of 0. A player who quits after 10 minutes.</li>\n<li><strong>Name your unit of averaging</strong>: per class, per student, per player, per player-day? Each one answers a <em>different</em> question.</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "2810d33bbaf17bd68a40fb0d5c13a7fd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eDanger, or totally fine?&#92;u003c/strong&#92;u003e As the video ends, a metric is a &#92;u003cem&#92;u003eproxy&#92;u003c/em&#92;u003e. A biased number can still be useful if it moves together with what you care about.&#92;nThe real danger is &#92;u003cstrong&#92;u003ecomparing numbers built with different sampling&#92;u003c/strong&#92;u003e, like a per-day dashboard against a per-period report, and concluding that behaviour changed.&#92;u003c/span&#92;u003e&#92;n&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e\ud83d\udcda &#92;u003cstrong&#92;u003eFurther reading&#92;u003c/strong&#92;u003e: &#92;u003cem&#92;u003eProbably Overthinking It&#92;u003c/em&#92;u003e by Allen B. Downey, which has a whole chapter on this paradox.&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;success&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

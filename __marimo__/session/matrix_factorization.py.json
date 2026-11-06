@@ -1,0 +1,581 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.25.2",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "f405f72d9ad1c6fe4dc9c12cdc6ccf43",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "dac70ef3b8cff3870ac106f8868eca8e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"matrix-factorization-factoring-the-unfactorable\">Matrix Factorization: factoring the unfactorable</h1>\n<span class=\"paragraph\"><em>An interactive companion to</em> <strong><a href=\"https://www.youtube.com/watch?v=wTUSz-HSaBg\" rel=\"noopener noreferrer\" target=\"_blank\">Matrix Factorization \u2013 Numberphile</a></strong> <em>with Prof. David Eisenbud.</em></span>\n<span class=\"paragraph\">Some polynomials can't be factored. Mathematicians have handled stuck problems like this before: they <strong>enlarge the domain</strong>. Negative numbers, fractions, and <em>i</em> were all added this way.\nDirac enlarged it to <strong>matrices</strong>, and Eisenbud proved that almost every polynomial can then be factored.</span></span><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/wTUSz-HSaBg\" title=\"Matrix Factorization - Numberphile\" frameborder=\"0\" allowfullscreen></iframe><marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eColor language used throughout:&#92;u003c/strong&#92;u003e&#92;n&#92;u003cspan style=&#92;&quot;color:#2e86de&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eblue = the first factor A&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e,&#92;n&#92;u003cspan style=&#92;&quot;color:#f18f01&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eorange = the second factor B&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e,&#92;n&#92;u003cspan style=&#92;&quot;color:#e4572e&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003ered = the product / the polynomial f&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e.&#92;nGray means zero or unknown.&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "fce42c0b9e5ce504e85df4e8d62b9de2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-factoring-and-why-you-sometimes-need-a-bigger-toolbox\">1. Factoring, and why you sometimes need a bigger toolbox</h2>\n<span class=\"paragraph\">The video opens with middle-school factoring:</span>\n<marimo-tex class=\"arithmatex\">||[x^2-4=(x-2)(x+2),\\qquad x^2-y^2=(x-y)(x+y),\\qquad x^2+2xy+y^2=(x+y)^2 .||]</marimo-tex><span class=\"paragraph\"><marimo-tex class=\"arithmatex\">||(x^2+3||)</marimo-tex> will not factor over the rationals, because there is no square root of <marimo-tex class=\"arithmatex\">||(-3||)</marimo-tex>. <strong>\"If you enlarge the domain of things you accept, there's a factorization.\"</strong>\nAllow complex numbers and <marimo-tex class=\"arithmatex\">||(x^2+3=(x-i\\sqrt3)(x+i\\sqrt3)||)</marimo-tex>.\nThis is the same move that gave us fractions (to solve <marimo-tex class=\"arithmatex\">||(3x-1=0||)</marimo-tex>) and negative numbers (to solve <marimo-tex class=\"arithmatex\">||(3x+1=0||)</marimo-tex>).</span>\n<span class=\"paragraph\">Pick a polynomial and a number system. Watch which factorizations appear and which never do.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "cb97b3de8982e2947def88d0373b294b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><marimo-ui-element object-id='bkHC-0' random-id='6fd3c240-2be1-2ac2-e735-8dbc421c94b4'><marimo-dropdown data-initial-value='[&quot;x**2 + 3&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ePolynomial&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;x**2 - 4&quot;,&quot;x**2 - y**2&quot;,&quot;x**2 + 2*x*y + y**2&quot;,&quot;x**2 + 3&quot;,&quot;x**2 - 3&quot;,&quot;x**2 + y**2&quot;,&quot;x*y - u*v&quot;,&quot;t**2 + x**2 + y**2 + z**2&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element><marimo-ui-element object-id='bkHC-1' random-id='1ce9d29a-f765-b9eb-1ea2-ea5653c025ff'><marimo-radio data-initial-value='&quot;integers / rationals \u211a&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eAllowed numbers&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;integers / rationals \u211a&quot;,&quot;add square roots (\u221a3)&quot;,&quot;add i as well (complex)&quot;]' data-inline='false' data-disabled='false'></marimo-radio></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "9d9d8175d20b52d92933fc588b989903",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"f-x2-3-x2-3\"><span style='color:#e4572e'>f = <marimo-tex class=\"arithmatex\">||(x^{2} + 3||)</marimo-tex></span>  \u2192  <marimo-tex class=\"arithmatex\">||(x^{2} + 3||)</marimo-tex></h3></span><span class=\"markdown prose dark:prose-invert contents\"><table>\n<thead>\n<tr>\n<th>number system</th>\n<th>best factorization</th>\n<th></th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>integers / rationals \u211a</td>\n<td><marimo-tex class=\"arithmatex\">||(x^{2} + 3||)</marimo-tex></td>\n<td>\u274c stuck</td>\n</tr>\n<tr>\n<td>add square roots (\u221a3)</td>\n<td><marimo-tex class=\"arithmatex\">||(x^{2} + 3||)</marimo-tex></td>\n<td>\u274c stuck</td>\n</tr>\n<tr>\n<td>add i as well (complex)</td>\n<td><marimo-tex class=\"arithmatex\">||(\\left(x - \\sqrt{3} i\\right) \\left(x + \\sqrt{3} i\\right)||)</marimo-tex></td>\n<td>\u2705 factors</td>\n</tr>\n</tbody>\n</table></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "4e20b0e2073d492b5f47e0435d6870ca",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eMove &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(x^2+3||)&#92;u003c/marimo-tex&#92;u003e from \u211a to &#92;u003cem&#92;u003ecomplex&#92;u003c/em&#92;u003e. It only splits once you allow &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(i||)&#92;u003c/marimo-tex&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(x^2+y^2||)&#92;u003c/marimo-tex&#92;u003e also needs &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(i||)&#92;u003c/marimo-tex&#92;u003e: &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||((x-iy)(x+iy)||)&#92;u003c/marimo-tex&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eNow pick &#92;u003cstrong&#92;u003eDirac&#x27;s polynomial&#92;u003c/strong&#92;u003e &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(t^2+x^2+y^2+z^2||)&#92;u003c/marimo-tex&#92;u003e (and its cousin &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(xy-uv||)&#92;u003c/marimo-tex&#92;u003e). They stay stuck &#92;u003cstrong&#92;u003eeven with complex numbers&#92;u003c/strong&#92;u003e. No number system rescues them. That is the cliffhanger the rest of the lesson resolves.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "79ed8a356e56f80adddda251ec2555ed",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-how-do-you-multiply-matrices-rows-times-columns\">2. How do you multiply matrices? Rows times columns</h2>\n<span class=\"paragraph\">To factor <em>into</em> matrices we first need a matrix multiplication. Eisenbud writes it out for <marimo-tex class=\"arithmatex\">||(2\\times2||)</marimo-tex>:</span>\n<marimo-tex class=\"arithmatex\">||[\\begin{pmatrix}a&amp;b\\\\c&amp;d\\end{pmatrix}\\begin{pmatrix}a'&amp;b'\\\\c'&amp;d'\\end{pmatrix}\n=\\begin{pmatrix}aa'+bc' &amp; ab'+bd'\\\\ ca'+dc' &amp; cb'+dd'\\end{pmatrix}.||]</marimo-tex><span class=\"paragraph\">Each entry of the product is a <strong>row of the first matrix</strong> combined with a <strong>column of the second</strong>. Because rows and columns play different roles, <strong>order matters</strong>:\nin general <marimo-tex class=\"arithmatex\">||(AB\\neq BA||)</marimo-tex>. \"They don't commute.\"</span>\n<span class=\"paragraph\">Drag the <span style=\"color:#2e86de\">blue</span> and <span style=\"color:#f18f01\">orange</span> numbers up or down. Hover a <span style=\"color:#e4572e\">red</span> entry to see the row and column that produce it.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "3bc390f423f9428760653385a88ecbb9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "caa439a635ff2ae832e1446703cb429f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='BYtC-0' random-id='3005917d-5dfc-9dbb-ffcb-2a7697166cca'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;20c509c2f3174fc39fb53179ddaffa9a&quot;}' data-label='null' data-model-id='&quot;20c509c2f3174fc39fb53179ddaffa9a&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "01da584a419b1b33c254e88575d61df7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='&quot;no&quot;' data-label='&quot;AB = BA ?&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;3&quot;' data-label='&quot;largest entry of AB \u2212 BA&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;2 = 2&quot;' data-label='&quot;det(AB) = det(BA), always&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;5 = 5&quot;' data-label='&quot;trace(AB) = trace(BA), always&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "b09615da54db9b8905cadc7c00b8c47e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eThe default &#92;u003cspan style=&#92;&quot;color:#f18f01&#92;&quot;&#92;u003eB&#92;u003c/span&#92;u003e is the &#92;u003cem&#92;u003eswap&#92;u003c/em&#92;u003e matrix. On the right, &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(AB||)&#92;u003c/marimo-tex&#92;u003e swaps A&#x27;s &#92;u003cstrong&#92;u003ecolumns&#92;u003c/strong&#92;u003e. On the left, &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(BA||)&#92;u003c/marimo-tex&#92;u003e swaps A&#x27;s &#92;u003cstrong&#92;u003erows&#92;u003c/strong&#92;u003e. Same two matrices, different products.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eMake B the identity (1, 0, 0, 1). Now &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(AB=BA=A||)&#92;u003c/marimo-tex&#92;u003e. The identity behaves like the number 1, and that will matter in Section 3.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eEven when &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(AB&#92;&#92;neq BA||)&#92;u003c/marimo-tex&#92;u003e, the determinant and trace of the two products always agree. Order changes the matrix but not every quantity derived from it.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "1458b4eacd491870cc965c1d64745fa9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-diracs-trick-factor-xy-uv-with-matrices\">3. Dirac's trick: factor <marimo-tex class=\"arithmatex\">||(xy-uv||)</marimo-tex> with matrices</h2>\n<span class=\"paragraph\">Dirac's polynomial <marimo-tex class=\"arithmatex\">||(t^2+x^2+y^2+z^2||)</marimo-tex> becomes, after a complex change of coordinates, the simpler-looking <marimo-tex class=\"arithmatex\">||(xy-uv||)</marimo-tex>.\nOrdinary polynomials can't factor it. With matrices it is one line:</span>\n<marimo-tex class=\"arithmatex\">||[\n\\color{#2e86de}{\\underbrace{\\begin{pmatrix}x&amp;u\\\\v&amp;y\\end{pmatrix}}_{A}}\\;\n\\color{#f18f01}{\\underbrace{\\begin{pmatrix}y&amp;-u\\\\-v&amp;x\\end{pmatrix}}_{B}}\n=\\color{#e4572e}{\\begin{pmatrix}xy-uv&amp;0\\\\0&amp;xy-uv\\end{pmatrix}} = (xy-uv)\\cdot I .\n||]</marimo-tex><span class=\"paragraph\">\"This equality is wrong\" if you read it literally, because the left side is a matrix and the right side a polynomial.\nThe polynomial is <strong>personified</strong> as <marimo-tex class=\"arithmatex\">||((xy-uv)||)</marimo-tex> times the identity matrix <marimo-tex class=\"arithmatex\">||(I||)</marimo-tex>, which behaves like the number 1. In that sense, <marimo-tex class=\"arithmatex\">||(A\\cdot B||)</marimo-tex> factors <marimo-tex class=\"arithmatex\">||(xy-uv||)</marimo-tex>.</span>\n<span class=\"paragraph\">Plug in numbers and check that the product is always <marimo-tex class=\"arithmatex\">||(f||)</marimo-tex> on the diagonal and zero elsewhere, in both orders.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "be74199cfefe41eb32c514b61f8b989a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='Hstk-0' random-id='5581b061-dc79-53cc-fdbc-7c6bb22d2790'><marimo-slider data-initial-value='3' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ex&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-5' data-stop='5' data-step='1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='Hstk-1' random-id='c9dae920-3e9d-89b8-48f3-943761e72afe'><marimo-slider data-initial-value='2' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ey&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-5' data-stop='5' data-step='1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='Hstk-2' random-id='7a33e792-79ee-4dc8-2ce5-e4a1defad137'><marimo-slider data-initial-value='1' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eu&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-5' data-stop='5' data-step='1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='Hstk-3' random-id='128eae3e-2503-7c85-dea5-bee2b0df493a'><marimo-slider data-initial-value='4' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ev&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-5' data-stop='5' data-step='1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "99b3b544065886c2bb39c7e776b7a074",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><marimo-tex class=\"arithmatex\">||[\\color{#2e86de}{\\left[\\begin{matrix}3 &amp; 1\\\\4 &amp; 2\\end{matrix}\\right]}\\color{#f18f01}{\\left[\\begin{matrix}2 &amp; -1\\\\-4 &amp; 3\\end{matrix}\\right]} = \\color{#e4572e}{\\left[\\begin{matrix}2 &amp; 0\\\\0 &amp; 2\\end{matrix}\\right]}\\qquad \\color{#f18f01}{\\left[\\begin{matrix}2 &amp; -1\\\\-4 &amp; 3\\end{matrix}\\right]}\\color{#2e86de}{\\left[\\begin{matrix}3 &amp; 1\\\\4 &amp; 2\\end{matrix}\\right]} = \\color{#e4572e}{\\left[\\begin{matrix}2 &amp; 0\\\\0 &amp; 2\\end{matrix}\\right]}||]</marimo-tex></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><span style='color:#e4572e'><marimo-tex class=\"arithmatex\">||(f = xy-uv = 3\\cdot2 - 1\\cdot4 = 2||)</marimo-tex></span>. Symbolically, <marimo-tex class=\"arithmatex\">||(AB - fI = \\left[\\begin{matrix}0 &amp; 0\\\\0 &amp; 0\\end{matrix}\\right]||)</marimo-tex> and <marimo-tex class=\"arithmatex\">||(BA - fI = \\left[\\begin{matrix}0 &amp; 0\\\\0 &amp; 0\\end{matrix}\\right]||)</marimo-tex>.</span></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "142a14dd9d056c04d31ebff32242a8aa",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eChoose values where &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(xy=uv||)&#92;u003c/marimo-tex&#92;u003e, for example x=2, y=3, u=1, v=6. The product becomes the &#92;u003cstrong&#92;u003ezero matrix&#92;u003c/strong&#92;u003e, even though neither A nor B is zero. Ordinary numbers can&#x27;t do that (&#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(ab=0||)&#92;u003c/marimo-tex&#92;u003e forces &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(a=0||)&#92;u003c/marimo-tex&#92;u003e or &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(b=0||)&#92;u003c/marimo-tex&#92;u003e).&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eNotice that &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(B||)&#92;u003c/marimo-tex&#92;u003e is just &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(A||)&#92;u003c/marimo-tex&#92;u003e with the diagonal swapped and the off-diagonal negated, its &#92;u003cstrong&#92;u003eadjugate&#92;u003c/strong&#92;u003e. And &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(xy-uv=&#92;&#92;det A||)&#92;u003c/marimo-tex&#92;u003e. Hold on to that; the sandbox uses it.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(AB||)&#92;u003c/marimo-tex&#92;u003e and &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(BA||)&#92;u003c/marimo-tex&#92;u003e agree here, unlike in Section 2. A matrix factorization requires &#92;u003cstrong&#92;u003eboth&#92;u003c/strong&#92;u003e &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(AB=fI||)&#92;u003c/marimo-tex&#92;u003e and &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(BA=fI||)&#92;u003c/marimo-tex&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "10df77988f6b3979682d031b6cfd9163",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-dirac-wanted-a-square-root-go-up-to-44\">4. Dirac wanted a <em>square root</em>: go up to 4\u00d74</h2>\n<span class=\"paragraph\">Dirac didn't just want <em>a</em> factorization. He wanted a <strong>square root</strong>, a single matrix <marimo-tex class=\"arithmatex\">||(M||)</marimo-tex> with <marimo-tex class=\"arithmatex\">||(M\\cdot M = f\\cdot I||)</marimo-tex>.\n\"This requires bigger matrices, no problem.\" Stack the two factors from Section 3 into a <marimo-tex class=\"arithmatex\">||(4\\times4||)</marimo-tex> block matrix:</span>\n<marimo-tex class=\"arithmatex\">||[M=\\begin{pmatrix}0&amp;\\color{#2e86de}{A}\\\\ \\color{#f18f01}{B}&amp;0\\end{pmatrix},\\qquad\nM^2=\\begin{pmatrix}\\color{#2e86de}{A}\\color{#f18f01}{B}&amp;0\\\\0&amp;\\color{#f18f01}{B}\\color{#2e86de}{A}\\end{pmatrix}=\\color{#e4572e}{(xy-uv)\\,I_4}.||]</marimo-tex><span class=\"paragraph\">So <marimo-tex class=\"arithmatex\">||(M||)</marimo-tex> is a square root of <marimo-tex class=\"arithmatex\">||(xy-uv||)</marimo-tex>. Here is the change of coordinates that turns Dirac's <marimo-tex class=\"arithmatex\">||(t^2+x^2+y^2+z^2||)</marimo-tex> into this form:</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "97eb8a63c7e6d198a2628fa5d26edc8d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">With <marimo-tex class=\"arithmatex\">||(x\\to t+iz,\\; y\\to t-iz,\\; u\\to ix+y,\\; v\\to ix-y||)</marimo-tex>: <marimo-tex class=\"arithmatex\">||(\\quad xy-uv \\;\\longrightarrow\\; \\color{#e4572e}{t^{2} + x^{2} + y^{2} + z^{2}}||)</marimo-tex>. Dirac's operator in disguise. (This is where complex numbers come in, as the video says.)</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "1a17cd5cc6af4b9689b7b67dfcc3e4a7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "e4488c9194aa409cbf95662bd6b708db",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "400a8563022b9dd7138ff366399b9ec4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='Vxnm-0' random-id='b4ec5240-d3b4-6c49-9b78-15933d6e312f'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;41c5845a31194b799a871ac7f09dbfba&quot;}' data-label='null' data-model-id='&quot;41c5845a31194b799a871ac7f09dbfba&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "e27ecd858347f9113ee1d3fd8b1d24f8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='&quot;0/16&quot;' data-label='&quot;entries of M\u00b2 computed&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;0/4&quot;' data-label='&quot;diagonal entries = xy \u2212 uv&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;0&quot;' data-label='&quot;off-diagonal entries (all 0)&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;\u2705&quot;' data-label='&quot;M\u00b2 = (xy \u2212 uv)\u00b7I\u2084 (sympy)&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "6786a8d2ab3fbcbdccbb5aade9e09d16",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eStep to entry (1,1). Row 1 of M meets column 1 of M through the &#92;u003cspan style=&#92;&quot;color:#2e86de&#92;&quot;&#92;u003eA&#92;u003c/span&#92;u003e block and the &#92;u003cspan style=&#92;&quot;color:#f18f01&#92;&quot;&#92;u003eB&#92;u003c/span&#92;u003e block. You get &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||((AB)_{11}=xy-uv||)&#92;u003c/marimo-tex&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eWatch the off-diagonal entries. Each one is either &#92;&quot;a 0 hits everything&#92;&quot; or a cancellation like &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(xu-ux||)&#92;u003c/marimo-tex&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eBrady asked: &#92;u003cem&#92;u003e&#92;&quot;Have you changed sports mid-game?&#92;&quot;&#92;u003c/em&#92;u003e Eisenbud: &#92;u003cem&#92;u003e&#92;&quot;Nature said, really you should be working with matrices to begin with.&#92;&quot;&#92;u003c/em&#92;u003e Dirac&#x27;s &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(M||)&#92;u003c/marimo-tex&#92;u003e (the gamma matrices) is the foundation of the Dirac equation for the electron.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "3cb43dd69e6573875126df043bb1439f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-eisenbuds-theorem-almost-everything-factors\">5. Eisenbud's theorem: (almost) everything factors</h2>\n<span class=\"paragraph\">\"f = 1 \u00b7 f\" factors anything, but you learn nothing from it. So <strong>ban constants</strong>: no numbers alone in any matrix entry.\nThen degree counting blocks some polynomials. A product of entries with no constant term has degree \u2265 2, so a polynomial with a <strong>linear term</strong> like <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex> or <marimo-tex class=\"arithmatex\">||(x+y^2||)</marimo-tex> is out.</span>\n<blockquote>\n<span class=\"paragraph\"><strong>Theorem (Eisenbud, 1980).</strong> Any polynomial with <strong>no constant and no linear term</strong> has a matrix factorization <marimo-tex class=\"arithmatex\">||(A\\,B = B\\,A = f\\cdot I||)</marimo-tex> in which no entry of <marimo-tex class=\"arithmatex\">||(A||)</marimo-tex> or <marimo-tex class=\"arithmatex\">||(B||)</marimo-tex> has a constant term.</span>\n</blockquote>\n<span class=\"paragraph\">\"I can write down an algorithm which would produce the matrix factorization of whatever you want, or the machine will do it for me.\" Here is a simple version of such a machine:</span>\n<ol>\n<li>Every monomial has degree \u2265 2, so write <marimo-tex class=\"arithmatex\">||(f = x_1 g_1 + x_2 g_2 + \\dots + x_n g_n||)</marimo-tex>, where each <marimo-tex class=\"arithmatex\">||(g_i||)</marimo-tex> has no constant term.</li>\n<li>Start with the <marimo-tex class=\"arithmatex\">||(1\\times1||)</marimo-tex> factorization <marimo-tex class=\"arithmatex\">||([x_1]\\,[g_1]||)</marimo-tex>.</li>\n<li>Add one term <marimo-tex class=\"arithmatex\">||(x\\,g||)</marimo-tex> at a time with the block rule\n<marimo-tex class=\"arithmatex\">||(A' = \\begin{pmatrix}A &amp; xI\\\\ -gI &amp; B\\end{pmatrix},\\; B' = \\begin{pmatrix}B &amp; -xI\\\\ gI &amp; A\\end{pmatrix}||)</marimo-tex>, which doubles the size. Section 3 is exactly this rule applied to <marimo-tex class=\"arithmatex\">||(xy + u(-v)||)</marimo-tex>.</li>\n</ol>\n<span class=\"paragraph\">Type a polynomial, including Brady's <marimo-tex class=\"arithmatex\">||(x^3+79y^2+34xz||)</marimo-tex>:</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "f52953a676d46d200c461ffac021c7ab",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "81c03a222a695b2c8a4c51fa99a8d39c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='ZBYS-0' random-id='3a90a316-5f17-8d3b-9296-9051db1f937c'><marimo-dropdown data-initial-value='[&quot;Brady&#x27;s: x\u00b3 + 79y\u00b2 + 34xz&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ePreset&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;Brady&#x27;s: x\u00b3 + 79y\u00b2 + 34xz&quot;,&quot;Dirac&#x27;s: xy \u2212 uv&quot;,&quot;Sum of three squares: x\u00b2 + y\u00b2 + z\u00b2&quot;,&quot;A cusp: x\u00b3 \u2212 y\u00b2&quot;,&quot;Has a linear term: x + y\u00b2&quot;,&quot;Has a constant: x\u00b2 + 1&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "c7d06d1dfd808adcfbcd996ed8e054d5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='aLJB-0' random-id='a95f1dcd-9d05-07ab-c97c-3929f723bee1'><marimo-text data-initial-value='&quot;x^3 + 79y^2 + 34xz&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ef =&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-placeholder='&quot;&quot;' data-kind='&quot;text&quot;' data-full-width='true' data-disabled='false' data-debounce='true'></marimo-text></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "759b2ea57addc6b855aa54d8d2a2f4b2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Step 1, split:</strong> <marimo-tex class=\"arithmatex\">||(\\color{#e4572e}{f} = \\color{#2e86de}{x}\\cdot\\color{#f18f01}{(x^{2} + 34 z)} + \\color{#2e86de}{y}\\cdot\\color{#f18f01}{(79 y)}||)</marimo-tex></span></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Result (2\u00d72):</strong> $<marimo-tex class=\"arithmatex\">||(\\color{#2e86de}{A=\\left[\\begin{matrix}x &amp; y\\\\- 79 y &amp; x^{2} + 34 z\\end{matrix}\\right]}\\qquad \\color{#f18f01}{B=\\left[\\begin{matrix}x^{2} + 34 z &amp; - y\\\\79 y &amp; x\\end{matrix}\\right]}||)</marimo-tex>$</span></span><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='&quot;2\u00d72&quot;' data-label='&quot;matrix size&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;\u2705&quot;' data-label='&quot;A\u00b7B = f\u00b7I&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;\u2705&quot;' data-label='&quot;B\u00b7A = f\u00b7I&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;none&quot;' data-label='&quot;constant terms in entries&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "a08eac1fda2622df0468fc472fec9212",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eBrady&#x27;s &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(x^3+79y^2+34xz||)&#92;u003c/marimo-tex&#92;u003e splits as &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(x(x^2+34z) + y(79y)||)&#92;u003c/marimo-tex&#92;u003e, giving a &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(2&#92;&#92;times2||)&#92;u003c/marimo-tex&#92;u003e factorization. &#92;&quot;Just anything, doesn&#x27;t matter.&#92;&quot;&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eType &#92;u003ccode&#92;u003ex + y^2&#92;u003c/code&#92;u003e. &#92;u003cem&#92;u003e&#92;&quot;You can&#x27;t do x plus anything.&#92;&quot;&#92;u003c/em&#92;u003e Then type &#92;u003ccode&#92;u003ex*z + y^2&#92;u003c/code&#92;u003e. Multiplying the lone &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(x||)&#92;u003c/marimo-tex&#92;u003e by another variable is enough, just as Brady guessed.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eType a long polynomial like &#92;u003ccode&#92;u003exy + zw + ab + cd&#92;u003c/code&#92;u003e. Each new variable group &#92;u003cstrong&#92;u003edoubles&#92;u003c/strong&#92;u003e the matrix size. Eisenbud&#x27;s actual theorem, via periodic free resolutions, often gives smaller factorizations; this machine is the simple (Koszul-style) one.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "86bfe1204cb1589c1cbcac4435887b2b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-another-matrix-factorization-the-recommender-grid\">6. Another \"matrix factorization\": the recommender grid</h2>\n<span class=\"paragraph\">The video ends with real-world uses. Outside pure maths, <em>matrix factorization</em> most often means something else, and you'd be using it every time Netflix suggests a film.\nTake a <strong>ratings matrix</strong> <marimo-tex class=\"arithmatex\">||(R||)</marimo-tex> (users \u00d7 movies, mostly blank) and approximate it by a product of two <strong>thin</strong> matrices:</span>\n<marimo-tex class=\"arithmatex\">||[\\color{#e4572e}{R}\\;\\approx\\;\\color{#2e86de}{U}\\,\\color{#f18f01}{V^\\top},\\qquad U\\in\\mathbb{R}^{\\text{users}\\times k},\\; V\\in\\mathbb{R}^{\\text{movies}\\times k}.||]</marimo-tex><table>\n<thead>\n<tr>\n<th></th>\n<th>Eisenbud / Dirac</th>\n<th>Recommender</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>entries</td>\n<td>polynomials</td>\n<td>real numbers</td>\n</tr>\n<tr>\n<td>equality</td>\n<td><strong>exact</strong>: <marimo-tex class=\"arithmatex\">||(AB=f\\,I||)</marimo-tex></td>\n<td><strong>approximate</strong>, fit only on the known cells</td>\n</tr>\n<tr>\n<td>goal</td>\n<td>understand <marimo-tex class=\"arithmatex\">||(f||)</marimo-tex></td>\n<td><strong>fill in the blanks</strong>: predict unseen ratings</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Click cells to rate. The factors <marimo-tex class=\"arithmatex\">||(U||)</marimo-tex> and <marimo-tex class=\"arithmatex\">||(V||)</marimo-tex> are refit (alternating least squares) every time you click.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "a7a0eaa581b684470988478daf3f2409",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "a43a287dbd0c54d80d7fee663bd7d225",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='NCOB-0' random-id='5e52b21b-9653-e92f-206e-b5416f0e08b8'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;7feecbdbfbb54f1d9b0ff89928654976&quot;}' data-label='null' data-model-id='&quot;7feecbdbfbb54f1d9b0ff89928654976&quot;'></marimo-anywidget></marimo-ui-element><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='NCOB-1' random-id='b4a1320a-1b50-4831-17dd-93066358d013'><marimo-slider data-initial-value='1' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003erank k (number of hidden &#x27;taste&#x27; dimensions)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='4' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='NCOB-2' random-id='95b5a1d7-84df-5417-6717-ea56fe8054f7'><marimo-slider data-initial-value='1.0' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eregularization \u03bb&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0.0' data-stop='2.0' data-step='0.05' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "80cd8202cafe0a85c311e9ddb890b336",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "60459b85b9535b685b03ca421cf79a1c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Reconstructed grid</strong> <marimo-tex class=\"arithmatex\">||(\\mu + UV^\\top||)</marimo-tex>. Blue outline = a cell you rated; all others are <strong>predictions</strong>.</span></span><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;data&#92;&quot;: {&#92;n    &#92;&quot;name&#92;&quot;: &#92;&quot;data-e78846845bbb3d1c26719424dab4f998&#92;&quot;&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-e78846845bbb3d1c26719424dab4f998&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Alien&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 5,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.9954986805245145,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ana&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Terminator&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 5,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.8456658155473615,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ana&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Star Wars&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.605001732493156,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ana&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Notting Hill&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 1,&#92;n        &#92;&quot;predicted&#92;&quot;: 1.6901707455821287,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ana&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Titanic&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 1.5319327181276547,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ana&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Love Actually&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 1,&#92;n        &#92;&quot;predicted&#92;&quot;: 1.5339981231363289,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ana&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Alien&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 4,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.537906798861898,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ben&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Terminator&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.4264376492105555,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ben&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Star Wars&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 5,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.247394014866629,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ben&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Notting Hill&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 2.0788862476428043,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ben&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Titanic&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 1,&#92;n        &#92;&quot;predicted&#92;&quot;: 1.961164021844442,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ben&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Love Actually&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 2,&#92;n        &#92;&quot;predicted&#92;&quot;: 1.9627005935440998,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Ben&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Alien&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 5,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.2704019482297975,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Cara&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Terminator&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 4,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.181359944577277,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Cara&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Star Wars&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 4,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.038339171627293,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Cara&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Notting Hill&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 2.3061264730141757,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Cara&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Titanic&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 2,&#92;n        &#92;&quot;predicted&#92;&quot;: 2.2120894870650836,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Cara&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Love Actually&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 2.2133169066993164,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Cara&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Alien&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 1,&#92;n        &#92;&quot;predicted&#92;&quot;: 1.8199636912966692,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Dev&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Terminator&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 1.9363622111317815,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Dev&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Star Wars&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 2,&#92;n        &#92;&quot;predicted&#92;&quot;: 2.12332348327495,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Dev&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Notting Hill&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 5,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.387726640070339,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Dev&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Titanic&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 4,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.510654758545129,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Dev&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Love Actually&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.5090502368275045,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Dev&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Alien&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 1.697710678939362,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Eli&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Terminator&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 1,&#92;n        &#92;&quot;predicted&#92;&quot;: 1.8243586807949104,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Eli&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Star Wars&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 2.027782844391199,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Eli&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Notting Hill&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 4,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.4915782226295295,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Eli&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Titanic&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 5,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.625330787513931,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Eli&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Love Actually&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 5,&#92;n        &#92;&quot;predicted&#92;&quot;: 4.623584979493702,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Eli&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Alien&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 2,&#92;n        &#92;&quot;predicted&#92;&quot;: 2.952162283392371,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Fay&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Terminator&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 2.9736392230595285,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Fay&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Star Wars&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 3,&#92;n        &#92;&quot;predicted&#92;&quot;: 3.0081358469650725,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Fay&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Notting Hill&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 3,&#92;n        &#92;&quot;predicted&#92;&quot;: 3.4259457130141215,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Fay&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Titanic&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 0,&#92;n        &#92;&quot;predicted&#92;&quot;: 3.4486274428816506,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Fay&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;kind&#92;&quot;: &#92;&quot;your rating&#92;&quot;,&#92;n        &#92;&quot;movie&#92;&quot;: &#92;&quot;Love Actually&#92;&quot;,&#92;n        &#92;&quot;observed&#92;&quot;: 3,&#92;n        &#92;&quot;predicted&#92;&quot;: 3.448331389150273,&#92;n        &#92;&quot;user&#92;&quot;: &#92;&quot;Fay&#92;&quot;&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 260,&#92;n  &#92;&quot;layer&#92;&quot;: [&#92;n    {&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;predicted&#92;&quot;,&#92;n          &#92;&quot;scale&#92;&quot;: {&#92;n            &#92;&quot;domain&#92;&quot;: [&#92;n              1,&#92;n              5&#92;n            ],&#92;n            &#92;&quot;scheme&#92;&quot;: &#92;&quot;orangered&#92;&quot;&#92;n          },&#92;n          &#92;&quot;title&#92;&quot;: &#92;&quot;U\u00b7V\u1d40&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        },&#92;n        &#92;&quot;stroke&#92;&quot;: {&#92;n          &#92;&quot;condition&#92;&quot;: {&#92;n            &#92;&quot;test&#92;&quot;: &#92;&quot;datum.kind == &#x27;your rating&#x27;&#92;&quot;,&#92;n            &#92;&quot;value&#92;&quot;: &#92;&quot;#2e86de&#92;&quot;&#92;n          },&#92;n          &#92;&quot;value&#92;&quot;: null&#92;n        },&#92;n        &#92;&quot;strokeWidth&#92;&quot;: {&#92;n          &#92;&quot;value&#92;&quot;: 3&#92;n        },&#92;n        &#92;&quot;tooltip&#92;&quot;: [&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;user&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;movie&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;predicted&#92;&quot;,&#92;n            &#92;&quot;format&#92;&quot;: &#92;&quot;.2f&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;observed&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;kind&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          }&#92;n        ],&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;axis&#92;&quot;: {&#92;n            &#92;&quot;labelAngle&#92;&quot;: -30&#92;n          },&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;movie&#92;&quot;,&#92;n          &#92;&quot;sort&#92;&quot;: [&#92;n            &#92;&quot;Alien&#92;&quot;,&#92;n            &#92;&quot;Terminator&#92;&quot;,&#92;n            &#92;&quot;Star Wars&#92;&quot;,&#92;n            &#92;&quot;Notting Hill&#92;&quot;,&#92;n            &#92;&quot;Titanic&#92;&quot;,&#92;n            &#92;&quot;Love Actually&#92;&quot;&#92;n          ],&#92;n          &#92;&quot;title&#92;&quot;: null,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;y&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;user&#92;&quot;,&#92;n          &#92;&quot;sort&#92;&quot;: [&#92;n            &#92;&quot;Ana&#92;&quot;,&#92;n            &#92;&quot;Ben&#92;&quot;,&#92;n            &#92;&quot;Cara&#92;&quot;,&#92;n            &#92;&quot;Dev&#92;&quot;,&#92;n            &#92;&quot;Eli&#92;&quot;,&#92;n            &#92;&quot;Fay&#92;&quot;&#92;n          ],&#92;n          &#92;&quot;title&#92;&quot;: null,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;cornerRadius&#92;&quot;: 4,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;rect&#92;&quot;&#92;n      }&#92;n    },&#92;n    {&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: {&#92;n          &#92;&quot;condition&#92;&quot;: {&#92;n            &#92;&quot;test&#92;&quot;: &#92;&quot;datum.kind == &#x27;your rating&#x27;&#92;&quot;,&#92;n            &#92;&quot;value&#92;&quot;: &#92;&quot;#1b4f8a&#92;&quot;&#92;n          },&#92;n          &#92;&quot;value&#92;&quot;: &#92;&quot;#222&#92;&quot;&#92;n        },&#92;n        &#92;&quot;text&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;predicted&#92;&quot;,&#92;n          &#92;&quot;format&#92;&quot;: &#92;&quot;.1f&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        },&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;axis&#92;&quot;: {&#92;n            &#92;&quot;labelAngle&#92;&quot;: -30&#92;n          },&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;movie&#92;&quot;,&#92;n          &#92;&quot;sort&#92;&quot;: [&#92;n            &#92;&quot;Alien&#92;&quot;,&#92;n            &#92;&quot;Terminator&#92;&quot;,&#92;n            &#92;&quot;Star Wars&#92;&quot;,&#92;n            &#92;&quot;Notting Hill&#92;&quot;,&#92;n            &#92;&quot;Titanic&#92;&quot;,&#92;n            &#92;&quot;Love Actually&#92;&quot;&#92;n          ],&#92;n          &#92;&quot;title&#92;&quot;: null,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;y&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;user&#92;&quot;,&#92;n          &#92;&quot;sort&#92;&quot;: [&#92;n            &#92;&quot;Ana&#92;&quot;,&#92;n            &#92;&quot;Ben&#92;&quot;,&#92;n            &#92;&quot;Cara&#92;&quot;,&#92;n            &#92;&quot;Dev&#92;&quot;,&#92;n            &#92;&quot;Eli&#92;&quot;,&#92;n            &#92;&quot;Fay&#92;&quot;&#92;n          ],&#92;n          &#92;&quot;title&#92;&quot;: null,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;fontSize&#92;&quot;: 13,&#92;n        &#92;&quot;fontWeight&#92;&quot;: &#92;&quot;bold&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;text&#92;&quot;&#92;n      }&#92;n    }&#92;n  ],&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: &#92;&quot;container&#92;&quot;&#92;n}&quot;'></marimo-mime-renderer><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='&quot;24/36&quot;' data-label='&quot;known ratings&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;0.54&quot;' data-label='&quot;RMSE on known cells&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;12 vs 36&quot;' data-label='&quot;numbers in U,V vs in R&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "d1e6da5f54d13003d668e64b0887af56",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: wrap;gap: 0.5rem'><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;data&#92;&quot;: {&#92;n    &#92;&quot;name&#92;&quot;: &#92;&quot;data-c8ba40ba447c0458cf1549e7d7d6445d&#92;&quot;&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-c8ba40ba447c0458cf1549e7d7d6445d&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Ana&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 1.4841240642716929,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;user (U)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Ben&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 1.1041239012995279,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;user (U)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Cara&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 0.8819785990998902,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;user (U)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Dev&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: -1.1529502847004713,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;user (U)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Eli&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: -1.2544734246015132,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;user (U)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Fay&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: -0.21273332116955906,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;user (U)&#92;&quot;&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;encoding&#92;&quot;: {&#92;n    &#92;&quot;column&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;factor&#92;&quot;,&#92;n      &#92;&quot;title&#92;&quot;: null,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    },&#92;n    &#92;&quot;tooltip&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;name&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;factor&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;value&#92;&quot;,&#92;n        &#92;&quot;format&#92;&quot;: &#92;&quot;.2f&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n      }&#92;n    ],&#92;n    &#92;&quot;x&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;value&#92;&quot;,&#92;n      &#92;&quot;title&#92;&quot;: null,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n    },&#92;n    &#92;&quot;y&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;name&#92;&quot;,&#92;n      &#92;&quot;sort&#92;&quot;: [&#92;n        &#92;&quot;Ana&#92;&quot;,&#92;n        &#92;&quot;Ben&#92;&quot;,&#92;n        &#92;&quot;Cara&#92;&quot;,&#92;n        &#92;&quot;Dev&#92;&quot;,&#92;n        &#92;&quot;Eli&#92;&quot;,&#92;n        &#92;&quot;Fay&#92;&quot;&#92;n      ],&#92;n      &#92;&quot;title&#92;&quot;: null,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    }&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 150,&#92;n  &#92;&quot;mark&#92;&quot;: {&#92;n    &#92;&quot;color&#92;&quot;: &#92;&quot;#2e86de&#92;&quot;,&#92;n    &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n  },&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;U: each user&#x27;s taste&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: 110&#92;n}&quot;'></marimo-mime-renderer><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;data&#92;&quot;: {&#92;n    &#92;&quot;name&#92;&quot;: &#92;&quot;data-5055c3664635d2d6c7867e6caefe1974&#92;&quot;&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-5055c3664635d2d6c7867e6caefe1974&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Alien&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 1.204188645824701,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;movie (V)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Terminator&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 1.1032315435283504,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;movie (V)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Star Wars&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 0.9410725375207843,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;movie (V)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Notting Hill&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: -1.022935093028234,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;movie (V)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Titanic&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: -1.1295555779754451,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;movie (V)&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;factor&#92;&quot;: &#92;&quot;taste 1&#92;&quot;,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Love Actually&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: -1.1281639119696198,&#92;n        &#92;&quot;who&#92;&quot;: &#92;&quot;movie (V)&#92;&quot;&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;encoding&#92;&quot;: {&#92;n    &#92;&quot;column&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;factor&#92;&quot;,&#92;n      &#92;&quot;title&#92;&quot;: null,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    },&#92;n    &#92;&quot;tooltip&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;name&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;factor&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;value&#92;&quot;,&#92;n        &#92;&quot;format&#92;&quot;: &#92;&quot;.2f&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n      }&#92;n    ],&#92;n    &#92;&quot;x&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;value&#92;&quot;,&#92;n      &#92;&quot;title&#92;&quot;: null,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n    },&#92;n    &#92;&quot;y&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;name&#92;&quot;,&#92;n      &#92;&quot;sort&#92;&quot;: [&#92;n        &#92;&quot;Alien&#92;&quot;,&#92;n        &#92;&quot;Terminator&#92;&quot;,&#92;n        &#92;&quot;Star Wars&#92;&quot;,&#92;n        &#92;&quot;Notting Hill&#92;&quot;,&#92;n        &#92;&quot;Titanic&#92;&quot;,&#92;n        &#92;&quot;Love Actually&#92;&quot;&#92;n      ],&#92;n      &#92;&quot;title&#92;&quot;: null,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    }&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 150,&#92;n  &#92;&quot;mark&#92;&quot;: {&#92;n    &#92;&quot;color&#92;&quot;: &#92;&quot;#f18f01&#92;&quot;,&#92;n    &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n  },&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;V: each movie&#x27;s traits&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: 110&#92;n}&quot;'></marimo-mime-renderer></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "ee88c8a0b203b8911f0514e9976a0870",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eWith &#92;&quot;Two tribes&#92;&quot; at the default &#92;u003cstrong&#92;u003ek = 1&#92;u003c/strong&#92;u003e, taste 1 separates the sci-fi fans from the romance fans, with opposite signs on the two movie groups. One hidden number per person explains most of the grid.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eAt k = 1, give &#92;u003cstrong&#92;u003eFay&#92;u003c/strong&#92;u003e \u26055 for &#92;u003cem&#92;u003eAlien&#92;u003c/em&#92;u003e, then watch her predicted &#92;u003cem&#92;u003eTerminator&#92;u003c/em&#92;u003e and &#92;u003cem&#92;u003eStar Wars&#92;u003c/em&#92;u003e rise. The factors moved her toward the sci-fi tribe.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003ePush &#92;u003cstrong&#92;u003ek to 4&#92;u003c/strong&#92;u003e with \u03bb = 0. The known cells are fit almost perfectly (RMSE \u2192 0) but the predictions get wild. That is overfitting. Unlike Eisenbud&#x27;s exact factorizations, a recommender must not reproduce its data &#92;u003cem&#92;u003etoo&#92;u003c/em&#92;u003e well.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "1f3030b9ef42c777977cd8937ade25da",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"7-sandbox-every-matrix-is-half-of-a-factorization\">7. Sandbox: every matrix is half of a factorization</h2>\n<span class=\"paragraph\">The pattern behind Section 3: for <strong>any</strong> square matrix <marimo-tex class=\"arithmatex\">||(A||)</marimo-tex>, the adjugate <marimo-tex class=\"arithmatex\">||(\\operatorname{adj}(A)||)</marimo-tex> satisfies</span>\n<marimo-tex class=\"arithmatex\">||[A\\cdot\\operatorname{adj}(A)=\\operatorname{adj}(A)\\cdot A=\\det(A)\\,I .||]</marimo-tex><span class=\"paragraph\">So <strong>any</strong> matrix of polynomials gives a matrix factorization of its determinant. Fill in a <marimo-tex class=\"arithmatex\">||(2\\times2||)</marimo-tex> or <marimo-tex class=\"arithmatex\">||(3\\times3||)</marimo-tex> matrix and see which polynomial you have factored.\nMatrices whose entries are all linear (as in Dirac's case) give the most interesting results.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "a33d07a8900cde0db30d90cd5f6adc13",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='wlCL-0' random-id='12c11fc8-3f6e-33ab-d50f-017b9873bbb7'><marimo-radio data-initial-value='&quot;2\u00d72&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003esize&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;2\u00d72&quot;,&quot;3\u00d73&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "c3b57308621401f91c0f2d628528c1e2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Your matrix A</strong> (any polynomial in each box):</span></span><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: flex-start;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 1'><marimo-ui-element object-id='kqZH-4' random-id='fa6740c2-6559-1838-0fff-4d0f54ed9016'><marimo-text data-initial-value='&quot;x&quot;' data-label='null' data-placeholder='&quot;&quot;' data-kind='&quot;text&quot;' data-full-width='true' data-disabled='false' data-debounce='true'></marimo-text></marimo-ui-element></div><div style='flex: 1'><marimo-ui-element object-id='kqZH-5' random-id='e0f0d0e8-9fd5-33e7-fd44-7d75bcc39633'><marimo-text data-initial-value='&quot;u&quot;' data-label='null' data-placeholder='&quot;&quot;' data-kind='&quot;text&quot;' data-full-width='true' data-disabled='false' data-debounce='true'></marimo-text></marimo-ui-element></div></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 1'><marimo-ui-element object-id='kqZH-6' random-id='9f58ee6d-907d-c942-4528-0a782ed92f3c'><marimo-text data-initial-value='&quot;v&quot;' data-label='null' data-placeholder='&quot;&quot;' data-kind='&quot;text&quot;' data-full-width='true' data-disabled='false' data-debounce='true'></marimo-text></marimo-ui-element></div><div style='flex: 1'><marimo-ui-element object-id='kqZH-7' random-id='56b1d2c6-f6be-e946-c01b-94997fc1fec9'><marimo-text data-initial-value='&quot;y&quot;' data-label='null' data-placeholder='&quot;&quot;' data-kind='&quot;text&quot;' data-full-width='true' data-disabled='false' data-debounce='true'></marimo-text></marimo-ui-element></div></div></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": "4df81beaba0bee5c5857a845bf4ca663",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><marimo-tex class=\"arithmatex\">||[\\color{#2e86de}{\\left[\\begin{matrix}x &amp; u\\\\v &amp; y\\end{matrix}\\right]}\\;\\color{#f18f01}{\\left[\\begin{matrix}y &amp; - u\\\\- v &amp; x\\end{matrix}\\right]}= \\color{#e4572e}{\\left(- u v + x y\\right)}\\cdot I_2||]</marimo-tex></span><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='&quot;\u2705&quot;' data-label='&quot;A\u00b7adj(A) = det(A)\u00b7I&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;2&quot;' data-label='&quot;degree of f = det A&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eNo constant terms anywhere: a genuine matrix factorization in Eisenbud&#x27;s sense.&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;success&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "rEll",
+      "code_hash": "2ecceccffc078d72d2ae56d46c1311e9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eChallenges&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eFind a &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(2&#92;&#92;times2||)&#92;u003c/marimo-tex&#92;u003e matrix of &#92;u003cem&#92;u003elinear&#92;u003c/em&#92;u003e entries whose determinant is &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(x^2+y^2||)&#92;u003c/marimo-tex&#92;u003e. (Hint: use &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(i||)&#92;u003c/marimo-tex&#92;u003e, written &#92;u003ccode&#92;u003eI&#92;u003c/code&#92;u003e.)&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eThe default &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(3&#92;&#92;times3||)&#92;u003c/marimo-tex&#92;u003e is skew-symmetric in its top-left block. What happens when you set &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(w=0||)&#92;u003c/marimo-tex&#92;u003e? Why is the determinant of an odd-sized skew-symmetric matrix always 0?&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eMake a &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(2&#92;&#92;times2||)&#92;u003c/marimo-tex&#92;u003e with determinant &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(x^3-y^2||)&#92;u003c/marimo-tex&#92;u003e (the cusp) and no constant entries. Compare it to the machine&#x27;s answer in Section 5.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dGlV",
+      "code_hash": "5c26696ee641f692e86a6a11e513948a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"8-quiz-check-yourself\">8. Quiz: check yourself</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SdmI",
+      "code_hash": "ddf67b2e331a328d94a1780cda3820c9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='SdmI-16' random-id='bfaa4771-74c9-bbae-31f7-6a607c44bd0a'><marimo-dict data-initial-value='{&quot;1. x\u00b2 + 3 factors over the rationals.&quot;:null,&quot;2. For 2\u00d72 matrices, AB = BA always.&quot;:null,&quot;3. t\u00b2 + x\u00b2 + y\u00b2 + z\u00b2 factors into polynomials once complex numbers are allowed.&quot;:null,&quot;4. [[x, u], [v, y]]\u00b7[[y, \u2212u], [\u2212v, x]] = (xy \u2212 uv)\u00b7I.&quot;:null,&quot;5. x + y\u00b2 has a matrix factorization with no constant entries.&quot;:null,&quot;6. x\u00b3 + 79y\u00b2 + 34xz has a matrix factorization with no constant entries.&quot;:null,&quot;7. The square of [[0, A], [B, 0]] is [[AB, 0], [0, BA]].&quot;:null,&quot;8. A recommender&#x27;s U\u00b7V\u1d40 must reproduce the known ratings exactly.&quot;:null}' data-label='null' data-element-ids='{&quot;SdmI-8&quot;:&quot;1. x\u00b2 + 3 factors over the rationals.&quot;,&quot;SdmI-9&quot;:&quot;2. For 2\u00d72 matrices, AB = BA always.&quot;,&quot;SdmI-10&quot;:&quot;3. t\u00b2 + x\u00b2 + y\u00b2 + z\u00b2 factors into polynomials once complex numbers are allowed.&quot;,&quot;SdmI-11&quot;:&quot;4. [[x, u], [v, y]]\u00b7[[y, \u2212u], [\u2212v, x]] = (xy \u2212 uv)\u00b7I.&quot;,&quot;SdmI-12&quot;:&quot;5. x + y\u00b2 has a matrix factorization with no constant entries.&quot;,&quot;SdmI-13&quot;:&quot;6. x\u00b3 + 79y\u00b2 + 34xz has a matrix factorization with no constant entries.&quot;,&quot;SdmI-14&quot;:&quot;7. The square of [[0, A], [B, 0]] is [[AB, 0], [0, BA]].&quot;,&quot;SdmI-15&quot;:&quot;8. A recommender&#x27;s U\u00b7V\u1d40 must reproduce the known ratings exactly.&quot;}'><marimo-json-output data-json-data='{&quot;1. x\u00b2 + 3 factors over the rationals.&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-8&#x27; random-id=&#x27;9e5d1a8a-c816-9be8-27f2-b776e8b6f8c9&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;null&#x27; data-options=&#x27;[&amp;quot;True&amp;quot;,&amp;quot;False&amp;quot;]&#x27; data-inline=&#x27;true&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;2. For 2\u00d72 matrices, AB = BA always.&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-9&#x27; random-id=&#x27;99552bc1-56fd-b919-dc29-0441c83e35d3&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;null&#x27; data-options=&#x27;[&amp;quot;True&amp;quot;,&amp;quot;False&amp;quot;]&#x27; data-inline=&#x27;true&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;3. t\u00b2 + x\u00b2 + y\u00b2 + z\u00b2 factors into polynomials once complex numbers are allowed.&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-10&#x27; random-id=&#x27;fb007c01-b18f-54e0-5237-0ee737e9550b&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;null&#x27; data-options=&#x27;[&amp;quot;True&amp;quot;,&amp;quot;False&amp;quot;]&#x27; data-inline=&#x27;true&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;4. [[x, u], [v, y]]\u00b7[[y, \u2212u], [\u2212v, x]] = (xy \u2212 uv)\u00b7I.&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-11&#x27; random-id=&#x27;e9f25b03-3986-545e-8887-29b21b3d392a&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;null&#x27; data-options=&#x27;[&amp;quot;True&amp;quot;,&amp;quot;False&amp;quot;]&#x27; data-inline=&#x27;true&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;5. x + y\u00b2 has a matrix factorization with no constant entries.&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-12&#x27; random-id=&#x27;be6b0fd5-445f-ebe1-675b-0ba8a127a8d3&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;null&#x27; data-options=&#x27;[&amp;quot;True&amp;quot;,&amp;quot;False&amp;quot;]&#x27; data-inline=&#x27;true&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;6. x\u00b3 + 79y\u00b2 + 34xz has a matrix factorization with no constant entries.&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-13&#x27; random-id=&#x27;7e3eecc0-5f1f-24f5-b84e-456f35514c9e&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;null&#x27; data-options=&#x27;[&amp;quot;True&amp;quot;,&amp;quot;False&amp;quot;]&#x27; data-inline=&#x27;true&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;7. The square of [[0, A], [B, 0]] is [[AB, 0], [0, BA]].&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-14&#x27; random-id=&#x27;d1dfd3b5-a4fa-ce74-1689-713ec78e3440&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;null&#x27; data-options=&#x27;[&amp;quot;True&amp;quot;,&amp;quot;False&amp;quot;]&#x27; data-inline=&#x27;true&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;8. A recommender&#x27;s U\u00b7V\u1d40 must reproduce the known ratings exactly.&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-15&#x27; random-id=&#x27;3fe93ef1-9b5d-0981-bb05-ae817b9a579e&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;null&#x27; data-options=&#x27;[&amp;quot;True&amp;quot;,&amp;quot;False&amp;quot;]&#x27; data-inline=&#x27;true&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;}' data-value-types='&quot;python&quot;' data-name='&quot;dictionary&quot;'></marimo-json-output></marimo-dict></marimo-ui-element><marimo-ui-element object-id='SdmI-17' random-id='9e29d2ee-d246-4084-5e6d-c223e1653b87'><marimo-switch data-initial-value='false' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eReveal answers&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-disabled='false'></marimo-switch></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lgWD",
+      "code_hash": "42699db346b09be792531f6e4cd5492b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>0/8 answered. Flip the switch to check.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yOPj",
+      "code_hash": "c70fba6621b62ce5d1b197b265131286",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"recap\">Recap</h2>\n<table>\n<thead>\n<tr>\n<th>Idea</th>\n<th>In one line</th>\n<th>Where you touched it</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Enlarge the domain</td>\n<td>Stuck equations get unstuck with new numbers: fractions, negatives, <marimo-tex class=\"arithmatex\">||(i||)</marimo-tex></td>\n<td>\u00a71 factor-in-a-domain picker</td>\n</tr>\n<tr>\n<td>Matrix multiplication</td>\n<td>Entry <marimo-tex class=\"arithmatex\">||((r,c)||)</marimo-tex> = row <marimo-tex class=\"arithmatex\">||(r||)</marimo-tex> \u00b7 column <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex>; generally <marimo-tex class=\"arithmatex\">||(AB\\neq BA||)</marimo-tex></td>\n<td>\u00a72 drag-and-hover multiplier</td>\n</tr>\n<tr>\n<td>Matrix factorization</td>\n<td><marimo-tex class=\"arithmatex\">||(AB = BA = f\\cdot I||)</marimo-tex>: the identity \"personifies\" the polynomial</td>\n<td>\u00a73 Dirac's <marimo-tex class=\"arithmatex\">||(xy-uv||)</marimo-tex> with sliders</td>\n</tr>\n<tr>\n<td>Square root</td>\n<td><marimo-tex class=\"arithmatex\">||(M=\\begin{pmatrix}0&amp;A\\\\B&amp;0\\end{pmatrix}||)</marimo-tex> gives <marimo-tex class=\"arithmatex\">||(M^2=f\\cdot I||)</marimo-tex></td>\n<td>\u00a74 4\u00d74 stepper</td>\n</tr>\n<tr>\n<td>Eisenbud's theorem</td>\n<td>No constant and no linear term \u21d2 a matrix factorization without constants exists</td>\n<td>\u00a75 factorization machine</td>\n</tr>\n<tr>\n<td>Recommender MF</td>\n<td><marimo-tex class=\"arithmatex\">||(R\\approx UV^\\top||)</marimo-tex>: approximate, low-rank, predicts blanks</td>\n<td>\u00a76 click-to-rate grid</td>\n</tr>\n<tr>\n<td>Adjugate trick</td>\n<td><marimo-tex class=\"arithmatex\">||(A\\cdot\\operatorname{adj}A=\\det A\\cdot I||)</marimo-tex> for any square <marimo-tex class=\"arithmatex\">||(A||)</marimo-tex></td>\n<td>\u00a77 sandbox</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><em>Further reading:</em> D. Eisenbud, \"Homological algebra on a complete intersection, with an application to group representations\", <em>Trans. AMS</em> 260 (1980). Matrix factorizations later became the boundary conditions (D-branes) of Landau\u2013Ginzburg models in string theory (Kapustin\u2013Li, 2003), which is why the paper is so widely cited.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

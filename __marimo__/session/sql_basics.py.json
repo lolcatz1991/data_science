@@ -1,0 +1,594 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.25.2",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "a7ecdcd9bbb78ccf44d3067a95a41978",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "b8b0ad6083c111bcdb48fad03b969f63",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"sql-basics-explained-by-touching-it\">SQL basics, explained by touching it</h1>\n<span class=\"paragraph\"><em>An interactive companion to Asynk's video <strong>\"SQL Basics Explained In 5 Minutes\"</strong>.</em></span>\n<span class=\"paragraph\">The video builds a tiny <strong>books + authors</strong> database and then writes one query, keyword by keyword:\n<code>SELECT \u2026 FROM \u2026 JOIN \u2026 WHERE \u2026 GROUP BY \u2026 HAVING \u2026 ORDER BY \u2026 LIMIT</code>.\nIts punchline: <strong>the order you <em>write</em> a query is not the order the database <em>runs</em> it.</strong>\nHere you'll build the same database and poke every keyword until that punchline feels obvious.</span></span><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/Ov7alIBCd3M\" title=\"SQL Basics Explained In 5 Minutes\" frameborder=\"0\" allowfullscreen></iframe><marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eColour language (used everywhere below)&#92;u003c/strong&#92;u003e&#92;n&#92;u003cspan style=&#92;&quot;color:#1f77b4&#92;&quot;&#92;u003e\u25a0 blue&#92;u003c/span&#92;u003e = a row that &#92;u003cstrong&#92;u003esurvives&#92;u003c/strong&#92;u003e this step &amp;nbsp;\u00b7&amp;nbsp;&#92;n&#92;u003cspan style=&#92;&quot;color:#d62728&#92;&quot;&#92;u003e\u25a0 red&#92;u003c/span&#92;u003e = a row that gets &#92;u003cstrong&#92;u003ethrown away&#92;u003c/strong&#92;u003e &amp;nbsp;\u00b7&amp;nbsp;&#92;n&#92;u003cspan style=&#92;&quot;color:#f18f01&#92;&quot;&#92;u003e\u25a0 orange&#92;u003c/span&#92;u003e = &#92;u003cstrong&#92;u003ekeys&#92;u003c/strong&#92;u003e (primary key / foreign key, the glue between tables).&#92;nEvery query runs on a real in-memory &#92;u003cstrong&#92;u003eDuckDB&#92;u003c/strong&#92;u003e database.&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "a0545396ca5a5c635870093ac182016f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 3'><marimo-ui-element object-id='vblA-0' random-id='f34622a5-a272-d414-96d0-4bac99623991'><marimo-table data-initial-value='[]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ebooks&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-data='&quot;[{&#92;&quot;id&#92;&quot;:101,&#92;&quot;title&#92;&quot;:&#92;&quot;The Hobbit&#92;&quot;,&#92;&quot;genre&#92;&quot;:&#92;&quot;fantasy&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1937,&#92;&quot;pages&#92;&quot;:310,&#92;&quot;author_id&#92;&quot;:1},{&#92;&quot;id&#92;&quot;:102,&#92;&quot;title&#92;&quot;:&#92;&quot;The Fellowship of the Ring&#92;&quot;,&#92;&quot;genre&#92;&quot;:&#92;&quot;fantasy&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1954,&#92;&quot;pages&#92;&quot;:423,&#92;&quot;author_id&#92;&quot;:1},{&#92;&quot;id&#92;&quot;:103,&#92;&quot;title&#92;&quot;:&#92;&quot;The Two Towers&#92;&quot;,&#92;&quot;genre&#92;&quot;:&#92;&quot;fantasy&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1954,&#92;&quot;pages&#92;&quot;:352,&#92;&quot;author_id&#92;&quot;:1},{&#92;&quot;id&#92;&quot;:104,&#92;&quot;title&#92;&quot;:&#92;&quot;The Return of the King&#92;&quot;,&#92;&quot;genre&#92;&quot;:&#92;&quot;fantasy&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1955,&#92;&quot;pages&#92;&quot;:416,&#92;&quot;author_id&#92;&quot;:1},{&#92;&quot;id&#92;&quot;:105,&#92;&quot;title&#92;&quot;:&#92;&quot;The Silmarillion&#92;&quot;,&#92;&quot;genre&#92;&quot;:&#92;&quot;fantasy&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1977,&#92;&quot;pages&#92;&quot;:365,&#92;&quot;author_id&#92;&quot;:1},{&#92;&quot;id&#92;&quot;:106,&#92;&quot;title&#92;&quot;:&#92;&quot;The Mysterious Affair at Styles&#92;&quot;,&#92;&quot;genre&#92;&quot;:&#92;&quot;mystery&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1920,&#92;&quot;pages&#92;&quot;:296,&#92;&quot;author_id&#92;&quot;:2},{&#92;&quot;id&#92;&quot;:107,&#92;&quot;title&#92;&quot;:&#92;&quot;The Murder of Roger Ackroyd&#92;&quot;,&#92;&quot;genre&#92;&quot;:&#92;&quot;mystery&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1926,&#92;&quot;pages&#92;&quot;:312,&#92;&quot;author_id&#92;&quot;:2},{&#92;&quot;id&#92;&quot;:108,&#92;&quot;title&#92;&quot;:&#92;&quot;Murder on the Orient Express&#92;&quot;,&#92;&quot;genre&#92;&quot;:&#92;&quot;mystery&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1934,&#92;&quot;pages&#92;&quot;:256,&#92;&quot;author_id&#92;&quot;:2}]&quot;' data-total-rows='26' data-total-columns='6' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='8' data-field-types='[[&quot;id&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;title&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;genre&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;release_year&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;pages&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;author_id&quot;,[&quot;integer&quot;,&quot;Int64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div><div style='flex: 2'><marimo-ui-element object-id='vblA-1' random-id='390eefbb-ff59-eb8d-abb0-a64ccca5b7b9'><marimo-table data-initial-value='[]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eauthors&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-data='&quot;[{&#92;&quot;id&#92;&quot;:1,&#92;&quot;name&#92;&quot;:&#92;&quot;J.R.R. Tolkien&#92;&quot;,&#92;&quot;birth_year&#92;&quot;:1892,&#92;&quot;country&#92;&quot;:&#92;&quot;UK&#92;&quot;},{&#92;&quot;id&#92;&quot;:2,&#92;&quot;name&#92;&quot;:&#92;&quot;Agatha Christie&#92;&quot;,&#92;&quot;birth_year&#92;&quot;:1890,&#92;&quot;country&#92;&quot;:&#92;&quot;UK&#92;&quot;},{&#92;&quot;id&#92;&quot;:3,&#92;&quot;name&#92;&quot;:&#92;&quot;Stephen King&#92;&quot;,&#92;&quot;birth_year&#92;&quot;:1947,&#92;&quot;country&#92;&quot;:&#92;&quot;USA&#92;&quot;},{&#92;&quot;id&#92;&quot;:4,&#92;&quot;name&#92;&quot;:&#92;&quot;Ursula K. Le Guin&#92;&quot;,&#92;&quot;birth_year&#92;&quot;:1929,&#92;&quot;country&#92;&quot;:&#92;&quot;USA&#92;&quot;},{&#92;&quot;id&#92;&quot;:5,&#92;&quot;name&#92;&quot;:&#92;&quot;George Orwell&#92;&quot;,&#92;&quot;birth_year&#92;&quot;:1903,&#92;&quot;country&#92;&quot;:&#92;&quot;UK&#92;&quot;},{&#92;&quot;id&#92;&quot;:6,&#92;&quot;name&#92;&quot;:&#92;&quot;Jane Austen&#92;&quot;,&#92;&quot;birth_year&#92;&quot;:1775,&#92;&quot;country&#92;&quot;:&#92;&quot;UK&#92;&quot;},{&#92;&quot;id&#92;&quot;:7,&#92;&quot;name&#92;&quot;:&#92;&quot;Terry Pratchett&#92;&quot;,&#92;&quot;birth_year&#92;&quot;:1948,&#92;&quot;country&#92;&quot;:&#92;&quot;UK&#92;&quot;}]&quot;' data-total-rows='7' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;id&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;name&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;birth_year&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;country&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "38b70c8eb687003f7548ae4b5c9cf9ac",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-tables-rows-columns-and-keys\">1. Tables, rows, columns and keys</h2>\n<blockquote>\n<span class=\"paragraph\"><em>\"Imagine a book. It has a title, a genre, a release date, a page count, an author. Each of these properties is called an <strong>attribute</strong>.\"</em></span>\n</blockquote>\n<span class=\"paragraph\">A <strong>table</strong> is the blueprint: the attributes become <strong>columns</strong>, every concrete book becomes a <strong>row</strong>.\nTwo books can share a title, so each row gets a unique <strong>primary key</strong> (<code>books.id</code>).\nAuthors have attributes of their own, so they get their own table, and <code>books</code> stores only the author's id:\na <strong>foreign key</strong> (<code>books.author_id \u2192 authors.id</code>).</span>\n<span class=\"paragraph\">Click a book to follow its foreign key; click an author to see every row that points at it.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "e64d269d082c7f436e110ec3a39033cc",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "248610d16ec78e8316590e80c560eacd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='PKri-0' random-id='6df1b26f-4743-2e6d-bbef-9616adb1197d'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;c1d3b4be433b42758f6b71fae542dde7&quot;}' data-label='null' data-model-id='&quot;c1d3b4be433b42758f6b71fae542dde7&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "29503642bff5cab9fddff155f24bf25b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='26' data-label='&quot;rows in books&quot;' data-caption='&quot;6 columns (attributes)&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='7' data-label='&quot;rows in authors&quot;' data-caption='&quot;4 columns&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='5' data-label='&quot;books by J.R.R. Tolkien&quot;' data-caption='&quot;rows sharing this foreign key&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;True&quot;' data-label='&quot;books.id unique?&quot;' data-caption='&quot;that&#x27;s what makes it a primary key&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "fc03966fd15fc5ecedfcf0e0b03d2562",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eClick &#92;u003cem&#92;u003eStephen King&#92;u003c/em&#92;u003e in &#92;u003ccode&#92;u003eauthors&#92;u003c/code&#92;u003e: six book rows light up; his name lives in exactly one place.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eClick &#92;u003cem&#92;u003eDiary of an Unknown Sailor&#92;u003c/em&#92;u003e: its foreign key is &#92;u003ccode&#92;u003eNULL&#92;u003c/code&#92;u003e. Remember it for the JOIN section.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eClick &#92;u003cem&#92;u003eTerry Pratchett&#92;u003c/em&#92;u003e: zero books point at him. Also remember that.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "7340c3626a9176c8aedbf5f22f67eb8b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-a-query-select-from-where\">2. A query: <code>SELECT \u2026 FROM \u2026 WHERE</code></h2>\n<blockquote>\n<span class=\"paragraph\"><em>\"A query is a request to the database to retrieve or change data.\"</em></span>\n</blockquote>\n<ul>\n<li><strong><code>SELECT</code></strong> picks the attributes (columns) you want to see; <code>*</code> means <em>everything</em>.</li>\n<li><strong><code>FROM</code></strong> says which table to take them from.</li>\n<li><strong><code>WHERE</code></strong> tests <strong>every row</strong> against a condition. <em>True \u2192 the row stays. False \u2192 it's gone.</em>\n  Conditions can use <code>AND</code>, <code>OR</code>, <code>NOT</code>, comparisons <code>=</code>, <code>&gt;</code>, <code>&lt;</code>, and keywords <code>BETWEEN</code>, <code>IN</code>, <code>LIKE</code>.</li>\n</ul>\n<span class=\"paragraph\">Build a query with the controls; the SQL text, the result, and the \"every row gets tested\" chart all update together.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "b6e8ff6bfe3cedef530f137e30ca38de",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='RGSE-0' random-id='831eecb0-72bb-a8cf-0d1e-59b24dce27de'><marimo-multiselect data-initial-value='[&quot;title&quot;,&quot;release_year&quot;,&quot;pages&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eSELECT&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;*&quot;,&quot;id&quot;,&quot;title&quot;,&quot;genre&quot;,&quot;release_year&quot;,&quot;pages&quot;,&quot;author_id&quot;]' data-full-width='false' data-disabled='false'></marimo-multiselect></marimo-ui-element><marimo-ui-element object-id='RGSE-1' random-id='77b09d23-2d51-ca66-5fe8-1005d31e6f7c'><marimo-dropdown data-initial-value='[&quot;pages &#92;u003e \u2026&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eWHERE&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;(no WHERE)&quot;,&quot;author_id = \u2026&quot;,&quot;pages &#92;u003e \u2026&quot;,&quot;release_year BETWEEN \u2026 AND \u2026&quot;,&quot;genre IN (\u2026)&quot;,&quot;title LIKE \u2026&quot;,&quot;pages &#92;u003e \u2026 AND genre IN (\u2026)&quot;,&quot;NOT (genre IN (\u2026))&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='RGSE-2' random-id='72279599-6259-45c9-1b51-4fb0ddec2759'><marimo-dropdown data-initial-value='[&quot;Stephen King&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eauthor&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;J.R.R. Tolkien&quot;,&quot;Agatha Christie&quot;,&quot;Stephen King&quot;,&quot;Ursula K. Le Guin&quot;,&quot;George Orwell&quot;,&quot;Jane Austen&quot;,&quot;Terry Pratchett&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element><marimo-ui-element object-id='RGSE-3' random-id='e0e2a7df-06ca-4f3a-8162-200d1dbfa4b9'><marimo-slider data-initial-value='350' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003epages &amp;gt;&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='100' data-stop='1200' data-step='10' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='RGSE-4' random-id='0e99d303-4175-5740-a432-4a656508a398'><marimo-range-slider data-initial-value='[1930,1960]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eyear between&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1800' data-stop='1990' data-step='1' data-steps='[]' data-debounce='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-full-width='false' data-disabled='false'></marimo-range-slider></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='RGSE-5' random-id='2dd053df-e8e7-458f-61fa-375a8e2a02e8'><marimo-multiselect data-initial-value='[&quot;fantasy&quot;,&quot;sci-fi&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003egenre IN&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;dystopia&quot;,&quot;fantasy&quot;,&quot;horror&quot;,&quot;memoir&quot;,&quot;mystery&quot;,&quot;romance&quot;,&quot;satire&quot;,&quot;sci-fi&quot;]' data-full-width='false' data-disabled='false'></marimo-multiselect></marimo-ui-element><marimo-ui-element object-id='RGSE-6' random-id='75572e33-4764-0217-6a7b-9e7218d38419'><marimo-text data-initial-value='&quot;The %&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003etitle LIKE&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-placeholder='&quot;&quot;' data-kind='&quot;text&quot;' data-full-width='false' data-disabled='false' data-debounce='true'></marimo-text></marimo-ui-element></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "dd534dbb270c93ec916fa7fdb9788c5a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><div class=\"language-sql codehilite\"><pre><span></span><code><span class=\"k\">SELECT</span><span class=\"w\"> </span><span class=\"n\">title</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">release_year</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">pages</span>\n<span class=\"k\">FROM</span><span class=\"w\"> </span><span class=\"n\">books</span>\n<span class=\"k\">WHERE</span><span class=\"w\"> </span><span class=\"n\">pages</span><span class=\"w\"> </span><span class=\"o\">&gt;</span><span class=\"w\"> </span><span class=\"mi\">350</span>\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "a0e84d8a4761c417626d0019269661ce",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Result: 11 of 26 rows survive</strong></span></span><marimo-ui-element object-id='emfo-0' random-id='499497d8-83d8-954f-3e2f-29a2c653e208'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;title&#92;&quot;:&#92;&quot;The Fellowship of the Ring&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1954,&#92;&quot;pages&#92;&quot;:423},{&#92;&quot;title&#92;&quot;:&#92;&quot;The Two Towers&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1954,&#92;&quot;pages&#92;&quot;:352},{&#92;&quot;title&#92;&quot;:&#92;&quot;The Return of the King&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1955,&#92;&quot;pages&#92;&quot;:416},{&#92;&quot;title&#92;&quot;:&#92;&quot;The Silmarillion&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1977,&#92;&quot;pages&#92;&quot;:365},{&#92;&quot;title&#92;&quot;:&#92;&quot;The Shining&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1977,&#92;&quot;pages&#92;&quot;:447},{&#92;&quot;title&#92;&quot;:&#92;&quot;The Stand&#92;&quot;,&#92;&quot;release_year&#92;&quot;:1978,&#92;&quot;pages&#92;&quot;:823}]&quot;' data-total-rows='11' data-total-columns='3' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='6' data-field-types='[[&quot;title&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;release_year&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;pages&quot;,[&quot;integer&quot;,&quot;int64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "b0d555732c78b7fc6a13d8cc5f334b93",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.vegalite.v6+json": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v6.4.1.json\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 300\n    }\n  },\n  \"data\": {\n    \"name\": \"data-847032121b659b22a6a0e1f579e362ef\"\n  },\n  \"datasets\": {\n    \"data-847032121b659b22a6a0e1f579e362ef\": [\n      {\n        \"author_id\": 1,\n        \"genre\": \"fantasy\",\n        \"id\": 101,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 310,\n        \"release_year\": 1937,\n        \"title\": \"The Hobbit\"\n      },\n      {\n        \"author_id\": 1,\n        \"genre\": \"fantasy\",\n        \"id\": 102,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 423,\n        \"release_year\": 1954,\n        \"title\": \"The Fellowship of the Ring\"\n      },\n      {\n        \"author_id\": 1,\n        \"genre\": \"fantasy\",\n        \"id\": 103,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 352,\n        \"release_year\": 1954,\n        \"title\": \"The Two Towers\"\n      },\n      {\n        \"author_id\": 1,\n        \"genre\": \"fantasy\",\n        \"id\": 104,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 416,\n        \"release_year\": 1955,\n        \"title\": \"The Return of the King\"\n      },\n      {\n        \"author_id\": 1,\n        \"genre\": \"fantasy\",\n        \"id\": 105,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 365,\n        \"release_year\": 1977,\n        \"title\": \"The Silmarillion\"\n      },\n      {\n        \"author_id\": 2,\n        \"genre\": \"mystery\",\n        \"id\": 106,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 296,\n        \"release_year\": 1920,\n        \"title\": \"The Mysterious Affair at Styles\"\n      },\n      {\n        \"author_id\": 2,\n        \"genre\": \"mystery\",\n        \"id\": 107,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 312,\n        \"release_year\": 1926,\n        \"title\": \"The Murder of Roger Ackroyd\"\n      },\n      {\n        \"author_id\": 2,\n        \"genre\": \"mystery\",\n        \"id\": 108,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 256,\n        \"release_year\": 1934,\n        \"title\": \"Murder on the Orient Express\"\n      },\n      {\n        \"author_id\": 2,\n        \"genre\": \"mystery\",\n        \"id\": 109,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 256,\n        \"release_year\": 1936,\n        \"title\": \"The A.B.C. Murders\"\n      },\n      {\n        \"author_id\": 2,\n        \"genre\": \"mystery\",\n        \"id\": 110,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 288,\n        \"release_year\": 1937,\n        \"title\": \"Death on the Nile\"\n      },\n      {\n        \"author_id\": 2,\n        \"genre\": \"mystery\",\n        \"id\": 111,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 272,\n        \"release_year\": 1939,\n        \"title\": \"And Then There Were None\"\n      },\n      {\n        \"author_id\": 2,\n        \"genre\": \"mystery\",\n        \"id\": 112,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 240,\n        \"release_year\": 1941,\n        \"title\": \"Evil Under the Sun\"\n      },\n      {\n        \"author_id\": 3,\n        \"genre\": \"horror\",\n        \"id\": 113,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 199,\n        \"release_year\": 1974,\n        \"title\": \"Carrie\"\n      },\n      {\n        \"author_id\": 3,\n        \"genre\": \"horror\",\n        \"id\": 114,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 447,\n        \"release_year\": 1977,\n        \"title\": \"The Shining\"\n      },\n      {\n        \"author_id\": 3,\n        \"genre\": \"horror\",\n        \"id\": 115,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 823,\n        \"release_year\": 1978,\n        \"title\": \"The Stand\"\n      },\n      {\n        \"author_id\": 3,\n        \"genre\": \"horror\",\n        \"id\": 116,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 374,\n        \"release_year\": 1983,\n        \"title\": \"Pet Sematary\"\n      },\n      {\n        \"author_id\": 3,\n        \"genre\": \"horror\",\n        \"id\": 117,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 1138,\n        \"release_year\": 1986,\n        \"title\": \"It\"\n      },\n      {\n        \"author_id\": 3,\n        \"genre\": \"horror\",\n        \"id\": 118,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 310,\n        \"release_year\": 1987,\n        \"title\": \"Misery\"\n      },\n      {\n        \"author_id\": 4,\n        \"genre\": \"fantasy\",\n        \"id\": 119,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 183,\n        \"release_year\": 1968,\n        \"title\": \"A Wizard of Earthsea\"\n      },\n      {\n        \"author_id\": 4,\n        \"genre\": \"sci-fi\",\n        \"id\": 120,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 286,\n        \"release_year\": 1969,\n        \"title\": \"The Left Hand of Darkness\"\n      },\n      {\n        \"author_id\": 4,\n        \"genre\": \"sci-fi\",\n        \"id\": 121,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 387,\n        \"release_year\": 1974,\n        \"title\": \"The Dispossessed\"\n      },\n      {\n        \"author_id\": 5,\n        \"genre\": \"satire\",\n        \"id\": 122,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 112,\n        \"release_year\": 1945,\n        \"title\": \"Animal Farm\"\n      },\n      {\n        \"author_id\": 5,\n        \"genre\": \"dystopia\",\n        \"id\": 123,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 328,\n        \"release_year\": 1949,\n        \"title\": \"Nineteen Eighty-Four\"\n      },\n      {\n        \"author_id\": 6,\n        \"genre\": \"romance\",\n        \"id\": 124,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 432,\n        \"release_year\": 1813,\n        \"title\": \"Pride and Prejudice\"\n      },\n      {\n        \"author_id\": 6,\n        \"genre\": \"romance\",\n        \"id\": 125,\n        \"kept\": \"kept (TRUE)\",\n        \"pages\": 474,\n        \"release_year\": 1815,\n        \"title\": \"Emma\"\n      },\n      {\n        \"author_id\": null,\n        \"genre\": \"memoir\",\n        \"id\": 126,\n        \"kept\": \"thrown away (FALSE)\",\n        \"pages\": 205,\n        \"release_year\": 1890,\n        \"title\": \"Diary of an Unknown Sailor\"\n      }\n    ]\n  },\n  \"encoding\": {\n    \"color\": {\n      \"field\": \"kept\",\n      \"scale\": {\n        \"domain\": [\n          \"kept (TRUE)\",\n          \"thrown away (FALSE)\"\n        ],\n        \"range\": [\n          \"#1f77b4\",\n          \"#d62728\"\n        ]\n      },\n      \"title\": \"WHERE test\",\n      \"type\": \"nominal\"\n    },\n    \"tooltip\": [\n      {\n        \"field\": \"title\",\n        \"type\": \"nominal\"\n      },\n      {\n        \"field\": \"genre\",\n        \"type\": \"nominal\"\n      },\n      {\n        \"field\": \"release_year\",\n        \"type\": \"quantitative\"\n      },\n      {\n        \"field\": \"pages\",\n        \"type\": \"quantitative\"\n      },\n      {\n        \"field\": \"author_id\",\n        \"type\": \"quantitative\"\n      }\n    ],\n    \"x\": {\n      \"field\": \"release_year\",\n      \"scale\": {\n        \"zero\": false\n      },\n      \"title\": \"release_year\",\n      \"type\": \"quantitative\"\n    },\n    \"y\": {\n      \"field\": \"pages\",\n      \"title\": \"pages\",\n      \"type\": \"quantitative\"\n    }\n  },\n  \"height\": 260,\n  \"mark\": {\n    \"size\": 140,\n    \"stroke\": \"white\",\n    \"strokeWidth\": 1,\n    \"type\": \"circle\"\n  },\n  \"title\": \"Every row gets tested: one dot per book\",\n  \"usermeta\": {\n    \"embedOptions\": {}\n  },\n  \"width\": \"container\"\n}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "9c730822aad223b05cb3761a34f3ae34",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003ccode&#92;u003epages &amp;gt; \u2026&#92;u003c/code&#92;u003e: slide down to 100, then up to 900. Only &#92;u003cem&#92;u003eIt&#92;u003c/em&#92;u003e survives the 1,000+ test.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003ccode&#92;u003etitle LIKE \u2026&#92;u003c/code&#92;u003e with &#92;u003ccode&#92;u003eThe %&#92;u003c/code&#92;u003e, then &#92;u003ccode&#92;u003e%Murder%&#92;u003c/code&#92;u003e. &#92;u003ccode&#92;u003e%&#92;u003c/code&#92;u003e matches any run of characters.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003ccode&#92;u003eNOT (genre IN \u2026)&#92;u003c/code&#92;u003e: the &#92;u003cem&#92;u003eDiary&#92;u003c/em&#92;u003e has a known genre, but try &#92;u003ccode&#92;u003eauthor_id = \u2026&#92;u003c/code&#92;u003e and notice it can &#92;u003cstrong&#92;u003enever&#92;u003c/strong&#92;u003e match the &#92;u003cem&#92;u003eDiary&#92;u003c/em&#92;u003e: comparisons with &#92;u003ccode&#92;u003eNULL&#92;u003c/code&#92;u003e are neither TRUE nor FALSE, so the row is dropped.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eDeselect every column in &#92;u003ccode&#92;u003eSELECT&#92;u003c/code&#92;u003e: you get &#92;u003ccode&#92;u003e*&#92;u003c/code&#92;u003e. &#92;u003ccode&#92;u003eSELECT&#92;u003c/code&#92;u003e changes the &#92;u003cstrong&#92;u003ecolumns&#92;u003c/strong&#92;u003e, &#92;u003ccode&#92;u003eWHERE&#92;u003c/code&#92;u003e changes the &#92;u003cstrong&#92;u003erows&#92;u003c/strong&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "76254b6bc854f126686b03c51c1f47a2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-join-gluing-tables-back-together-by-matching-keys\">3. <code>JOIN</code>: gluing tables back together by matching keys</h2>\n<blockquote>\n<span class=\"paragraph\"><em>\"For every book, find the author whose ID matches and merge them into one wider row.\"</em></span>\n</blockquote>\n<span class=\"paragraph\">The result of <code>WHERE</code> showed <code>author_id = 3</code>, not <em>Stephen King</em>. The name lives in the other table, so we <strong>join</strong>:</span>\n<div class=\"language-sql codehilite\"><pre><span></span><code><span class=\"k\">SELECT</span><span class=\"w\"> </span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">title</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span>\n<span class=\"k\">FROM</span><span class=\"w\"> </span><span class=\"n\">books</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">b</span>\n<span class=\"k\">JOIN</span><span class=\"w\"> </span><span class=\"n\">authors</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"w\"> </span><span class=\"k\">ON</span><span class=\"w\"> </span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">author_id</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">id</span>\n</code></pre></div>\n<span class=\"paragraph\">Below is a mini version of both tables. Lines are matches of the <code>ON</code> condition. Switch the join type and watch\nwhich rows make it into the wider result: plain <code>JOIN</code> (= <code>INNER JOIN</code>) keeps only matched pairs; the <code>OUTER</code>\nvariants also keep the lonely rows and pad the missing side with <code>NULL</code>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "1cb9209d7a4f1b3bcf3403524eeaf6fd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "362420fe572d4449b6e947b435a7e3d8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='ROlb-0' random-id='d62f4f1a-6f1c-62a3-1d9a-b1e0e9ffe8ba'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;646e19f7522a4da8b11693f575dfeb2a&quot;}' data-label='null' data-model-id='&quot;646e19f7522a4da8b11693f575dfeb2a&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "e6860d24b90a2a75478990bf2da5516c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 2;display: flex;min-width: 0;min-height: 0'><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><div class=\"language-sql codehilite\"><pre><span></span><code><span class=\"k\">SELECT</span><span class=\"w\"> </span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">title</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span>\n<span class=\"k\">FROM</span><span class=\"w\"> </span><span class=\"n\">mini_books</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">b</span>\n<span class=\"k\">INNER</span><span class=\"w\"> </span><span class=\"k\">JOIN</span><span class=\"w\"> </span><span class=\"n\">mini_authors</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"w\"> </span><span class=\"k\">ON</span><span class=\"w\"> </span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">author_id</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">id</span>\n<span class=\"k\">ORDER</span><span class=\"w\"> </span><span class=\"k\">BY</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span><span class=\"w\"> </span><span class=\"n\">NULLS</span><span class=\"w\"> </span><span class=\"k\">LAST</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">title</span>\n</code></pre></div></span><marimo-stat data-value='6' data-label='&quot;rows returned by DuckDB&quot;' data-caption='&quot;7 books \u00d7 6 authors in&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat></div></div><div style='flex: 3'><marimo-ui-element object-id='qnkX-0' random-id='1842d184-01a6-a5a3-d04f-01c1e42d8d54'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;title&#92;&quot;:&#92;&quot;Murder on the Orient Express&#92;&quot;,&#92;&quot;name&#92;&quot;:&#92;&quot;Agatha Christie&#92;&quot;},{&#92;&quot;title&#92;&quot;:&#92;&quot;Nineteen Eighty-Four&#92;&quot;,&#92;&quot;name&#92;&quot;:&#92;&quot;George Orwell&#92;&quot;},{&#92;&quot;title&#92;&quot;:&#92;&quot;The Hobbit&#92;&quot;,&#92;&quot;name&#92;&quot;:&#92;&quot;J.R.R. Tolkien&#92;&quot;},{&#92;&quot;title&#92;&quot;:&#92;&quot;Emma&#92;&quot;,&#92;&quot;name&#92;&quot;:&#92;&quot;Jane Austen&#92;&quot;},{&#92;&quot;title&#92;&quot;:&#92;&quot;Carrie&#92;&quot;,&#92;&quot;name&#92;&quot;:&#92;&quot;Stephen King&#92;&quot;},{&#92;&quot;title&#92;&quot;:&#92;&quot;It&#92;&quot;,&#92;&quot;name&#92;&quot;:&#92;&quot;Stephen King&#92;&quot;}]&quot;' data-total-rows='6' data-total-columns='2' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;title&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;name&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "3c49417548a043aec4f20a79ab252233",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"aliases-which-id-do-you-mean\">Aliases: which <code>id</code> do you mean?</h3>\n<blockquote>\n<span class=\"paragraph\"><em>\"Both tables have an attribute called <code>id</code>. So, which one do you mean?\"</em></span>\n</blockquote>\n<span class=\"paragraph\">After a join the wide row has <strong>two</strong> columns called <code>id</code>. Asking for plain <code>id</code> is ambiguous, so the database refuses.\nPrefix with the table name (<code>books.id</code>), or give the table a short <strong>alias</strong> with <code>AS</code> (<code>books AS b</code> \u2192 <code>b.id</code>).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "b1354730a927040bcf5179a5ac0a3c0e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='Vxnm-0' random-id='3e337006-adcb-3a78-91cc-9fb30c11c73f'><marimo-radio data-initial-value='&quot;SELECT id, name \u2026  (ambiguous)&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ePick a SELECT list&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;SELECT id, name \u2026  (ambiguous)&quot;,&quot;SELECT books.id, authors.name \u2026  (full names)&quot;,&quot;SELECT b.id, a.name \u2026  (aliases)&quot;]' data-inline='false' data-disabled='false'></marimo-radio></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "f9e23199b04186c5f6153b802d511c4f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><div class=\"language-sql codehilite\"><pre><span></span><code><span class=\"k\">SELECT</span><span class=\"w\"> </span><span class=\"n\">id</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">name</span>\n<span class=\"k\">FROM</span><span class=\"w\"> </span><span class=\"n\">books</span>\n<span class=\"k\">JOIN</span><span class=\"w\"> </span><span class=\"n\">authors</span><span class=\"w\"> </span><span class=\"k\">ON</span><span class=\"w\"> </span><span class=\"n\">books</span><span class=\"p\">.</span><span class=\"n\">author_id</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">authors</span><span class=\"p\">.</span><span class=\"n\">id</span>\n<span class=\"k\">LIMIT</span><span class=\"w\"> </span><span class=\"mi\">3</span>\n</code></pre></div></span><marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eDuckDB error&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003cdiv class=&#92;&quot;language-text codehilite&#92;&quot;&#92;u003e&#92;u003cpre&#92;u003e&#92;u003cspan&#92;u003e&#92;u003c/span&#92;u003e&#92;u003ccode&#92;u003eBinder Error: Ambiguous reference to column name &#92;&quot;id&#92;&quot; (use: &#x27;books.id&#x27; or &#x27;authors.id&#x27;)&#92;n&#92;u003c/code&#92;u003e&#92;u003c/pre&#92;u003e&#92;u003c/div&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;danger&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "0d51ecb2bb4333711efa75180ae8854b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cstrong&#92;u003eINNER&#92;u003c/strong&#92;u003e: the &#92;u003cem&#92;u003eDiary&#92;u003c/em&#92;u003e (&#92;u003ccode&#92;u003eNULL&#92;u003c/code&#92;u003e key) and &#92;u003cem&#92;u003eTerry Pratchett&#92;u003c/em&#92;u003e (no books) both vanish. 7 books in, 6 rows out.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cstrong&#92;u003eLEFT&#92;u003c/strong&#92;u003e: the &#92;u003cem&#92;u003eDiary&#92;u003c/em&#92;u003e comes back with &#92;u003ccode&#92;u003ename = NULL&#92;u003c/code&#92;u003e. &#92;u003cstrong&#92;u003eRIGHT&#92;u003c/strong&#92;u003e: Pratchett comes back with &#92;u003ccode&#92;u003etitle = NULL&#92;u003c/code&#92;u003e. &#92;u003cstrong&#92;u003eFULL&#92;u003c/strong&#92;u003e: both.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eHover &#92;u003cem&#92;u003eStephen King&#92;u003c/em&#92;u003e: one author row matches two books, so his name is &#92;u003cstrong&#92;u003ecopied&#92;u003c/strong&#92;u003e into two result rows. That&#x27;s how a join makes the result &#92;u003cem&#92;u003ewider&#92;u003c/em&#92;u003e and sometimes &#92;u003cem&#92;u003elonger&#92;u003c/em&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "0c13f53942ec3dcb360f2df22f21ab1b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-aggregation-group-by-and-having\">4. Aggregation, <code>GROUP BY</code> and <code>HAVING</code></h2>\n<blockquote>\n<span class=\"paragraph\"><em>\"Aggregation functions take many rows and squeeze them into a single value.\"</em></span>\n</blockquote>\n<span class=\"paragraph\"><code>COUNT(*)</code>, <code>SUM(pages)</code>, <code>AVG(pages)</code>, <code>MIN</code>, <code>MAX</code> collapse rows. Without <code>GROUP BY</code> the database doesn't know\n<em>what to count for</em> and fails. <strong><code>GROUP BY</code> splits the rows into buckets, one per author</strong>, and the aggregate runs\non each bucket separately. To keep only authors with <strong>more than five books</strong> you can't use <code>WHERE</code>;\nyou need <strong><code>HAVING</code></strong>, which filters <strong>buckets</strong> instead of rows.</span>\n<span class=\"paragraph\">Each square below is one book row, stacked into its author's bucket. Buckets that fail <code>HAVING</code> turn red.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "64de23dee620ad450133adc2b857a747",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='Pvdt-0' random-id='346cff11-e254-d7a0-3f64-4475509bcc4a'><marimo-dropdown data-initial-value='[&quot;COUNT(*)&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eaggregate&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;COUNT(*)&quot;,&quot;SUM(b.pages)&quot;,&quot;AVG(b.pages)&quot;,&quot;MIN(b.release_year)&quot;,&quot;MAX(b.pages)&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element><marimo-ui-element object-id='Pvdt-1' random-id='c8e1a2ea-5923-554a-0e71-eb6ea98bb2ae'><marimo-slider data-initial-value='5' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eHAVING aggregate &amp;gt;&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0' data-stop='2000' data-step='1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div><marimo-ui-element object-id='Pvdt-2' random-id='ccb56775-96a1-0948-75ac-16cca1984433'><marimo-radio data-initial-value='&quot;GROUP BY a.name + HAVING (correct)&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003equery variant&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;GROUP BY a.name + HAVING (correct)&quot;,&quot;forget GROUP BY&quot;,&quot;filter with WHERE instead of HAVING&quot;]' data-inline='false' data-disabled='false'></marimo-radio></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "0057b59f909f3b30d726e89dbb17e4f2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 1'><span class=\"markdown prose dark:prose-invert contents\"><div class=\"language-sql codehilite\"><pre><span></span><code><span class=\"k\">SELECT</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"k\">COUNT</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"p\">)</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">value</span>\n<span class=\"k\">FROM</span><span class=\"w\"> </span><span class=\"n\">books</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">b</span>\n<span class=\"k\">JOIN</span><span class=\"w\"> </span><span class=\"n\">authors</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"w\"> </span><span class=\"k\">ON</span><span class=\"w\"> </span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">author_id</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">id</span>\n<span class=\"k\">GROUP</span><span class=\"w\"> </span><span class=\"k\">BY</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span>\n<span class=\"k\">HAVING</span><span class=\"w\"> </span><span class=\"k\">COUNT</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"p\">)</span><span class=\"w\"> </span><span class=\"o\">&gt;</span><span class=\"w\"> </span><span class=\"mi\">5</span>\n</code></pre></div></span></div><div style='flex: 1;display: flex;min-width: 0;min-height: 0'><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>2 bucket(s) survive</strong></span></span><marimo-ui-element object-id='ZBYS-0' random-id='fef5752a-71d9-78bf-54f1-686d158bf4de'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;name&#92;&quot;:&#92;&quot;Agatha Christie&#92;&quot;,&#92;&quot;value&#92;&quot;:7},{&#92;&quot;name&#92;&quot;:&#92;&quot;Stephen King&#92;&quot;,&#92;&quot;value&#92;&quot;:6}]&quot;' data-total-rows='2' data-total-columns='2' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;name&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;value&quot;,[&quot;integer&quot;,&quot;int64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "fb426bde89c5700970c7a1d11bbd6e5f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.vegalite.v6+json": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v6.4.1.json\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 300\n    }\n  },\n  \"datasets\": {\n    \"data-0824e47f54c635a5f07ff7a63a6e66eb\": [\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 2,\n        \"name\": \"Jane Austen\",\n        \"pages\": 432,\n        \"release_year\": 1813,\n        \"slot\": 0,\n        \"title\": \"Pride and Prejudice\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 2,\n        \"name\": \"Jane Austen\",\n        \"pages\": 474,\n        \"release_year\": 1815,\n        \"slot\": 1,\n        \"title\": \"Emma\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 7,\n        \"name\": \"Agatha Christie\",\n        \"pages\": 296,\n        \"release_year\": 1920,\n        \"slot\": 0,\n        \"title\": \"The Mysterious Affair at Styles\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 7,\n        \"name\": \"Agatha Christie\",\n        \"pages\": 312,\n        \"release_year\": 1926,\n        \"slot\": 1,\n        \"title\": \"The Murder of Roger Ackroyd\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 7,\n        \"name\": \"Agatha Christie\",\n        \"pages\": 256,\n        \"release_year\": 1934,\n        \"slot\": 2,\n        \"title\": \"Murder on the Orient Express\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 7,\n        \"name\": \"Agatha Christie\",\n        \"pages\": 256,\n        \"release_year\": 1936,\n        \"slot\": 3,\n        \"title\": \"The A.B.C. Murders\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 7,\n        \"name\": \"Agatha Christie\",\n        \"pages\": 288,\n        \"release_year\": 1937,\n        \"slot\": 4,\n        \"title\": \"Death on the Nile\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 7,\n        \"name\": \"Agatha Christie\",\n        \"pages\": 272,\n        \"release_year\": 1939,\n        \"slot\": 5,\n        \"title\": \"And Then There Were None\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 7,\n        \"name\": \"Agatha Christie\",\n        \"pages\": 240,\n        \"release_year\": 1941,\n        \"slot\": 6,\n        \"title\": \"Evil Under the Sun\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 5,\n        \"name\": \"J.R.R. Tolkien\",\n        \"pages\": 310,\n        \"release_year\": 1937,\n        \"slot\": 0,\n        \"title\": \"The Hobbit\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 5,\n        \"name\": \"J.R.R. Tolkien\",\n        \"pages\": 423,\n        \"release_year\": 1954,\n        \"slot\": 1,\n        \"title\": \"The Fellowship of the Ring\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 5,\n        \"name\": \"J.R.R. Tolkien\",\n        \"pages\": 352,\n        \"release_year\": 1954,\n        \"slot\": 2,\n        \"title\": \"The Two Towers\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 5,\n        \"name\": \"J.R.R. Tolkien\",\n        \"pages\": 416,\n        \"release_year\": 1955,\n        \"slot\": 3,\n        \"title\": \"The Return of the King\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 5,\n        \"name\": \"J.R.R. Tolkien\",\n        \"pages\": 365,\n        \"release_year\": 1977,\n        \"slot\": 4,\n        \"title\": \"The Silmarillion\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 6,\n        \"name\": \"Stephen King\",\n        \"pages\": 199,\n        \"release_year\": 1974,\n        \"slot\": 0,\n        \"title\": \"Carrie\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 6,\n        \"name\": \"Stephen King\",\n        \"pages\": 447,\n        \"release_year\": 1977,\n        \"slot\": 1,\n        \"title\": \"The Shining\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 6,\n        \"name\": \"Stephen King\",\n        \"pages\": 823,\n        \"release_year\": 1978,\n        \"slot\": 2,\n        \"title\": \"The Stand\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 6,\n        \"name\": \"Stephen King\",\n        \"pages\": 374,\n        \"release_year\": 1983,\n        \"slot\": 3,\n        \"title\": \"Pet Sematary\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 6,\n        \"name\": \"Stephen King\",\n        \"pages\": 1138,\n        \"release_year\": 1986,\n        \"slot\": 4,\n        \"title\": \"It\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 6,\n        \"name\": \"Stephen King\",\n        \"pages\": 310,\n        \"release_year\": 1987,\n        \"slot\": 5,\n        \"title\": \"Misery\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 2,\n        \"name\": \"George Orwell\",\n        \"pages\": 112,\n        \"release_year\": 1945,\n        \"slot\": 0,\n        \"title\": \"Animal Farm\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 2,\n        \"name\": \"George Orwell\",\n        \"pages\": 328,\n        \"release_year\": 1949,\n        \"slot\": 1,\n        \"title\": \"Nineteen Eighty-Four\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 3,\n        \"name\": \"Ursula K. Le Guin\",\n        \"pages\": 183,\n        \"release_year\": 1968,\n        \"slot\": 0,\n        \"title\": \"A Wizard of Earthsea\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 3,\n        \"name\": \"Ursula K. Le Guin\",\n        \"pages\": 286,\n        \"release_year\": 1969,\n        \"slot\": 1,\n        \"title\": \"The Left Hand of Darkness\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 3,\n        \"name\": \"Ursula K. Le Guin\",\n        \"pages\": 387,\n        \"release_year\": 1974,\n        \"slot\": 2,\n        \"title\": \"The Dispossessed\"\n      }\n    ],\n    \"data-6ec76b718eae774cbecfe0637c7fbfc3\": [\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 2,\n        \"name\": \"Jane Austen\",\n        \"pages\": 432,\n        \"release_year\": 1813,\n        \"slot\": 0,\n        \"title\": \"Pride and Prejudice\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 7,\n        \"name\": \"Agatha Christie\",\n        \"pages\": 296,\n        \"release_year\": 1920,\n        \"slot\": 0,\n        \"title\": \"The Mysterious Affair at Styles\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 5,\n        \"name\": \"J.R.R. Tolkien\",\n        \"pages\": 310,\n        \"release_year\": 1937,\n        \"slot\": 0,\n        \"title\": \"The Hobbit\"\n      },\n      {\n        \"HAVING\": \"bucket kept\",\n        \"bucket_value\": 6,\n        \"name\": \"Stephen King\",\n        \"pages\": 199,\n        \"release_year\": 1974,\n        \"slot\": 0,\n        \"title\": \"Carrie\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 2,\n        \"name\": \"George Orwell\",\n        \"pages\": 112,\n        \"release_year\": 1945,\n        \"slot\": 0,\n        \"title\": \"Animal Farm\"\n      },\n      {\n        \"HAVING\": \"bucket dropped\",\n        \"bucket_value\": 3,\n        \"name\": \"Ursula K. Le Guin\",\n        \"pages\": 183,\n        \"release_year\": 1968,\n        \"slot\": 0,\n        \"title\": \"A Wizard of Earthsea\"\n      }\n    ]\n  },\n  \"height\": 260,\n  \"layer\": [\n    {\n      \"data\": {\n        \"name\": \"data-0824e47f54c635a5f07ff7a63a6e66eb\"\n      },\n      \"encoding\": {\n        \"color\": {\n          \"field\": \"HAVING\",\n          \"scale\": {\n            \"domain\": [\n              \"bucket kept\",\n              \"bucket dropped\"\n            ],\n            \"range\": [\n              \"#1f77b4\",\n              \"#d62728\"\n            ]\n          },\n          \"type\": \"nominal\"\n        },\n        \"tooltip\": [\n          {\n            \"field\": \"title\",\n            \"type\": \"nominal\"\n          },\n          {\n            \"field\": \"pages\",\n            \"type\": \"quantitative\"\n          },\n          {\n            \"field\": \"release_year\",\n            \"type\": \"quantitative\"\n          }\n        ],\n        \"x\": {\n          \"axis\": {\n            \"labelAngle\": 0\n          },\n          \"field\": \"name\",\n          \"sort\": \"-y\",\n          \"title\": null,\n          \"type\": \"nominal\"\n        },\n        \"y\": {\n          \"axis\": null,\n          \"field\": \"slot\",\n          \"sort\": \"descending\",\n          \"title\": \"rows in bucket\",\n          \"type\": \"ordinal\"\n        }\n      },\n      \"mark\": {\n        \"size\": 600,\n        \"type\": \"square\"\n      }\n    },\n    {\n      \"data\": {\n        \"name\": \"data-6ec76b718eae774cbecfe0637c7fbfc3\"\n      },\n      \"encoding\": {\n        \"text\": {\n          \"field\": \"bucket_value\",\n          \"format\": \".4~f\",\n          \"type\": \"quantitative\"\n        },\n        \"x\": {\n          \"field\": \"name\",\n          \"sort\": \"-y\",\n          \"type\": \"nominal\"\n        },\n        \"y\": {\n          \"value\": 0\n        }\n      },\n      \"mark\": {\n        \"dy\": -14,\n        \"fontWeight\": \"bold\",\n        \"type\": \"text\"\n      }\n    }\n  ],\n  \"title\": \"GROUP BY a.name \u2192 one bucket per author; bold number = COUNT(*) of the bucket\",\n  \"usermeta\": {\n    \"embedOptions\": {}\n  },\n  \"width\": \"container\"\n}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "c71dfd33e734b65d9f64d7a29f376ed0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eWith &#92;u003ccode&#92;u003eCOUNT(*)&#92;u003c/code&#92;u003e and &#92;u003ccode&#92;u003e&amp;gt; 5&#92;u003c/code&#92;u003e, only Christie (7) and King (6) survive, exactly the video&#x27;s &#92;&quot;more than five books&#92;&quot;.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003ePick &#92;u003cstrong&#92;u003eforget GROUP BY&#92;u003c/strong&#92;u003e and &#92;u003cstrong&#92;u003eWHERE instead of HAVING&#92;u003c/strong&#92;u003e: read the two errors. Both are explained by &#92;u003cem&#92;u003eexecution order&#92;u003c/em&#92;u003e (next sections).&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eSwitch to &#92;u003ccode&#92;u003eSUM(b.pages)&#92;u003c/code&#92;u003e and set the threshold to 1500: King&#x27;s 3,291 pages win easily even though Christie has more books.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "c9cdb9ba707a47d18b85857171c6e06a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-order-by-and-limit\">5. <code>ORDER BY</code> and <code>LIMIT</code></h2>\n<blockquote>\n<span class=\"paragraph\"><em>\"Order the output from the highest to the lowest number of written books\u2026 and if you want only the top 10, use <code>LIMIT</code>.\"</em></span>\n</blockquote>\n<span class=\"paragraph\"><code>ORDER BY column ASC|DESC</code> sorts the final rows; <code>LIMIT n</code> cuts off everything after the first <em>n</em>. That's the complete query from the video.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "be70ffa1dc4932ec3b774668039308c1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><marimo-ui-element object-id='AjVT-0' random-id='1a88e811-3cf9-96e7-e5d7-856f432a7a36'><marimo-dropdown data-initial-value='[&quot;n_books&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eORDER BY&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;n_books&quot;,&quot;total_pages&quot;,&quot;first_book&quot;,&quot;name&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element><marimo-ui-element object-id='AjVT-1' random-id='1c9d27a8-ffc3-b6a4-60cc-09b4e8378cd9'><marimo-radio data-initial-value='&quot;DESC&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003edirection&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;DESC&quot;,&quot;ASC&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element><marimo-ui-element object-id='AjVT-2' random-id='ae9bacef-2527-5e87-e222-eafab571a5a2'><marimo-slider data-initial-value='3' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eLIMIT&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='6' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "c92b8ebda6fb7c9dd8325a47eb66e090",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><div class=\"language-sql codehilite\"><pre><span></span><code><span class=\"k\">SELECT</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"k\">COUNT</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"p\">)</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">n_books</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"k\">SUM</span><span class=\"p\">(</span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">pages</span><span class=\"p\">)</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">total_pages</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"k\">MIN</span><span class=\"p\">(</span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">release_year</span><span class=\"p\">)</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">first_book</span>\n<span class=\"k\">FROM</span><span class=\"w\"> </span><span class=\"n\">books</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">b</span>\n<span class=\"k\">JOIN</span><span class=\"w\"> </span><span class=\"n\">authors</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"w\"> </span><span class=\"k\">ON</span><span class=\"w\"> </span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">author_id</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">id</span>\n<span class=\"k\">GROUP</span><span class=\"w\"> </span><span class=\"k\">BY</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span>\n<span class=\"k\">ORDER</span><span class=\"w\"> </span><span class=\"k\">BY</span><span class=\"w\"> </span><span class=\"n\">n_books</span><span class=\"w\"> </span><span class=\"k\">DESC</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span>\n<span class=\"k\">LIMIT</span><span class=\"w\"> </span><span class=\"mi\">3</span>\n</code></pre></div></span><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;data&#92;&quot;: {&#92;n    &#92;&quot;name&#92;&quot;: &#92;&quot;data-4c6ce1a1d884d91d8b569c9b0e8289ec&#92;&quot;&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-4c6ce1a1d884d91d8b569c9b0e8289ec&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;LIMIT&#92;&quot;: &#92;&quot;kept&#92;&quot;,&#92;n        &#92;&quot;first_book&#92;&quot;: 1920,&#92;n        &#92;&quot;index&#92;&quot;: 0,&#92;n        &#92;&quot;n_books&#92;&quot;: 7,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Agatha Christie&#92;&quot;,&#92;n        &#92;&quot;total_pages&#92;&quot;: 1920.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;LIMIT&#92;&quot;: &#92;&quot;kept&#92;&quot;,&#92;n        &#92;&quot;first_book&#92;&quot;: 1974,&#92;n        &#92;&quot;index&#92;&quot;: 1,&#92;n        &#92;&quot;n_books&#92;&quot;: 6,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Stephen King&#92;&quot;,&#92;n        &#92;&quot;total_pages&#92;&quot;: 3291.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;LIMIT&#92;&quot;: &#92;&quot;kept&#92;&quot;,&#92;n        &#92;&quot;first_book&#92;&quot;: 1937,&#92;n        &#92;&quot;index&#92;&quot;: 2,&#92;n        &#92;&quot;n_books&#92;&quot;: 5,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;J.R.R. Tolkien&#92;&quot;,&#92;n        &#92;&quot;total_pages&#92;&quot;: 1866.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;LIMIT&#92;&quot;: &#92;&quot;cut off&#92;&quot;,&#92;n        &#92;&quot;first_book&#92;&quot;: 1968,&#92;n        &#92;&quot;index&#92;&quot;: 3,&#92;n        &#92;&quot;n_books&#92;&quot;: 3,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Ursula K. Le Guin&#92;&quot;,&#92;n        &#92;&quot;total_pages&#92;&quot;: 856.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;LIMIT&#92;&quot;: &#92;&quot;cut off&#92;&quot;,&#92;n        &#92;&quot;first_book&#92;&quot;: 1945,&#92;n        &#92;&quot;index&#92;&quot;: 4,&#92;n        &#92;&quot;n_books&#92;&quot;: 2,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;George Orwell&#92;&quot;,&#92;n        &#92;&quot;total_pages&#92;&quot;: 440.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;LIMIT&#92;&quot;: &#92;&quot;cut off&#92;&quot;,&#92;n        &#92;&quot;first_book&#92;&quot;: 1813,&#92;n        &#92;&quot;index&#92;&quot;: 5,&#92;n        &#92;&quot;n_books&#92;&quot;: 2,&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;Jane Austen&#92;&quot;,&#92;n        &#92;&quot;total_pages&#92;&quot;: 906.0&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;encoding&#92;&quot;: {&#92;n    &#92;&quot;color&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;LIMIT&#92;&quot;,&#92;n      &#92;&quot;scale&#92;&quot;: {&#92;n        &#92;&quot;domain&#92;&quot;: [&#92;n          &#92;&quot;kept&#92;&quot;,&#92;n          &#92;&quot;cut off&#92;&quot;&#92;n        ],&#92;n        &#92;&quot;range&#92;&quot;: [&#92;n          &#92;&quot;#1f77b4&#92;&quot;,&#92;n          &#92;&quot;#d62728&#92;&quot;&#92;n        ]&#92;n      },&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    },&#92;n    &#92;&quot;tooltip&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;name&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;n_books&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;total_pages&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;first_book&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n      }&#92;n    ],&#92;n    &#92;&quot;x&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;n_books&#92;&quot;,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n    },&#92;n    &#92;&quot;y&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;name&#92;&quot;,&#92;n      &#92;&quot;sort&#92;&quot;: {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;index&#92;&quot;&#92;n      },&#92;n      &#92;&quot;title&#92;&quot;: null,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    }&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 200,&#92;n  &#92;&quot;mark&#92;&quot;: {&#92;n    &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n  },&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;All grouped rows in ORDER BY order; LIMIT keeps the blue ones&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: &#92;&quot;container&#92;&quot;&#92;n}&quot;'></marimo-mime-renderer><marimo-ui-element object-id='pHFh-0' random-id='9cf96a28-60c0-b5f5-c30f-e07c116f7755'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;name&#92;&quot;:&#92;&quot;Agatha Christie&#92;&quot;,&#92;&quot;n_books&#92;&quot;:7,&#92;&quot;total_pages&#92;&quot;:1920.0,&#92;&quot;first_book&#92;&quot;:1920},{&#92;&quot;name&#92;&quot;:&#92;&quot;Stephen King&#92;&quot;,&#92;&quot;n_books&#92;&quot;:6,&#92;&quot;total_pages&#92;&quot;:3291.0,&#92;&quot;first_book&#92;&quot;:1974},{&#92;&quot;name&#92;&quot;:&#92;&quot;J.R.R. Tolkien&#92;&quot;,&#92;&quot;n_books&#92;&quot;:5,&#92;&quot;total_pages&#92;&quot;:1866.0,&#92;&quot;first_book&#92;&quot;:1937}]&quot;' data-total-rows='3' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;name&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;n_books&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;total_pages&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;first_book&quot;,[&quot;integer&quot;,&quot;int64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "0feccb0374cfe896b331c66466b9fb59",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-the-twist-execution-order\">6. The twist: execution order</h2>\n<blockquote>\n<span class=\"paragraph\"><em>\"The order of the keywords you just saw is the order you <strong>write</strong>, not the order the database <strong>runs</strong> it.\"</em></span>\n</blockquote>\n<table>\n<thead>\n<tr>\n<th>written</th>\n<th><code>SELECT</code></th>\n<th><code>FROM</code></th>\n<th><code>JOIN</code></th>\n<th><code>WHERE</code></th>\n<th><code>GROUP BY</code></th>\n<th><code>HAVING</code></th>\n<th><code>ORDER BY</code></th>\n<th><code>LIMIT</code></th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>run</strong></td>\n<td><code>FROM</code></td>\n<td><code>JOIN</code></td>\n<td><code>WHERE</code></td>\n<td><code>GROUP BY</code></td>\n<td><code>HAVING</code></td>\n<td><strong><code>SELECT</code></strong></td>\n<td><code>ORDER BY</code></td>\n<td><code>LIMIT</code></td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Step through the full query clause by clause. Both strips at the top show where you are: in the text you wrote,\nand in the database's real pipeline. The table is the <em>intermediate result</em> after that clause.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "00e46f1226fb2e6cf0400b8c077dd6ff",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><marimo-ui-element object-id='aqbW-0' random-id='cc67ccf5-5fc6-6b16-52f3-7ebe1fc94ca5'><marimo-slider data-initial-value='1900' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eWHERE b.release_year &amp;gt;=&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1800' data-stop='1980' data-step='5' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='aqbW-1' random-id='8991c979-98e1-a5c5-3d44-c96bb4bd0120'><marimo-slider data-initial-value='2' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eHAVING COUNT(*) &amp;gt;&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0' data-stop='6' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='aqbW-2' random-id='4f85308b-b6dc-3eba-e32f-e060dceff997'><marimo-slider data-initial-value='3' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eLIMIT&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='5' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "1f20519a7b22b169e4cd0130532b5d04",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "fcbff354c1ee0a39f227521dafb97425",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='TXez-0' random-id='d65f796c-cf81-0edd-59ed-05ee9c919a1d'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;afb00596926d42858f4be281f861e226&quot;}' data-label='null' data-model-id='&quot;afb00596926d42858f4be281f861e226&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "fac8a0787aa633c82026de561d2791ee",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 1'><span class=\"markdown prose dark:prose-invert contents\"><div class=\"language-sql codehilite\"><pre><span></span><code><span class=\"k\">SELECT</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"k\">COUNT</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"p\">)</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">n_books</span>\n<span class=\"k\">FROM</span><span class=\"w\"> </span><span class=\"n\">books</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">b</span>\n<span class=\"k\">JOIN</span><span class=\"w\"> </span><span class=\"n\">authors</span><span class=\"w\"> </span><span class=\"k\">AS</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"w\"> </span><span class=\"k\">ON</span><span class=\"w\"> </span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">author_id</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">id</span>\n<span class=\"k\">WHERE</span><span class=\"w\"> </span><span class=\"n\">b</span><span class=\"p\">.</span><span class=\"n\">release_year</span><span class=\"w\"> </span><span class=\"o\">&gt;=</span><span class=\"w\"> </span><span class=\"mi\">1900</span>\n<span class=\"k\">GROUP</span><span class=\"w\"> </span><span class=\"k\">BY</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span>\n<span class=\"k\">HAVING</span><span class=\"w\"> </span><span class=\"k\">COUNT</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"p\">)</span><span class=\"w\"> </span><span class=\"o\">&gt;</span><span class=\"w\"> </span><span class=\"mi\">2</span>\n<span class=\"k\">ORDER</span><span class=\"w\"> </span><span class=\"k\">BY</span><span class=\"w\"> </span><span class=\"n\">n_books</span><span class=\"w\"> </span><span class=\"k\">DESC</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">a</span><span class=\"p\">.</span><span class=\"n\">name</span>\n<span class=\"k\">LIMIT</span><span class=\"w\"> </span><span class=\"mi\">3</span>\n</code></pre></div></span></div><div style='flex: 1;display: flex;min-width: 0;min-height: 0'><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='&quot;FROM&quot;' data-label='&quot;clause running (step 1/8)&quot;' data-caption='&quot;position 2 in the written query&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>DuckDB's answer</strong> (matches the step-by-step replay: \u2705)</span></span><marimo-ui-element object-id='dNNg-0' random-id='80817019-21fa-dc13-673a-fe1ca35170f3'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;name&#92;&quot;:&#92;&quot;Agatha Christie&#92;&quot;,&#92;&quot;n_books&#92;&quot;:7},{&#92;&quot;name&#92;&quot;:&#92;&quot;Stephen King&#92;&quot;,&#92;&quot;n_books&#92;&quot;:6},{&#92;&quot;name&#92;&quot;:&#92;&quot;J.R.R. Tolkien&#92;&quot;,&#92;&quot;n_books&#92;&quot;:5}]&quot;' data-total-rows='3' data-total-columns='2' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;name&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;n_books&quot;,[&quot;integer&quot;,&quot;int64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "4f694a85946792ad26db631be35ba1fd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003ePress &#92;u003cstrong&#92;u003e\u25b6 play&#92;u003c/strong&#92;u003e and watch &#92;u003ccode&#92;u003eSELECT&#92;u003c/code&#92;u003e light up in the &#92;u003cem&#92;u003ewritten&#92;u003c/em&#92;u003e strip at position 1 but in the &#92;u003cem&#92;u003erun&#92;u003c/em&#92;u003e strip at position 6.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eStop at &#92;u003cstrong&#92;u003eWHERE&#92;u003c/strong&#92;u003e: there&#x27;s no count anywhere in that table. Now you can &#92;u003cem&#92;u003esee&#92;u003c/em&#92;u003e why &#92;u003ccode&#92;u003eWHERE COUNT(*) &amp;gt; 5&#92;u003c/code&#92;u003e is impossible.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eSet &#92;u003ccode&#92;u003eWHERE b.release_year &amp;gt;=&#92;u003c/code&#92;u003e to 1950: Christie&#x27;s whole bucket disappears &#92;u003cem&#92;u003ebefore&#92;u003c/em&#92;u003e grouping, so HAVING never even sees her.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eSet &#92;u003ccode&#92;u003eHAVING COUNT(*) &amp;gt;&#92;u003c/code&#92;u003e to 6: only Christie (7) survives. Then also set the year to 1950: nobody survives, and an empty result is not an error.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;n&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cem&#92;u003eNote: DuckDB is lenient and lets you reuse a &#92;u003ccode&#92;u003eSELECT&#92;u003c/code&#92;u003e alias in &#92;u003ccode&#92;u003eWHERE&#92;u003c/code&#92;u003e/&#92;u003ccode&#92;u003eGROUP BY&#92;u003c/code&#92;u003e as a convenience. Many databases (PostgreSQL, SQL Server) do not; the logical order above is why.&#92;u003c/em&#92;u003e&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "7b217358cb5a9a3fe22325fe49363ad1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"7-sandbox-write-your-own-queries\">7. Sandbox: write your own queries</h2>\n<span class=\"paragraph\">Tables available: <code>books</code>, <code>authors</code> (plus <code>mini_books</code>, <code>mini_authors</code>). Pick a challenge to load a starter, edit it, and press <strong>Run</strong>.\nErrors are shown, not hidden: reading them is half of learning SQL.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "7778b106cfb1af298cce0daca60f9269",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='kqZH-0' random-id='ea33481e-442b-da25-4302-90c9c365d93c'><marimo-dropdown data-initial-value='[&quot;Free play&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eLoad a challenge&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;Free play&quot;,&quot;Titles by UK authors, newest first&quot;,&quot;Average pages per genre (genres with \u2265 2 books)&quot;,&quot;Authors with no books (LEFT JOIN + IS NULL)&quot;,&quot;Break it: WHERE with an aggregate&quot;,&quot;Longest book per author&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": "bc09e0e9cd58ddc492b3971d83ea13c3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='wAgl-0' random-id='c7e8e8f3-2eec-6244-da13-6a5d4668fd96'><marimo-code-editor data-initial-value='&quot;SELECT *&#92;nFROM books&#92;nLIMIT 5;&quot;' data-label='null' data-language='&quot;sql&quot;' data-placeholder='&quot;&quot;' data-disabled='false' data-min-height='160' data-show-copy-button='true' data-debounce='false'></marimo-code-editor></marimo-ui-element><marimo-ui-element object-id='wAgl-1' random-id='b7d0d8a9-dc73-7cfe-39ba-fd89ffbcfb7f'><marimo-button data-initial-value='0' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e\u25b6 Run query&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;neutral&quot;' data-disabled='false' data-full-width='false'></marimo-button></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "rEll",
+      "code_hash": "96c5ffeb3671b13e12fbc066262f1df0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>Edit the query, then press <strong>Run query</strong>.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dGlV",
+      "code_hash": "afc7996a188233899479504a40fb9824",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eChallenges&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eHow many books did &#92;u003cstrong&#92;u003eUK&#92;u003c/strong&#92;u003e authors publish &#92;u003cstrong&#92;u003ebefore 1940&#92;u003c/strong&#92;u003e? &#92;u003cem&#92;u003e(hint: JOIN + two WHERE conditions with AND)&#92;u003c/em&#92;u003e&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eList genres in which &#92;u003cstrong&#92;u003emore than one author&#92;u003c/strong&#92;u003e wrote, using &#92;u003ccode&#92;u003eCOUNT(DISTINCT author_id)&#92;u003c/code&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eRun &#92;u003cem&#92;u003eBreak it&#92;u003c/em&#92;u003e, read the error, then fix it by moving the condition into &#92;u003ccode&#92;u003eHAVING&#92;u003c/code&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eFind every book whose title &#92;u003ccode&#92;u003eLIKE &#x27;%the%&#x27;&#92;u003c/code&#92;u003e, case-insensitively with &#92;u003ccode&#92;u003eILIKE&#92;u003c/code&#92;u003e (a DuckDB/Postgres extra).&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;success&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SdmI",
+      "code_hash": "cde4f0167a7de646ef03146fadd53e2a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"8-quiz-check-yourself\">8. Quiz: check yourself</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lgWD",
+      "code_hash": "bc91d65ec7b0ee193640afaabed7e952",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>In a table, every row is a ____ and every column is an ____.</strong></span></span><marimo-ui-element object-id='lgWD-7' random-id='3809c9ec-82f1-378c-0171-edbd597f995f'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;attribute / record&quot;,&quot;record / attribute&quot;,&quot;key / value&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong><code>books.author_id</code> pointing at <code>authors.id</code> is a\u2026</strong></span></span><marimo-ui-element object-id='lgWD-8' random-id='7241e9f1-64d9-b9ec-9864-673eef62da38'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;primary key&quot;,&quot;foreign key&quot;,&quot;alias&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Which clause does the database run FIRST?</strong></span></span><marimo-ui-element object-id='lgWD-9' random-id='3f57be6c-8219-a1b6-54b3-b2bf073d88b8'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;SELECT&quot;,&quot;FROM&quot;,&quot;WHERE&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>You want authors with more than 5 books. Which keyword filters?</strong></span></span><marimo-ui-element object-id='lgWD-10' random-id='7618b3f7-3eb9-ca21-149b-2a42283d878b'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;WHERE&quot;,&quot;HAVING&quot;,&quot;LIMIT&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>An INNER JOIN of books and authors keeps a book whose author_id is NULL.</strong></span></span><marimo-ui-element object-id='lgWD-11' random-id='81ca2801-251b-76bc-63c8-4d75f0f9b94e'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;true&quot;,&quot;false&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Which runs LAST?</strong></span></span><marimo-ui-element object-id='lgWD-12' random-id='668b3c36-4a69-acda-7821-09434be12b2d'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;ORDER BY&quot;,&quot;LIMIT&quot;,&quot;SELECT&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong><code>SELECT id FROM books JOIN authors ON \u2026</code> fails because\u2026</strong></span></span><marimo-ui-element object-id='lgWD-13' random-id='73f82339-441e-5d5b-a76a-298312a454e3'><marimo-radio data-initial-value='null' data-label='null' data-options='[&quot;id is ambiguous&quot;,&quot;JOIN needs GROUP BY&quot;,&quot;id is a reserved word&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element></div></div><marimo-ui-element object-id='lgWD-15' random-id='067ed41f-3719-3228-b79e-c4cb632524f0'><marimo-switch data-initial-value='false' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eReveal answers&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-disabled='false'></marimo-switch></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yOPj",
+      "code_hash": "788619dec9f57bbd675f443a4dc74001",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>Answer, then flip the switch.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "fwwy",
+      "code_hash": "e00f384b742cb65c5b7e48a974161242",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"recap\">Recap</h2>\n<table>\n<thead>\n<tr>\n<th>Keyword</th>\n<th>Job</th>\n<th>Runs</th>\n<th>Works on</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>FROM</code></td>\n<td>pick the table</td>\n<td>1</td>\n<td>tables</td>\n</tr>\n<tr>\n<td><code>JOIN \u2026 ON</code></td>\n<td>glue tables by matching keys (FK = PK)</td>\n<td>2</td>\n<td>rows of two tables</td>\n</tr>\n<tr>\n<td><code>WHERE</code></td>\n<td>test each <strong>row</strong>, keep the TRUE ones</td>\n<td>3</td>\n<td>rows</td>\n</tr>\n<tr>\n<td><code>GROUP BY</code></td>\n<td>split rows into <strong>buckets</strong></td>\n<td>4</td>\n<td>rows \u2192 groups</td>\n</tr>\n<tr>\n<td><code>HAVING</code></td>\n<td>test each <strong>bucket</strong></td>\n<td>5</td>\n<td>groups</td>\n</tr>\n<tr>\n<td><code>SELECT</code></td>\n<td>choose columns, compute aggregates, create aliases</td>\n<td>6</td>\n<td>columns</td>\n</tr>\n<tr>\n<td><code>ORDER BY</code></td>\n<td>sort <code>ASC</code> / <code>DESC</code></td>\n<td>7</td>\n<td>final rows</td>\n</tr>\n<tr>\n<td><code>LIMIT</code></td>\n<td>keep the first <em>n</em></td>\n<td>8</td>\n<td>final rows</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Remember:</strong> you <em>write</em> <code>SELECT</code> first, but the database <em>runs</em> it sixth. Most \"why doesn't this work?\" moments\n(aggregates in <code>WHERE</code>, aliases in <code>WHERE</code>) are explained by that one table.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

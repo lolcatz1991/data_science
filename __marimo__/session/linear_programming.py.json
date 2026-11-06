@@ -1,0 +1,542 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.25.2",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "47ad8a13edf109c730b53068d599fee0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "fc62e37b20ca0900237ae8c29c344477",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"intro-to-linear-programming-the-carpenters-problem\">Intro to Linear Programming: the carpenter's problem</h1>\n<span class=\"paragraph\"><em>An interactive companion to Dr. Trefor Bazett's video <strong>\"Intro to Linear Programming\"</strong>.</em></span>\n<span class=\"paragraph\">A carpenter can build <strong>tables</strong> or <strong>bookcases</strong>, with a limited supply of wood and time.\nHow many of each should they make to earn the most money? We answer this with no calculus and no matrices,\nonly a picture: shade a region, slide a line across it, and look where the line touches last.</span></span><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/K7TL5NMlKIk\" title=\"Intro to Linear Programming\" frameborder=\"0\" allow=\"accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "65b77c1b27a0e0a9a965cfdaf5886eea",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"colour-language-used-throughout\">Colour language used throughout</h3>\n<table>\n<thead>\n<tr>\n<th>colour</th>\n<th>meaning</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><span style=\"color:#e76f51\">\u25a0 orange</span></td>\n<td>the <strong>labour</strong> constraint <marimo-tex class=\"arithmatex\">||(5x+4y\\le 80||)</marimo-tex> (hours)</td>\n</tr>\n<tr>\n<td><span style=\"color:#8d6e63\">\u25a0 brown</span></td>\n<td>the <strong>lumber</strong> constraint <marimo-tex class=\"arithmatex\">||(10x+20y\\le 200||)</marimo-tex> (wood)</td>\n</tr>\n<tr>\n<td><span style=\"color:#2a9d8f\">\u25a0 green</span></td>\n<td>the <strong>feasible region</strong>, i.e. plans that break no rule (green, like in the video)</td>\n</tr>\n<tr>\n<td><span style=\"color:#1f77b4\">\u25a0 blue</span></td>\n<td><strong>iso-value lines</strong>, where profit <marimo-tex class=\"arithmatex\">||(180x+200y||)</marimo-tex> is constant</td>\n</tr>\n<tr>\n<td><span style=\"color:#d62828\">\u25a0 red</span></td>\n<td>the <strong>optimum</strong></td>\n</tr>\n<tr>\n<td><span style=\"color:#6c5b7b\">\u25a0 purple</span></td>\n<td><em>your</em> plan or guess</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "3d1568537652a25758d0d86e45dfca9e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "d8172fb19014460a43012c69e82eb3c3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "827c35d7649c20ae9a723db5e2a291e0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-what-is-a-linear-program\">1 \u00b7 What is a linear program?</h2>\n<span class=\"paragraph\">Despite the name, <em>programming</em> here means <strong>planning</strong>, not coding. A linear program is</span>\n<marimo-tex class=\"arithmatex\">||[\\text{optimize}\\quad 180x + 200y \\qquad\\text{subject to}\\qquad\n\\begin{cases}5x + 4y \\le 80\\\\ 10x + 20y \\le 200\\\\ x \\ge 0,\\; y \\ge 0\\end{cases}||]</marimo-tex><span class=\"paragraph\">Everything is <strong>linear</strong>: no <marimo-tex class=\"arithmatex\">||(x^2||)</marimo-tex>, no <marimo-tex class=\"arithmatex\">||(\\sin x||)</marimo-tex>, only numbers times variables, added up.\n\"Optimize\" can mean maximize <em>or</em> minimize.</span>\n<h3 id=\"the-carpenter-problem\">The carpenter problem</h3>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>lumber (units)</th>\n<th>labour (hours)</th>\n<th>profit</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>table</strong> (<marimo-tex class=\"arithmatex\">||(x||)</marimo-tex>)</td>\n<td>10</td>\n<td>5</td>\n<td>$180</td>\n</tr>\n<tr>\n<td><strong>bookcase</strong> (<marimo-tex class=\"arithmatex\">||(y||)</marimo-tex>)</td>\n<td>20</td>\n<td>4</td>\n<td>$200</td>\n</tr>\n<tr>\n<td><strong>available</strong></td>\n<td>200</td>\n<td>80</td>\n<td>maximize</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">So <marimo-tex class=\"arithmatex\">||(x||)</marimo-tex> tables use <marimo-tex class=\"arithmatex\">||(10x||)</marimo-tex> lumber and <marimo-tex class=\"arithmatex\">||(5x||)</marimo-tex> hours, and <marimo-tex class=\"arithmatex\">||(y||)</marimo-tex> bookcases use <marimo-tex class=\"arithmatex\">||(20y||)</marimo-tex> lumber and <marimo-tex class=\"arithmatex\">||(4y||)</marimo-tex> hours.\n<strong>Before reading on, pick a production plan. Can you beat $3,000?</strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "1f8999d734c83af87b1ff10fc7828e10",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><marimo-ui-element object-id='Xref-0' random-id='cfdb0205-bcf2-0f92-0081-4e77c05b5220'><marimo-slider data-initial-value='8' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003etables x&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0' data-stop='20' data-step='1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='Xref-1' random-id='b4a5a33d-233d-48a3-93d5-4313ddd90a3a'><marimo-slider data-initial-value='4' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ebookcases y&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0' data-stop='12' data-step='1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "7a49a91b3f0102fbde35e8774aff9cd2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='&quot;&#36;2,240&quot;' data-label='&quot;profit 180x + 200y&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;56 / 80&quot;' data-label='&quot;hours used&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;160 / 200&quot;' data-label='&quot;lumber used&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-0b038d98d2d830213a9da65ef15840a2&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;x&#92;&quot;: 1&#92;n      }&#92;n    ],&#92;n    &#92;&quot;data-7d353a6cda1ab268e919a47356ffdc2e&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;available&#92;&quot;: 80,&#92;n        &#92;&quot;color&#92;&quot;: &#92;&quot;#e76f51&#92;&quot;,&#92;n        &#92;&quot;resource&#92;&quot;: &#92;&quot;labour (hours)&#92;&quot;,&#92;n        &#92;&quot;share&#92;&quot;: 0.7,&#92;n        &#92;&quot;used&#92;&quot;: 56&#92;n      },&#92;n      {&#92;n        &#92;&quot;available&#92;&quot;: 200,&#92;n        &#92;&quot;color&#92;&quot;: &#92;&quot;#8d6e63&#92;&quot;,&#92;n        &#92;&quot;resource&#92;&quot;: &#92;&quot;lumber (units)&#92;&quot;,&#92;n        &#92;&quot;share&#92;&quot;: 0.8,&#92;n        &#92;&quot;used&#92;&quot;: 160&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 110,&#92;n  &#92;&quot;layer&#92;&quot;: [&#92;n    {&#92;n      &#92;&quot;data&#92;&quot;: {&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;data-7d353a6cda1ab268e919a47356ffdc2e&#92;&quot;&#92;n      },&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;color&#92;&quot;,&#92;n          &#92;&quot;scale&#92;&quot;: null,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;tooltip&#92;&quot;: [&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;resource&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;used&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;available&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          }&#92;n        ],&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;axis&#92;&quot;: {&#92;n            &#92;&quot;format&#92;&quot;: &#92;&quot;%&#92;&quot;&#92;n          },&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;share&#92;&quot;,&#92;n          &#92;&quot;scale&#92;&quot;: {&#92;n            &#92;&quot;domain&#92;&quot;: [&#92;n              0,&#92;n              1.3&#92;n            ]&#92;n          },&#92;n          &#92;&quot;title&#92;&quot;: &#92;&quot;share of what&#x27;s available&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        },&#92;n        &#92;&quot;y&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;resource&#92;&quot;,&#92;n          &#92;&quot;title&#92;&quot;: null,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;height&#92;&quot;: 26,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n      }&#92;n    },&#92;n    {&#92;n      &#92;&quot;data&#92;&quot;: {&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;data-0b038d98d2d830213a9da65ef15840a2&#92;&quot;&#92;n      },&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;x&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: &#92;&quot;#d62828&#92;&quot;,&#92;n        &#92;&quot;size&#92;&quot;: 2,&#92;n        &#92;&quot;strokeDash&#92;&quot;: [&#92;n          5,&#92;n          3&#92;n        ],&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;rule&#92;&quot;&#92;n      }&#92;n    }&#92;n  ],&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;Resource use (red line = 100%)&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: &#92;&quot;container&#92;&quot;&#92;n}&quot;'></marimo-mime-renderer><marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e\u2705 &#92;u003cstrong&#92;u003eFeasible&#92;u003c/strong&#92;u003e: this plan breaks no rule.&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;success&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "f8d72959a0ae1d6ad2852d6b5f199bfe",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eMake only tables (y = 0). Which resource runs out first, and at how many tables?&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eMake only bookcases (x = 0). Now which resource is the bottleneck?&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eHunt for the best whole-number plan. Notice that the good plans use up &#92;u003cem&#92;u003enearly all&#92;u003c/em&#92;u003e of &#92;u003cstrong&#92;u003eboth&#92;u003c/strong&#92;u003e resources.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "0525da10dab4d849271bf3c6111f3584",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-graphing-inequalities-the-feasible-region\">2 \u00b7 Graphing inequalities: the feasible region</h2>\n<span class=\"paragraph\">Each inequality is a <strong>line plus a side</strong>. The line <marimo-tex class=\"arithmatex\">||(5x+4y=80||)</marimo-tex> is \"all 80 hours used exactly\", and\n<marimo-tex class=\"arithmatex\">||(5x+4y\\le 80||)</marimo-tex> shades everything <em>beneath</em> it. Do this for every constraint: the spot where <strong>all</strong> shadings\noverlap (dark green in the video) is the <strong>feasible region</strong>.</span>\n<marimo-tex class=\"arithmatex\">||[\\underbrace{5x+4y\\le 80}_{\\text{labour}}\\ \\cap\\ \\underbrace{10x+20y\\le 200}_{\\text{lumber}}\\ \\cap\\ \\underbrace{x\\ge0,\\ y\\ge0}_{\\text{no negative furniture}}||]</marimo-tex><span class=\"paragraph\">Four edges give a <strong>quadrilateral with four vertices</strong>. Any point inside it is a legal plan.\n<strong>Drag the purple dot</strong> (or click anywhere) to test plans. Use the sliders to change the carpenter's budgets.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "67f7ab13e286120b4842211ed2f9fd0b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><marimo-ui-element object-id='Kclp-0' random-id='2dc438cb-1dbf-117a-4cda-88860a54e4b1'><marimo-slider data-initial-value='80' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003elabour hours available&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='40' data-stop='120' data-step='5' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='Kclp-1' random-id='4efc6e13-19a5-2e09-2e23-c79a771aaee7'><marimo-slider data-initial-value='200' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003elumber available&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='100' data-stop='300' data-step='10' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "e1f94b5dc1b62ccf32b241964f1cef31",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "bdb3552e3d1ff8c25f3bb354b532e4aa",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "e491054ba1acb14e1fdfae292521da26",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='nWHF-0' random-id='513ec67c-601e-feb2-0d40-079e9ab98e2c'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;f7dbf167b9ea48aeb365c93124f94098&quot;}' data-label='null' data-model-id='&quot;f7dbf167b9ea48aeb365c93124f94098&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "6a3526f6a16e0a61be35a45e279986cb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Plan:</strong> 8 tables, 4 bookcases, profit <strong>$2,240</strong></span></span><marimo-ui-element object-id='iLit-0' random-id='99fe6954-f6d4-9925-e76f-738063b3c606'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;constraint&#92;&quot;:&#92;&quot;labour&#92;&quot;,&#92;&quot;LHS&#92;&quot;:56.0,&#92;&quot;RHS&#92;&quot;:80,&#92;&quot;slack (unused)&#92;&quot;:24.0,&#92;&quot;status&#92;&quot;:&#92;&quot;&#92;&#92;u2705 satisfied&#92;&quot;},{&#92;&quot;constraint&#92;&quot;:&#92;&quot;lumber&#92;&quot;,&#92;&quot;LHS&#92;&quot;:160.0,&#92;&quot;RHS&#92;&quot;:200,&#92;&quot;slack (unused)&#92;&quot;:40.0,&#92;&quot;status&#92;&quot;:&#92;&quot;&#92;&#92;u2705 satisfied&#92;&quot;},{&#92;&quot;constraint&#92;&quot;:&#92;&quot;x &#92;&#92;u2265 0&#92;&quot;,&#92;&quot;LHS&#92;&quot;:-8.0,&#92;&quot;RHS&#92;&quot;:0,&#92;&quot;slack (unused)&#92;&quot;:8.0,&#92;&quot;status&#92;&quot;:&#92;&quot;&#92;&#92;u2705 satisfied&#92;&quot;},{&#92;&quot;constraint&#92;&quot;:&#92;&quot;y &#92;&#92;u2265 0&#92;&quot;,&#92;&quot;LHS&#92;&quot;:-4.0,&#92;&quot;RHS&#92;&quot;:0,&#92;&quot;slack (unused)&#92;&quot;:4.0,&#92;&quot;status&#92;&quot;:&#92;&quot;&#92;&#92;u2705 satisfied&#92;&quot;}]&quot;' data-total-rows='4' data-total-columns='5' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='4' data-field-types='[[&quot;constraint&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;LHS&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;RHS&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;slack (unused)&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;status&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "0d008b9bac083f5bb05043f890a62983",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eDrag the dot exactly onto the orange line. Its &#92;u003cem&#92;u003eslack&#92;u003c/em&#92;u003e becomes 0: every hour is used. Then slide along that line and watch the lumber slack.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eFind the one point where &#92;u003cstrong&#92;u003eboth&#92;u003c/strong&#92;u003e slacks are 0 at once. That is the video&#x27;s &#92;&quot;middle vertex&#92;&quot;.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eIncrease the labour budget until the orange line no longer cuts the region. Now labour stops mattering and only lumber binds.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "407717b28b5f84da4ee23fb7977d40bb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-computing-the-maximum-check-the-corners\">3 \u00b7 Computing the maximum: check the corners</h2>\n<span class=\"paragraph\">The video's intuition: if you finish with <strong>unused wood or unused hours</strong>, you could have built more and earned more.\nSo the best plan should use <strong>all</strong> of both, which is the vertex where the two lines cross. Turn both inequalities into equations:</span>\n<marimo-tex class=\"arithmatex\">||[5x+4y=80 \\;\\Rightarrow\\; y = 20-\\tfrac54x \\qquad\\qquad 10x+20y=200 \\;\\Rightarrow\\; y = 10-\\tfrac{x}{2}||]</marimo-tex><marimo-tex class=\"arithmatex\">||[20-\\tfrac54x = 10-\\tfrac x2 \\;\\Rightarrow\\; x=\\tfrac{40}{3}\\approx 13.3,\\quad y=\\tfrac{10}{3}\\approx 3.33,\\quad 180x+200y \\approx \\$3{,}066.67||]</marimo-tex><span class=\"paragraph\">The general recipe: <strong>intersect every pair of boundary lines, throw away crossings that break a rule, and evaluate the profit\nat the survivors.</strong> Step through it below. Green dots are kept, red \u2717s are infeasible crossings, and the red star is the best so far.</span>\n<span class=\"paragraph\"><small><em>Note: one slide in the video writes the lumber rule as 10x + 10y \u2264 200 and says the all-bookcase corner pays $1,800.\nThe setup (20 lumber per bookcase) gives 10x + 20y \u2264 200 and 200\u00b710 = <strong>$2,000</strong> there. The optimum ($3,066.67) is unaffected.</em></small></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "c1662ef47c72facbdf2330913e500722",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "5c717451913299f6ec4a332a811aabe4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "ae56cfbf705372e6bb6d2512c6faabb9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='Vxnm-0' random-id='a12b7868-55a2-b84a-7ff5-6797c6587244'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;a961525236b947a7824e21a510beb519&quot;}' data-label='null' data-model-id='&quot;a961525236b947a7824e21a510beb519&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "92ff6d890239bef127500e272e5e1657",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;data&#92;&quot;: {&#92;n    &#92;&quot;name&#92;&quot;: &#92;&quot;data-ee9792c541fa4d92df849c65d15f6b89&#92;&quot;&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-ee9792c541fa4d92df849c65d15f6b89&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;is_best&#92;&quot;: false,&#92;n        &#92;&quot;plan&#92;&quot;: &#92;&quot;(0.00, 0.00)&#92;&quot;,&#92;n        &#92;&quot;tight&#92;&quot;: &#92;&quot;x \u2265 0 &amp; y \u2265 0&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 0.0,&#92;n        &#92;&quot;x&#92;&quot;: 0.0,&#92;n        &#92;&quot;y&#92;&quot;: 0.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;is_best&#92;&quot;: false,&#92;n        &#92;&quot;plan&#92;&quot;: &#92;&quot;(16.00, 0.00)&#92;&quot;,&#92;n        &#92;&quot;tight&#92;&quot;: &#92;&quot;labour 5x+4y\u226480 &amp; y \u2265 0&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 2880.0,&#92;n        &#92;&quot;x&#92;&quot;: 16.0,&#92;n        &#92;&quot;y&#92;&quot;: 0.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;is_best&#92;&quot;: true,&#92;n        &#92;&quot;plan&#92;&quot;: &#92;&quot;(13.33, 3.33)&#92;&quot;,&#92;n        &#92;&quot;tight&#92;&quot;: &#92;&quot;labour 5x+4y\u226480 &amp; lumber 10x+20y\u2264200&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 3066.666666666667,&#92;n        &#92;&quot;x&#92;&quot;: 13.333333333333332,&#92;n        &#92;&quot;y&#92;&quot;: 3.3333333333333335&#92;n      },&#92;n      {&#92;n        &#92;&quot;is_best&#92;&quot;: false,&#92;n        &#92;&quot;plan&#92;&quot;: &#92;&quot;(0.00, 10.00)&#92;&quot;,&#92;n        &#92;&quot;tight&#92;&quot;: &#92;&quot;lumber 10x+20y\u2264200 &amp; x \u2265 0&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 2000.0,&#92;n        &#92;&quot;x&#92;&quot;: 0.0,&#92;n        &#92;&quot;y&#92;&quot;: 10.0&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;encoding&#92;&quot;: {&#92;n    &#92;&quot;color&#92;&quot;: {&#92;n      &#92;&quot;condition&#92;&quot;: {&#92;n        &#92;&quot;test&#92;&quot;: &#92;&quot;datum.is_best&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: &#92;&quot;#d62828&#92;&quot;&#92;n      },&#92;n      &#92;&quot;value&#92;&quot;: &#92;&quot;#2a9d8f&#92;&quot;&#92;n    },&#92;n    &#92;&quot;tooltip&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;plan&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;value&#92;&quot;,&#92;n        &#92;&quot;format&#92;&quot;: &#92;&quot;,.2f&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;field&#92;&quot;: &#92;&quot;tight&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n      }&#92;n    ],&#92;n    &#92;&quot;x&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;value&#92;&quot;,&#92;n      &#92;&quot;title&#92;&quot;: &#92;&quot;profit 180x + 200y (&#36;)&#92;&quot;,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n    },&#92;n    &#92;&quot;y&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;plan&#92;&quot;,&#92;n      &#92;&quot;sort&#92;&quot;: &#92;&quot;-x&#92;&quot;,&#92;n      &#92;&quot;title&#92;&quot;: &#92;&quot;vertex (tables, bookcases)&#92;&quot;,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    }&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 150,&#92;n  &#92;&quot;mark&#92;&quot;: {&#92;n    &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n  },&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;Profit at each vertex of the feasible region&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: &#92;&quot;container&#92;&quot;&#92;n}&quot;'></marimo-mime-renderer><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Stepper is at step <strong>0</strong>. Vertex check: max <strong>$3,066.67</strong>. scipy <code>linprog</code> (HiGHS) agrees: <strong>$3,066.67</strong> at (13.333, 3.333).</span></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "1bae3c0fd0dd6196a3939ba79d4db506",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003ePress &#92;u003cstrong&#92;u003e\u25b6\u25b6 play&#92;u003c/strong&#92;u003e and count the pairs. With &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(m||)&#92;u003c/marimo-tex&#92;u003e lines there are &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(&#92;&#92;binom{m}{2}||)&#92;u003c/marimo-tex&#92;u003e pairs: 6 here, but 4,950 for 100 constraints. That&#x27;s why real solvers (the &#92;u003cstrong&#92;u003esimplex method&#92;u003c/strong&#92;u003e) walk from vertex to neighbouring vertex instead of checking them all.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eGo back to section 2 and raise the lumber budget to 300. Re-run the stepper: which crossing switches from \u2717 to a green dot?&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eLook at the &#92;u003cem&#92;u003erejected&#92;u003c/em&#92;u003e crossings: some would pay more than &#36;3,067. Being profitable is not enough; a plan must also be feasible.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "7804a6cd617b217f9936d906c3d57cca",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-iso-value-lines-why-the-answer-is-a-corner\">4 \u00b7 Iso-value lines: why the answer is a corner</h2>\n<span class=\"paragraph\">That still leaves a question: <em>why</em> must the best plan be a vertex? The video's argument uses <strong>iso-value lines</strong>,\nwhich are all plans that earn the <em>same</em> amount <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex>:</span>\n<marimo-tex class=\"arithmatex\">||[180x + 200y = c||]</marimo-tex><span class=\"paragraph\">Changing <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> slides the line <strong>parallel to itself</strong>. A bigger <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> moves it up and to the right, in the direction of the arrow\n<marimo-tex class=\"arithmatex\">||((180, 200)||)</marimo-tex>, which points where profit grows fastest.</span>\n<ul>\n<li>Is <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> too big? The line misses the green region, so <strong>no feasible plan</strong> earns that much.</li>\n<li>Is <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> too small? Lots of feasible plans earn it, but you're leaving money on the table.</li>\n<li>The best <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> is the largest one where the line still <em>\"comes down and kisses\"</em> the region. For a polygon, that kiss happens at a <strong>vertex</strong>.</li>\n</ul>\n<span class=\"paragraph\"><strong>Drag on the plane</strong> to sweep the blue line (it follows your pointer). <strong>Drag the arrow tip</strong> to change the profit per table or bookcase.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "391a4e031d6c66cdc6b48a9c85b5522f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "c6eb3f341e43378f3bb3903f52e0fad1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='ZBYS-0' random-id='5ee9b26e-eeb7-c0af-43b5-34cf153f572f'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;40242d14386a43c5a31490c384fcbaff&quot;}' data-label='null' data-model-id='&quot;40242d14386a43c5a31490c384fcbaff&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "24668540ea9a6035e3000b10b6af295b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='&quot;&#36;1,500&quot;' data-label='&quot;your iso-value c&quot;' data-caption='&quot;below the maximum: money left on the table&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;&#36;3,066.67&quot;' data-label='&quot;max of 180x + 200y&quot;' data-caption='&quot;at (13.33, 3.33)&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;0.90&quot;' data-label='&quot;price ratio p/q&quot;' data-caption='&quot;labour line 1.25 \u00b7 lumber line 0.50&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><span class=\"markdown prose dark:prose-invert contents\"></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "cfcb4793c284e94eaa11a7fb6e7abf85",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eSweep the line from the origin outward. Watch the thick in-region segment &#92;u003cstrong&#92;u003eshrink to a single point&#92;u003c/strong&#92;u003e just before it leaves the region. That point is the vertex (40/3, 10/3).&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eRotate the arrow so tables pay much more (e.g. p = 400, q = 100). The kiss jumps to the &#92;u003cstrong&#92;u003eall-tables&#92;u003c/strong&#92;u003e corner (16, 0). The optimum moves &#92;u003cem&#92;u003ebetween vertices&#92;u003c/em&#92;u003e and never into the middle of an edge.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eSet the ratio p/q to exactly &#92;u003cstrong&#92;u003e1.25&#92;u003c/strong&#92;u003e (e.g. 250 and 200). The iso-line is now parallel to the labour line, and a whole edge ties. The vertices are still optimal, just not uniquely.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "fdb9ca4849f1d91f0520c3c712f5ca66",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-the-big-idea-and-when-it-breaks\">5 \u00b7 The big idea, and when it breaks</h2>\n<blockquote>\n<span class=\"paragraph\"><strong>If the feasible region is a bounded, convex polygon, a linear function reaches its maximum and its minimum at a vertex.</strong></span>\n</blockquote>\n<span class=\"paragraph\">So the method is: <strong>list the vertices, evaluate, pick the best.</strong> The video adds two caveats, and there is one more worth knowing:</span>\n<ul>\n<li><strong>Ties:</strong> if the iso-line is parallel to an edge, the whole edge is optimal (its end vertices included).</li>\n<li><strong>Minimum:</strong> the same picture works. Slide the line <em>down</em> until it last touches. For the carpenter that's <marimo-tex class=\"arithmatex\">||(c = 0||)</marimo-tex> at <marimo-tex class=\"arithmatex\">||((0,0)||)</marimo-tex>.</li>\n<li><strong>Unbounded:</strong> if the region runs off to infinity in the arrow's direction, no maximum exists. The \"vertices only\" rule needs the region to be <strong>bounded</strong>.</li>\n</ul>\n<span class=\"paragraph\">Pick a case. Each one uses the same iso-line widget; press <strong>snap to optimum</strong>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "0a8333550c0d58061280e8cbaeb4523d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='AjVT-0' random-id='5a8274b3-96bc-761d-97f9-1eb7dff428c6'><marimo-dropdown data-initial-value='[&quot;Unique vertex (carpenter)&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ecase&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;Unique vertex (carpenter)&quot;,&quot;Tie along an edge&quot;,&quot;Minimize instead&quot;,&quot;Unbounded region&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "8873dea6631124900e534a0c3034e378",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='pHFh-0' random-id='11ffe179-0dfe-25dc-3f57-483b3b5296ca'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;393e695e865241dcb7553c7230eefb46&quot;}' data-label='null' data-model-id='&quot;393e695e865241dcb7553c7230eefb46&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "cd2eaa00497372e2330305303f61bf28",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">One vertex wins outright: <strong>(40/3, 10/3)</strong> at <strong>$3,066.67</strong>.</span></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">scipy <code>linprog</code> says: <strong>optimal</strong>, optimum $3,066.67 at (13.33, 3.33)</span></span><marimo-ui-element object-id='NCOB-0' random-id='783c61ba-9077-a131-9bbe-c0fed888b61b'><marimo-table data-initial-value='[]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003etrue vertices of the region&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-data='&quot;[{&#92;&quot;x&#92;&quot;:0.0,&#92;&quot;y&#92;&quot;:0.0,&#92;&quot;value&#92;&quot;:0.0,&#92;&quot;tight&#92;&quot;:&#92;&quot;x &#92;&#92;u2265 0 &amp; y &#92;&#92;u2265 0&#92;&quot;},{&#92;&quot;x&#92;&quot;:16.0,&#92;&quot;y&#92;&quot;:0.0,&#92;&quot;value&#92;&quot;:2880.0,&#92;&quot;tight&#92;&quot;:&#92;&quot;labour &amp; y &#92;&#92;u2265 0&#92;&quot;},{&#92;&quot;x&#92;&quot;:13.33,&#92;&quot;y&#92;&quot;:3.33,&#92;&quot;value&#92;&quot;:3066.67,&#92;&quot;tight&#92;&quot;:&#92;&quot;labour &amp; lumber&#92;&quot;},{&#92;&quot;x&#92;&quot;:0.0,&#92;&quot;y&#92;&quot;:10.0,&#92;&quot;value&#92;&quot;:2000.0,&#92;&quot;tight&#92;&quot;:&#92;&quot;lumber &amp; x &#92;&#92;u2265 0&#92;&quot;}]&quot;' data-total-rows='4' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='4' data-field-types='[[&quot;x&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;y&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;value&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;tight&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "096011fb78f9e8eab72d24283336ef93",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eIn &#92;u003cstrong&#92;u003eTie along an edge&#92;u003c/strong&#92;u003e, sweep slowly. At &#36;4,000 the thick in-region segment is the &#92;u003cem&#92;u003ewhole&#92;u003c/em&#92;u003e orange edge, not just a point.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eIn &#92;u003cstrong&#92;u003eUnbounded region&#92;u003c/strong&#92;u003e, rotate the arrow to point down-left (negative p and q, so you are minimizing cost). Now the line &#92;u003cem&#92;u003edoes&#92;u003c/em&#92;u003e get a last touch. An unbounded region can still have an optimum if the arrow points away from the open end.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eIn &#92;u003cstrong&#92;u003eMinimize instead&#92;u003c/strong&#92;u003e, compare with the carpenter case. The same four vertices are checked; only &#92;&quot;best&#92;&quot; flips from largest to smallest.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "40f60ad8982435cd4230d72f1357c35e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-sandbox-write-your-own-linear-program\">6 \u00b7 Sandbox: write your own linear program</h2>\n<span class=\"paragraph\">Edit the constraint table (each row means <marimo-tex class=\"arithmatex\">||(a\\,x + b\\,y \\le r||)</marimo-tex>; for a \"\u2265\" rule, multiply by \u22121), set the objective,\nand the region, vertices and iso-line all update. Rows with a = b = 0 are ignored.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "6004959942ca5c32ba5abdf62fc121a7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='TXez-0' random-id='6e9c0ca7-a90b-2962-81d1-bc152ab9e569'><marimo-data-editor data-initial-value='{&quot;edits&quot;:[]}' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003econstraints  a\u00b7x + b\u00b7y \u2264 r&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-data='&quot;data:text/csv;base64,YSxiLHIsbGFiZWwKNS4wLDQuMCw4MC4wLGxhYm91cgoxMC4wLDIwLjAsMjAwLjAsbHVtYmVyCjEuMCwwLjAsMTIuMCxtYXggMTIgdGFibGVzCg==&quot;' data-field-types='[[&quot;a&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;b&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;r&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;label&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-column-names='[&quot;a&quot;,&quot;b&quot;,&quot;r&quot;,&quot;label&quot;]' data-editable-columns='&quot;all&quot;' data-column-sizing-mode='&quot;auto&quot;'></marimo-data-editor></marimo-ui-element><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='TXez-1' random-id='1c75dfe8-8cd8-4ed6-61ee-6266e7a570df'><marimo-number data-initial-value='180' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ep (profit per x)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-1000' data-stop='1000' data-step='10' data-debounce='false' data-full-width='false' data-disabled='false'></marimo-number></marimo-ui-element><marimo-ui-element object-id='TXez-2' random-id='c5127cca-9a0f-263e-dd58-49547a3a88ad'><marimo-number data-initial-value='200' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eq (profit per y)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-1000' data-stop='1000' data-step='10' data-debounce='false' data-full-width='false' data-disabled='false'></marimo-number></marimo-ui-element><marimo-ui-element object-id='TXez-3' random-id='46aee2b8-cadd-18d6-f594-e70fd7205c71'><marimo-dropdown data-initial-value='[&quot;max&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003esense&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;max&quot;,&quot;min&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "d5d71ced23bfe04e98c21acdf9431414",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='dNNg-0' random-id='6a77cbbb-1950-0900-1f3e-ec725d8d4757'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;df7760dcc38947459b02aa9431bd5443&quot;}' data-label='null' data-model-id='&quot;df7760dcc38947459b02aa9431bd5443&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "f6b223a3fcffc517fb35fe7f286d1cb2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>4 vertices.</strong> Solver status: <strong>optimal</strong>, optimum <strong>2,960.00</strong> at (12.00, 4.00). \u2705 matches the best vertex.</span></span><marimo-ui-element object-id='yCnT-0' random-id='9f8c121d-8c40-a4f1-08f4-17e3653c06b7'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;x&#92;&quot;:0.0,&#92;&quot;y&#92;&quot;:0.0,&#92;&quot;value&#92;&quot;:0.0,&#92;&quot;tight&#92;&quot;:&#92;&quot;x &#92;&#92;u2265 0 &amp; y &#92;&#92;u2265 0&#92;&quot;,&#92;&quot;optimal&#92;&quot;:&#92;&quot;&#92;&quot;},{&#92;&quot;x&#92;&quot;:12.0,&#92;&quot;y&#92;&quot;:0.0,&#92;&quot;value&#92;&quot;:2160.0,&#92;&quot;tight&#92;&quot;:&#92;&quot;max 12 tables &amp; y &#92;&#92;u2265 0&#92;&quot;,&#92;&quot;optimal&#92;&quot;:&#92;&quot;&#92;&quot;},{&#92;&quot;x&#92;&quot;:12.0,&#92;&quot;y&#92;&quot;:4.0,&#92;&quot;value&#92;&quot;:2960.0,&#92;&quot;tight&#92;&quot;:&#92;&quot;lumber &amp; max 12 tables&#92;&quot;,&#92;&quot;optimal&#92;&quot;:&#92;&quot;&#92;&#92;u2605&#92;&quot;},{&#92;&quot;x&#92;&quot;:0.0,&#92;&quot;y&#92;&quot;:10.0,&#92;&quot;value&#92;&quot;:2000.0,&#92;&quot;tight&#92;&quot;:&#92;&quot;lumber &amp; x &#92;&#92;u2265 0&#92;&quot;,&#92;&quot;optimal&#92;&quot;:&#92;&quot;&#92;&quot;}]&quot;' data-total-rows='4' data-total-columns='5' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='4' data-field-types='[[&quot;x&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;y&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;value&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;tight&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;optimal&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "3f0690e355a217c0260bb1f421a1f4af",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eChallenges&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eAdd a third rule &#92;u003cem&#92;u003e&#92;&quot;at most 12 tables&#92;&quot;&#92;u003c/em&#92;u003e (already there: a = 1, b = 0, r = 12). It cuts off the old optimum (40/3, 10/3). Which constraint stops binding, and what&#x27;s the new best vertex?&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eMake the region &#92;u003cstrong&#92;u003eempty&#92;u003c/strong&#92;u003e (e.g. add \u2212x \u2212 y \u2264 \u221240, meaning &#92;&quot;build at least 40 items&#92;&quot;). What does the solver say?&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eFind an objective where the optimum is the all-bookcases corner. &#92;u003cem&#92;u003eHint:&#92;u003c/em&#92;u003e the ratio p/q must drop below the lumber line&#x27;s slope ratio 0.5.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "57766ff1fb15fbb810e00b4f55c277a5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"7-quiz-check-your-intuition\">7 \u00b7 Quiz: check your intuition</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": "92e5e99bebd74f756132bb608b1c476c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='wAgl-12' random-id='e352a905-6a6f-36f3-6087-0d2d06f48ac3'><marimo-dict data-initial-value='{&quot;q1&quot;:null,&quot;q2&quot;:null,&quot;q3&quot;:null,&quot;q4&quot;:null,&quot;q5&quot;:null,&quot;q6&quot;:null}' data-label='null' data-element-ids='{&quot;wAgl-6&quot;:&quot;q1&quot;,&quot;wAgl-7&quot;:&quot;q2&quot;,&quot;wAgl-8&quot;:&quot;q3&quot;,&quot;wAgl-9&quot;:&quot;q4&quot;,&quot;wAgl-10&quot;:&quot;q5&quot;,&quot;wAgl-11&quot;:&quot;q6&quot;}'><marimo-json-output data-json-data='{&quot;q1&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;wAgl-6&#x27; random-id=&#x27;7a499939-6051-68fe-f564-730f72b3f94e&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cstrong&amp;#92;u003e1.&amp;#92;u003c/strong&amp;#92;u003e Where can the maximum of a linear objective over a bounded polygon occur?&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;Only at the centre of the region&amp;quot;,&amp;quot;At a vertex (possibly a whole edge in a tie)&amp;quot;,&amp;quot;Anywhere inside the region&amp;quot;,&amp;quot;Only on the x-axis&amp;quot;]&#x27; data-inline=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q2&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;wAgl-7&#x27; random-id=&#x27;8d9b7c3e-602d-55d4-fdb4-395d951433c4&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cstrong&amp;#92;u003e2.&amp;#92;u003c/strong&amp;#92;u003e In the carpenter problem, what is the profit at the all-tables corner (16, 0)?&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;&amp;#36;1,800&amp;quot;,&amp;quot;&amp;#36;2,000&amp;quot;,&amp;quot;&amp;#36;2,880&amp;quot;,&amp;quot;&amp;#36;3,067&amp;quot;]&#x27; data-inline=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q3&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;wAgl-8&#x27; random-id=&#x27;242ad4a6-8e69-d8f3-2dfe-1aab781ff034&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cstrong&amp;#92;u003e3.&amp;#92;u003c/strong&amp;#92;u003e An iso-value line 180x + 200y = c lies completely outside the feasible region, above it. This means\u2026&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;c is the optimum&amp;quot;,&amp;quot;no feasible plan earns c&amp;quot;,&amp;quot;every plan earns c&amp;quot;,&amp;quot;the region is unbounded&amp;quot;]&#x27; data-inline=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q4&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;wAgl-9&#x27; random-id=&#x27;1630c249-4d9c-04d6-0029-7b0eb6adedf2&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cstrong&amp;#92;u003e4.&amp;#92;u003c/strong&amp;#92;u003e The profit changes to 250x + 200y. What happens?&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;Unique optimum at (0, 10)&amp;quot;,&amp;quot;The whole labour edge ties for the maximum&amp;quot;,&amp;quot;No maximum exists&amp;quot;,&amp;quot;The optimum moves to (0, 0)&amp;quot;]&#x27; data-inline=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q5&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;wAgl-10&#x27; random-id=&#x27;44fdf5e7-8ff7-1cf1-ec3e-77e7a1507968&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cstrong&amp;#92;u003e5.&amp;#92;u003c/strong&amp;#92;u003e Why does the carpenter&amp;#x27;s optimum sit where both lines cross?&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;Because x = y there&amp;quot;,&amp;quot;Any leftover wood or hours could have been turned into more profit&amp;quot;,&amp;quot;Because it&amp;#x27;s the centre of mass&amp;quot;,&amp;quot;Coincidence&amp;quot;]&#x27; data-inline=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q6&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;wAgl-11&#x27; random-id=&#x27;2c9b97f2-35c2-bf08-831d-c148bd8aaa9a&#x27;&#92;u003e&#92;u003cmarimo-radio data-initial-value=&#x27;null&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cstrong&amp;#92;u003e6.&amp;#92;u003c/strong&amp;#92;u003e What can go wrong with &amp;#x27;just check the vertices&amp;#x27; if the region is unbounded?&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;Nothing&amp;quot;,&amp;quot;The objective may increase forever, so there is no maximum&amp;quot;,&amp;quot;There are no vertices at all, ever&amp;quot;,&amp;quot;The minimum is always 0&amp;quot;]&#x27; data-inline=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-radio&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;}' data-value-types='&quot;python&quot;' data-name='&quot;dictionary&quot;'></marimo-json-output></marimo-dict></marimo-ui-element><marimo-ui-element object-id='wAgl-13' random-id='5e3bcd7a-dcba-ec2a-113f-78e7568d0bad'><marimo-switch data-initial-value='false' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ereveal answers&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-disabled='false'></marimo-switch></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "rEll",
+      "code_hash": "e4385eb1d6ab9564d6f5d2cd8eb0c96c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='&quot;0 / 6&quot;' data-label='&quot;score&quot;' data-caption='&quot;0 answered&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>Answer some questions to see your marks.</em></span></span><span class=\"markdown prose dark:prose-invert contents\"></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dGlV",
+      "code_hash": "5c4e6c79ceff2ab3587091dfa474a8b4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"recap\">Recap</h2>\n<table>\n<thead>\n<tr>\n<th>idea</th>\n<th>in symbols</th>\n<th>what you did</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>linear program</td>\n<td>optimize <marimo-tex class=\"arithmatex\">||(px+qy||)</marimo-tex> subject to <marimo-tex class=\"arithmatex\">||(a_ix+b_iy\\le r_i||)</marimo-tex></td>\n<td>turned the carpenter story into <marimo-tex class=\"arithmatex\">||(180x+200y||)</marimo-tex>, <marimo-tex class=\"arithmatex\">||(5x+4y\\le80||)</marimo-tex>, <marimo-tex class=\"arithmatex\">||(10x+20y\\le200||)</marimo-tex></td>\n</tr>\n<tr>\n<td>feasible region</td>\n<td>intersection of half-planes (a convex polygon)</td>\n<td>dragged a plan point and read off slack</td>\n</tr>\n<tr>\n<td>vertices</td>\n<td>crossings of two boundary lines that satisfy every rule</td>\n<td>stepped through all <marimo-tex class=\"arithmatex\">||(\\binom{m}{2}||)</marimo-tex> crossings</td>\n</tr>\n<tr>\n<td>iso-value line</td>\n<td><marimo-tex class=\"arithmatex\">||(px+qy=c||)</marimo-tex>, slides parallel as <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> changes</td>\n<td>swept <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> until the line <em>kissed</em> the region</td>\n</tr>\n<tr>\n<td>big idea</td>\n<td>bounded region \u21d2 max &amp; min at a vertex</td>\n<td>carpenter optimum <marimo-tex class=\"arithmatex\">||((40/3,\\,10/3)||)</marimo-tex>, <strong>$3,066.67</strong></td>\n</tr>\n<tr>\n<td>caveats</td>\n<td>ties (parallel edge), minimize, unbounded</td>\n<td>explored each in section 5</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Next steps:</strong> the <strong>simplex method</strong> (hop vertex \u2192 better neighbour rather than checking all of them), <strong>integer programming</strong>\n(the carpenter can't sell a third of a table: the best whole-number plan is (12, 4) for $2,960, not the rounded (13, 3) at $2,940, and you can check it in section 1), and <strong>duality</strong>\n(what is one more hour of labour worth?).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
