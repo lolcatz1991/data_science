@@ -68,8 +68,4 @@ the same time.
 ## Credits
 
 Built on the explanations of many wonderful YouTube creators — each notebook credits its
-source video inside.
-" path="/var/home/lasse/projects/data_science/README.md">|<|start|>assistant<|channel|>analysis<|message|>README created. Done.<|end|><|start|><|start|>assistant<|channel|>final<|message|>Created `README.md` in the project root. It describes your visual-learning, marimo-tinkering, YouTube-inspired approach, gives the `uvx marimo edit` quick start, mentions the marimo glance browser plugin, and lists all the notebooks. Done. 🎉
-
-Want me to adjust the tone, add a license section, or include anything else?|<|start|>tool_calls_section_begin|><|start|>assistant to=shell<|channel|>analysis <|constrain|>xml<|message|><rfl:parameter name="command">
-cd /var/home/lasse/projects/data_science && git status --short && echo "---" && head -20 README.md
+source video inside. 
