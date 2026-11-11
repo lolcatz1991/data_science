@@ -1,0 +1,607 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.25.2",
+    "script_metadata_hash": "ff10b089cd8f73d289006c58d80c0156"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "ede56dae1b56c6c5cb545c32c394dc0b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "180403be30b6e147507e0b1af8c41a13",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"sequence-prediction-with-cpt-and-cpt-explained-by-playing-with-it\">Sequence prediction with CPT and CPT+, explained by playing with it</h1>\n<span class=\"paragraph\"><em>An interactive companion to Philippe Fournier-Viger's video <strong>\"The CPT+ Algorithm for Sequence Prediction\"</strong>.</em></span>\n<blockquote>\n<span class=\"paragraph\">Someone went to the <strong>gym (A)</strong>, then a <strong>restaurant (B)</strong>, then the <strong>movie theater (C)</strong>. Where will they go next?\nYou typed <em>\"hello how are\"</em>. What is the next word?</span>\n</blockquote>\n<span class=\"paragraph\"><strong>Sequence prediction</strong>: given a set of training sequences of <em>symbols</em>, predict the <strong>next symbol</strong> of a new sequence.\nIt is used for web-page prefetching, product recommendation, next-location and next-word prediction.</span>\n<span class=\"paragraph\">Every method in this lesson follows the same two phases:</span>\n<ol>\n<li><strong>Training</strong>: training sequences \u2192 build a <em>sequence prediction model</em>.</li>\n<li><strong>Prediction</strong>: model + a new sequence (e.g. <code>A B C</code>) \u2192 the predicted next symbol (e.g. <code>D</code>).</li>\n</ol>\n<span class=\"paragraph\">We first build the classical models (<strong>DG, PPM, AKOM</strong>), see where they break, then build <strong>CPT</strong>\n(Compact Prediction Tree) by hand, query it, make it noise tolerant, compress it (<strong>CPT+</strong>) and finally race all of them on data.</span></span><marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eColor language used throughout&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003cul&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cspan style=&#92;&quot;color:#8c6bb1&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003epurple&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e DG \u00b7 &#92;u003cspan style=&#92;&quot;color:#3b6fb6&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eblue&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e PPM order 1 \u00b7 &#92;u003cspan style=&#92;&quot;color:#56a0d3&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003elight blue&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e PPM order 2 \u00b7 &#92;u003cspan style=&#92;&quot;color:#f18f01&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eorange&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e AKOM \u00b7 &#92;u003cspan style=&#92;&quot;color:#2a9d8f&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eteal&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e CPT \u00b7 &#92;u003cspan style=&#92;&quot;color:#e4572e&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003ered&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e CPT+&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eIn the widgets: &#92;u003cspan style=&#92;&quot;color:#f18f01&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eorange&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e = &#92;u003cem&#92;u003ejust added / new&#92;u003c/em&#92;u003e, &#92;u003cspan style=&#92;&quot;color:#2a9d8f&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eteal&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e = &#92;u003cem&#92;u003ematches the query&#92;u003c/em&#92;u003e, &#92;u003cspan style=&#92;&quot;color:#e4572e&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003ered&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e = &#92;u003cem&#92;u003ethe prediction&#92;u003c/em&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ul&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "74bbedfa9afafefaa27b775c8708d059",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "74ba01a31eef154deb02b49917c63614",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-classical-baselines-dg-ppm-and-akom\">1 \u00b7 Classical baselines: DG, PPM and AKOM</h2>\n<span class=\"paragraph\">The video trains every baseline on the same two sequences:</span>\n<marimo-tex class=\"arithmatex\">||[S_1 = \\langle A, B, C, A, C, D, D\\rangle \\qquad S_2 = \\langle C, C, A, B, C, B, C, A\\rangle||]</marimo-tex><table>\n<thead>\n<tr>\n<th>model</th>\n<th>what it stores</th>\n<th>how it predicts after context \u2026 x</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>DG</strong> (dependency graph), window <marimo-tex class=\"arithmatex\">||(w||)</marimo-tex></td>\n<td>arc <marimo-tex class=\"arithmatex\">||(a\\to b||)</marimo-tex> weighted by how often <marimo-tex class=\"arithmatex\">||(b||)</marimo-tex> appears <strong>within the next <marimo-tex class=\"arithmatex\">||(w||)</marimo-tex> symbols</strong> after <marimo-tex class=\"arithmatex\">||(a||)</marimo-tex></td>\n<td><marimo-tex class=\"arithmatex\">||(P(b\\mid a)=\\dfrac{\\#(a\\to b)}{\\#a}||)</marimo-tex>, using only the last symbol</td>\n</tr>\n<tr>\n<td><strong>PPM order 1</strong></td>\n<td>how often <marimo-tex class=\"arithmatex\">||(b||)</marimo-tex> comes <strong>immediately</strong> after <marimo-tex class=\"arithmatex\">||(a||)</marimo-tex></td>\n<td><marimo-tex class=\"arithmatex\">||(P(b\\mid a)=\\dfrac{\\#(ab)}{\\#a}||)</marimo-tex></td>\n</tr>\n<tr>\n<td><strong>PPM order 2</strong></td>\n<td>how often <marimo-tex class=\"arithmatex\">||(c||)</marimo-tex> comes immediately after the pair <marimo-tex class=\"arithmatex\">||(ab||)</marimo-tex></td>\n<td><marimo-tex class=\"arithmatex\">||(P(c\\mid ab)=\\dfrac{\\#(abc)}{\\#ab}||)</marimo-tex></td>\n</tr>\n<tr>\n<td><strong>AKOM</strong> (All-K-Order Markov)</td>\n<td>PPM of every order <marimo-tex class=\"arithmatex\">||(1..K||)</marimo-tex></td>\n<td>try order <marimo-tex class=\"arithmatex\">||(K||)</marimo-tex>; if the context was never seen, fall back to <marimo-tex class=\"arithmatex\">||(K-1||)</marimo-tex>, \u2026, 1</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">The video's worked numbers: DG gives <marimo-tex class=\"arithmatex\">||(P(C\\mid A)=3/4||)</marimo-tex>, PPM1 gives <marimo-tex class=\"arithmatex\">||(P(B\\mid A)=2/4||)</marimo-tex> and <marimo-tex class=\"arithmatex\">||(P(C\\mid A)=1/4||)</marimo-tex>,\nand PPM2 gives <marimo-tex class=\"arithmatex\">||(P(C\\mid AB)=2/2||)</marimo-tex>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "08ebe1f001ccfb665aa4668411715dc9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><marimo-ui-element object-id='lEQa-0' random-id='caa9a228-abda-c65e-c194-1474d5cb0cad'><marimo-dropdown data-initial-value='[&quot;A&quot;]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003econtext (what happened so far)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-options='[&quot;A&quot;,&quot;B&quot;,&quot;C&quot;,&quot;D&quot;,&quot;AB&quot;,&quot;AC&quot;,&quot;BC&quot;,&quot;CA&quot;,&quot;BA&quot;,&quot;BD&quot;,&quot;AD&quot;,&quot;ABC&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false' data-disabled='false'></marimo-dropdown></marimo-ui-element><marimo-ui-element object-id='lEQa-1' random-id='fe7ff9ee-de8f-fc63-5730-472ad9e21152'><marimo-slider data-initial-value='2' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eDG lookahead window w&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='4' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='lEQa-2' random-id='0fd80bf0-a628-808f-e0ed-c80d57e0546e'><marimo-slider data-initial-value='2' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eAKOM order K&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='5' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "a7800315f82fee0956e1ebbff06df594",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.vegalite.v6+json": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v6.4.1.json\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 300\n    }\n  },\n  \"data\": {\n    \"name\": \"data-d850ec4987f2806074c3d6f2c4d4cc6a\"\n  },\n  \"datasets\": {\n    \"data-d850ec4987f2806074c3d6f2c4d4cc6a\": [\n      {\n        \"P\": 0.0,\n        \"label\": \"\",\n        \"model\": \"DG\",\n        \"next\": \"A\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.5,\n        \"label\": \"\",\n        \"model\": \"DG\",\n        \"next\": \"B\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.75,\n        \"label\": \"\u2605\",\n        \"model\": \"DG\",\n        \"next\": \"C\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.25,\n        \"label\": \"\",\n        \"model\": \"DG\",\n        \"next\": \"D\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.0,\n        \"label\": \"\",\n        \"model\": \"PPM1\",\n        \"next\": \"A\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.5,\n        \"label\": \"\u2605\",\n        \"model\": \"PPM1\",\n        \"next\": \"B\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.25,\n        \"label\": \"\",\n        \"model\": \"PPM1\",\n        \"next\": \"C\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.0,\n        \"label\": \"\",\n        \"model\": \"PPM1\",\n        \"next\": \"D\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.0,\n        \"label\": \"\",\n        \"model\": \"PPM2\",\n        \"next\": \"A\",\n        \"reason\": \"\u2717 needs 2 symbols of context\"\n      },\n      {\n        \"P\": 0.0,\n        \"label\": \"\",\n        \"model\": \"PPM2\",\n        \"next\": \"B\",\n        \"reason\": \"\u2717 needs 2 symbols of context\"\n      },\n      {\n        \"P\": 0.0,\n        \"label\": \"\",\n        \"model\": \"PPM2\",\n        \"next\": \"C\",\n        \"reason\": \"\u2717 needs 2 symbols of context\"\n      },\n      {\n        \"P\": 0.0,\n        \"label\": \"\",\n        \"model\": \"PPM2\",\n        \"next\": \"D\",\n        \"reason\": \"\u2717 needs 2 symbols of context\"\n      },\n      {\n        \"P\": 0.0,\n        \"label\": \"\",\n        \"model\": \"AKOM\",\n        \"next\": \"A\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.5,\n        \"label\": \"\u2605\",\n        \"model\": \"AKOM\",\n        \"next\": \"B\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.25,\n        \"label\": \"\",\n        \"model\": \"AKOM\",\n        \"next\": \"C\",\n        \"reason\": \"\"\n      },\n      {\n        \"P\": 0.0,\n        \"label\": \"\",\n        \"model\": \"AKOM\",\n        \"next\": \"D\",\n        \"reason\": \"\"\n      }\n    ]\n  },\n  \"facet\": {\n    \"column\": {\n      \"field\": \"model\",\n      \"sort\": [\n        \"DG\",\n        \"PPM1\",\n        \"PPM2\",\n        \"AKOM\"\n      ],\n      \"title\": \"next-symbol distribution after context A\",\n      \"type\": \"nominal\"\n    }\n  },\n  \"spec\": {\n    \"height\": 180,\n    \"layer\": [\n      {\n        \"encoding\": {\n          \"color\": {\n            \"field\": \"model\",\n            \"legend\": null,\n            \"scale\": {\n              \"domain\": [\n                \"DG\",\n                \"PPM1\",\n                \"PPM2\",\n                \"AKOM\",\n                \"CPT\",\n                \"CPT+\"\n              ],\n              \"range\": [\n                \"#8c6bb1\",\n                \"#3b6fb6\",\n                \"#56a0d3\",\n                \"#f18f01\",\n                \"#2a9d8f\",\n                \"#e4572e\"\n              ]\n            },\n            \"type\": \"nominal\"\n          },\n          \"tooltip\": [\n            {\n              \"field\": \"model\",\n              \"type\": \"nominal\"\n            },\n            {\n              \"field\": \"next\",\n              \"type\": \"nominal\"\n            },\n            {\n              \"field\": \"P\",\n              \"format\": \".2f\",\n              \"type\": \"quantitative\"\n            }\n          ],\n          \"x\": {\n            \"field\": \"next\",\n            \"title\": null,\n            \"type\": \"nominal\"\n          },\n          \"y\": {\n            \"field\": \"P\",\n            \"scale\": {\n              \"domain\": [\n                0,\n                1.05\n              ]\n            },\n            \"title\": \"P(next | context)\",\n            \"type\": \"quantitative\"\n          }\n        },\n        \"mark\": {\n          \"type\": \"bar\"\n        }\n      },\n      {\n        \"encoding\": {\n          \"text\": {\n            \"field\": \"label\",\n            \"type\": \"nominal\"\n          },\n          \"x\": {\n            \"field\": \"next\",\n            \"title\": null,\n            \"type\": \"nominal\"\n          },\n          \"y\": {\n            \"field\": \"P\",\n            \"scale\": {\n              \"domain\": [\n                0,\n                1.05\n              ]\n            },\n            \"title\": \"P(next | context)\",\n            \"type\": \"quantitative\"\n          }\n        },\n        \"mark\": {\n          \"dy\": -8,\n          \"fontSize\": 14,\n          \"type\": \"text\"\n        }\n      },\n      {\n        \"encoding\": {\n          \"text\": {\n            \"field\": \"reason\",\n            \"type\": \"nominal\"\n          },\n          \"x\": {\n            \"value\": 75\n          },\n          \"y\": {\n            \"value\": 90\n          }\n        },\n        \"mark\": {\n          \"color\": \"#999\",\n          \"fontSize\": 11,\n          \"type\": \"text\"\n        },\n        \"transform\": [\n          {\n            \"filter\": \"((datum.reason !== '') && (datum.next === 'A'))\"\n          }\n        ]\n      }\n    ],\n    \"width\": 150\n  },\n  \"usermeta\": {\n    \"embedOptions\": {}\n  }\n}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "191b9db5222d66e5fef6d4dd3bb14957",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;data&#92;&quot;: {&#92;n    &#92;&quot;name&#92;&quot;: &#92;&quot;data-149430585fb5950e8e71d20bd2a015e3&#92;&quot;&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-149430585fb5950e8e71d20bd2a015e3&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 2,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;A&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;B&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 3,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;A&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;C&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 2,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;B&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;A&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 3,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;B&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;C&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 4,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;C&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;A&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 3,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;C&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;C&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 1,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;A&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;D&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 1,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;C&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;D&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 1,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;D&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;D&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 2,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;C&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;B&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 1,&#92;n        &#92;&quot;from&#92;&quot;: &#92;&quot;B&#92;&quot;,&#92;n        &#92;&quot;to&#92;&quot;: &#92;&quot;B&#92;&quot;&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 200,&#92;n  &#92;&quot;layer&#92;&quot;: [&#92;n    {&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;opacity&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;count&#92;&quot;,&#92;n          &#92;&quot;legend&#92;&quot;: null,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        },&#92;n        &#92;&quot;tooltip&#92;&quot;: [&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;from&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;to&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;count&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          }&#92;n        ],&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;to&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;y&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;from&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: &#92;&quot;#8c6bb1&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;rect&#92;&quot;&#92;n      }&#92;n    },&#92;n    {&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;text&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;count&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        },&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;to&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;y&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;from&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;fontSize&#92;&quot;: 14,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;text&#92;&quot;&#92;n      }&#92;n    }&#92;n  ],&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;DG arcs, window w=2&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: 200&#92;n}&quot;'></marimo-mime-renderer><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>DG, by hand</strong> for the last symbol <strong>A</strong> (it occurs <strong>4</strong> times):</span>\n<ul>\n<li>P(B | A) = #(A\u2192B) / #A = 2 / 4 = <strong>0.50</strong></li>\n<li>P(C | A) = #(A\u2192C) / #A = 3 / 4 = <strong>0.75</strong></li>\n<li>P(D | A) = #(A\u2192D) / #A = 1 / 4 = <strong>0.25</strong></li>\n</ul>\n<span class=\"paragraph\"><em>Counting precisely with w = 2, A\u2192B is found only <strong>2</strong> times (the B right after each AB); the slide in the video says 3.\nA\u2192C = 3 matches the video exactly. Slide w to see arcs appear: a bigger window means more (and fuzzier) dependencies.</em></span></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "8911871071a8155f7724a6576cb529a2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='28' data-label='&quot;AKOM nodes at K=2 (video data)&quot;' data-caption='&quot;PPM1 alone: 12&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-3053d6d31e9d0abca632b2610a9ee74d&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 1,&#92;n        &#92;&quot;data&#92;&quot;: &#92;&quot;video (2 sequences)&#92;&quot;,&#92;n        &#92;&quot;nodes&#92;&quot;: 12&#92;n      },&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 1,&#92;n        &#92;&quot;data&#92;&quot;: &#92;&quot;400 noisy route sequences&#92;&quot;,&#92;n        &#92;&quot;nodes&#92;&quot;: 701&#92;n      },&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 2,&#92;n        &#92;&quot;data&#92;&quot;: &#92;&quot;video (2 sequences)&#92;&quot;,&#92;n        &#92;&quot;nodes&#92;&quot;: 28&#92;n      },&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 2,&#92;n        &#92;&quot;data&#92;&quot;: &#92;&quot;400 noisy route sequences&#92;&quot;,&#92;n        &#92;&quot;nodes&#92;&quot;: 2121&#92;n      },&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 3,&#92;n        &#92;&quot;data&#92;&quot;: &#92;&quot;video (2 sequences)&#92;&quot;,&#92;n        &#92;&quot;nodes&#92;&quot;: 45&#92;n      },&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 3,&#92;n        &#92;&quot;data&#92;&quot;: &#92;&quot;400 noisy route sequences&#92;&quot;,&#92;n        &#92;&quot;nodes&#92;&quot;: 3790&#92;n      },&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 4,&#92;n        &#92;&quot;data&#92;&quot;: &#92;&quot;video (2 sequences)&#92;&quot;,&#92;n        &#92;&quot;nodes&#92;&quot;: 59&#92;n      },&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 4,&#92;n        &#92;&quot;data&#92;&quot;: &#92;&quot;400 noisy route sequences&#92;&quot;,&#92;n        &#92;&quot;nodes&#92;&quot;: 5418&#92;n      },&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 5,&#92;n        &#92;&quot;data&#92;&quot;: &#92;&quot;video (2 sequences)&#92;&quot;,&#92;n        &#92;&quot;nodes&#92;&quot;: 69&#92;n      },&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 5,&#92;n        &#92;&quot;data&#92;&quot;: &#92;&quot;400 noisy route sequences&#92;&quot;,&#92;n        &#92;&quot;nodes&#92;&quot;: 6831&#92;n      }&#92;n    ],&#92;n    &#92;&quot;data-33b8821dec2299a7c24e96aa398eeeb4&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;K&#92;&quot;: 2&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 220,&#92;n  &#92;&quot;layer&#92;&quot;: [&#92;n    {&#92;n      &#92;&quot;data&#92;&quot;: {&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;data-3053d6d31e9d0abca632b2610a9ee74d&#92;&quot;&#92;n      },&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;strokeDash&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;data&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;tooltip&#92;&quot;: [&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;K&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;data&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;nodes&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          }&#92;n        ],&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;K&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;ordinal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;y&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;nodes&#92;&quot;,&#92;n          &#92;&quot;title&#92;&quot;: &#92;&quot;model size (contexts + arcs)&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: &#92;&quot;#f18f01&#92;&quot;,&#92;n        &#92;&quot;point&#92;&quot;: true,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;line&#92;&quot;&#92;n      }&#92;n    },&#92;n    {&#92;n      &#92;&quot;data&#92;&quot;: {&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;data-33b8821dec2299a7c24e96aa398eeeb4&#92;&quot;&#92;n      },&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;K&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;ordinal&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: &#92;&quot;#e4572e&#92;&quot;,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;rule&#92;&quot;&#92;n      }&#92;n    }&#92;n  ],&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;AKOM grows fast with K: there are up to |\u03a3|^K contexts&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: &#92;&quot;container&#92;&quot;&#92;n}&quot;'></marimo-mime-renderer></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "f0150e331c63be65aef7125b56789ed7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eContext &#92;u003cstrong&#92;u003eA&#92;u003c/strong&#92;u003e: PPM1 says B (2/4) while DG with w = 2 ties B and C. Move &#92;u003cstrong&#92;u003ew&#92;u003c/strong&#92;u003e to 1: DG turns into PPM1.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003ePick &#92;u003cstrong&#92;u003eBD&#92;u003c/strong&#92;u003e (&#92;&quot;break it&#92;&quot;): BD never occurs in the training data, so &#92;u003cstrong&#92;u003ePPM2 cannot predict&#92;u003c/strong&#92;u003e. AKOM falls back to order 1 and uses just D.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eCompare &#92;u003cstrong&#92;u003eAB&#92;u003c/strong&#92;u003e with &#92;u003cstrong&#92;u003eBA&#92;u003c/strong&#92;u003e. A shopper who buys A then B probably wants the same thing as one who buys B then A, but every&#92;n   order-sensitive model treats them as unrelated contexts. That is the &#92;u003cem&#92;u003eorder noise&#92;u003c/em&#92;u003e problem CPT is designed to handle.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eRaise &#92;u003cstrong&#92;u003eK&#92;u003c/strong&#92;u003e and watch the size counter: on real data AKOM explodes, as the video warns.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "4f3164b2eb5646122035f6dde2b69504",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-training-cpt-a-tree-a-lookup-table-and-an-inverted-index\">2 \u00b7 Training CPT: a tree, a lookup table and an inverted index</h2>\n<span class=\"paragraph\">Every model above <strong>loses information</strong>: from a PPM or DG model you cannot recover the training sequences.\nCPT (Compact Prediction Tree, 2013) is <strong>lossless</strong>: it keeps <em>all</em> training data, stored compactly, in three structures:</span>\n<ol>\n<li><strong>Prediction tree</strong>: each sequence is inserted as a branch from the root. Sequences that <strong>share a prefix share nodes</strong> (AB is stored once for ABC, AB and ABDC).</li>\n<li><strong>Lookup table</strong>: one pointer per sequence, <marimo-tex class=\"arithmatex\">||(S_x \\to||)</marimo-tex> the node where it ends. Walking <strong>backwards</strong> to the root gives the sequence back.</li>\n<li><strong>Inverted index</strong>: one bit-vector per symbol; bit <marimo-tex class=\"arithmatex\">||((s, S_x)=1||)</marimo-tex> if symbol <marimo-tex class=\"arithmatex\">||(s||)</marimo-tex> appears in <marimo-tex class=\"arithmatex\">||(S_x||)</marimo-tex>.</li>\n</ol>\n<span class=\"paragraph\">The video's training sequences are ABC, AB, ABDC, BC and BD. Step through the insertion below.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "4be62b90e77cfb8753779e2e3216a241",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "92e072de1171272c0da9c7e3f9727cea",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "4589756e5dabf645511dc74876984ce7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='Hstk-0' random-id='1bc31d41-f13d-5de6-5f80-0d337f5f19f6'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;2e46bfc352ab481493478566026602df&quot;}' data-label='null' data-model-id='&quot;2e46bfc352ab481493478566026602df&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "0ae277959116097cf8f9fbc1bc11cac5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='0' data-label='&quot;prediction-tree nodes&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='0' data-label='&quot;symbols in the training DB so far&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;100%&quot;' data-label='&quot;tree size / DB size&quot;' data-caption='&quot;lower = more prefix sharing&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>(nothing inserted yet)</em></span></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "a596953498bef2b23b7cf472d5a9dda6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eStep to S2 = AB: &#92;u003cstrong&#92;u003eno new node&#92;u003c/strong&#92;u003e is created, only a pointer. Prefix sharing is what makes the tree &#92;u003cem&#92;u003ecompact&#92;u003c/em&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eAt S4 = BC, the tree has to start a second branch from the root, because CPT only shares &#92;u003cem&#92;u003eprefixes&#92;u003c/em&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eAt the end, 8 nodes hold 13 symbols, and the lossless check still reproduces every sequence exactly.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "7debcb35a3ed89ef37c58e55318738c4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-predicting-with-cpt-intersect-look-up-count\">3 \u00b7 Predicting with CPT: intersect, look up, count</h2>\n<span class=\"paragraph\">To predict what comes after a query such as <strong>AB</strong>:</span>\n<ol>\n<li><strong>Intersect</strong>: AND the inverted-index bit-vectors of the query symbols: <marimo-tex class=\"arithmatex\">||(A \\wedge B = 11100||)</marimo-tex>, so the sequences containing <em>both</em> A and B are <marimo-tex class=\"arithmatex\">||(S_1, S_2, S_3||)</marimo-tex>.</li>\n<li><strong>Look up</strong>: follow each matching sequence's pointer and read it back from the tree.</li>\n<li><strong>Consequent</strong>: take what comes <strong>after</strong> the point where all query symbols have appeared. The order inside the query does not matter, which makes CPT tolerant to order noise.</li>\n<li><strong>Count table</strong>: count each symbol in the consequents. The prediction is the most frequent one.</li>\n</ol>\n<span class=\"paragraph\">The video's result: after AB the count table is <strong>C: 2, D: 1</strong>, so CPT <strong>predicts C</strong>. Build queries below by clicking symbols.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "75db0c26cc5b34f6ef42b926ea19998c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "69293337b36ba8924c02381b453df732",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='qnkX-0' random-id='3df017bd-1644-b700-b778-b09e57a32736'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;f757c09f50b24e2ea8ba2db5fcfd2c5f&quot;}' data-label='null' data-model-id='&quot;f757c09f50b24e2ea8ba2db5fcfd2c5f&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "1098db1eab33f2bfa0e72735793c7a9d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 3rem'><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Python's CPT</strong> for query <code>A B</code></span></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">matching sequences: <strong>S1, S2, S3</strong></span></span><marimo-stat data-value='&quot;C&quot;' data-label='&quot;prediction&quot;' data-caption='&quot;count table {&#x27;C&#x27;: 2, &#x27;D&#x27;: 1}&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;data&#92;&quot;: {&#92;n    &#92;&quot;name&#92;&quot;: &#92;&quot;data-52a410aaffaee6b088a68484a0aba957&#92;&quot;&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-52a410aaffaee6b088a68484a0aba957&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 2,&#92;n        &#92;&quot;role&#92;&quot;: &#92;&quot;prediction&#92;&quot;,&#92;n        &#92;&quot;symbol&#92;&quot;: &#92;&quot;C&#92;&quot;&#92;n      },&#92;n      {&#92;n        &#92;&quot;count&#92;&quot;: 1,&#92;n        &#92;&quot;role&#92;&quot;: &#92;&quot;other&#92;&quot;,&#92;n        &#92;&quot;symbol&#92;&quot;: &#92;&quot;D&#92;&quot;&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;encoding&#92;&quot;: {&#92;n    &#92;&quot;color&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;role&#92;&quot;,&#92;n      &#92;&quot;legend&#92;&quot;: null,&#92;n      &#92;&quot;scale&#92;&quot;: {&#92;n        &#92;&quot;domain&#92;&quot;: [&#92;n          &#92;&quot;prediction&#92;&quot;,&#92;n          &#92;&quot;other&#92;&quot;&#92;n        ],&#92;n        &#92;&quot;range&#92;&quot;: [&#92;n          &#92;&quot;#e4572e&#92;&quot;,&#92;n          &#92;&quot;#2a9d8f&#92;&quot;&#92;n        ]&#92;n      },&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    },&#92;n    &#92;&quot;x&#92;&quot;: {&#92;n      &#92;&quot;axis&#92;&quot;: {&#92;n        &#92;&quot;tickMinStep&#92;&quot;: 1&#92;n      },&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;count&#92;&quot;,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n    },&#92;n    &#92;&quot;y&#92;&quot;: {&#92;n      &#92;&quot;field&#92;&quot;: &#92;&quot;symbol&#92;&quot;,&#92;n      &#92;&quot;sort&#92;&quot;: &#92;&quot;-x&#92;&quot;,&#92;n      &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n    }&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 120,&#92;n  &#92;&quot;mark&#92;&quot;: {&#92;n    &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n  },&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;count table&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: 300&#92;n}&quot;'></marimo-mime-renderer></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "120c3288b2bd4d442260fe0035289543",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cstrong&#92;u003eA B&#92;u003c/strong&#92;u003e reproduces the video: S1, S2 and S3 match, and the consequents are C, (nothing), D C, so C: 2, D: 1 \u2192 &#92;u003cstrong&#92;u003eC&#92;u003c/strong&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eBuild &#92;u003cstrong&#92;u003eB A&#92;u003c/strong&#92;u003e. The result is the same as for AB: CPT ignores order &#92;u003cem&#92;u003ewithin&#92;u003c/em&#92;u003e the query. PPM2 treated AB and BA as different contexts.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eBuild &#92;u003cstrong&#92;u003eB D&#92;u003c/strong&#92;u003e. PPM2 could not predict this one (section 1), while CPT finds S3 and S5 and predicts C.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eBuild &#92;u003cstrong&#92;u003eA B C&#92;u003c/strong&#92;u003e. Every match ends right there, so the count table is empty and CPT cannot predict. The next section fixes that.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "a948a318391b0f3f366111eef4735928",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-noise-reduction-recursive-divider-and-sequence-splitting\">4 \u00b7 Noise reduction (recursive divider) and sequence splitting</h2>\n<span class=\"paragraph\">A query can contain a symbol that never appears in the training data, or so many symbols that no training sequence contains all of them.\nThen the intersection is empty and CPT <strong>cannot predict</strong>. Removing the <strong>noise</strong> helps.</span>\n<ul>\n<li><strong>CPT, recursive divider</strong>: if the query fails, try every subquery with <strong>1</strong> symbol removed, then every subquery with <strong>2</strong> removed, and so on up to <em>max level</em>.\n  For ABCD that means BCD, ACD, ABD and ABC, then CD, BD, BC, AD, AC and AB, \u2026</li>\n<li><strong>CPT+, improved noise reduction</strong>: remove the <strong>least frequent</strong> symbols first. Rare symbols are the most likely to be noise, and far fewer subqueries are tried.</li>\n</ul>\n<span class=\"paragraph\">Coverage is the share of queries for which the model produces <em>some</em> prediction. Raising the max level pushes coverage towards 100%.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "47f9e6345f354ceefdde72cbefff32d5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><marimo-ui-element object-id='ulZA-0' random-id='b9828912-a8e1-c7ef-ba87-17764f1ecd07'><marimo-text data-initial-value='&quot;A E B C&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003equery (space-separated; E never appears in training)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-placeholder='&quot;&quot;' data-kind='&quot;text&quot;' data-full-width='false' data-disabled='false' data-debounce='true'></marimo-text></marimo-ui-element><marimo-ui-element object-id='ulZA-1' random-id='8cd5ba28-8bd5-dab0-9b2a-f7ff8e3e253f'><marimo-slider data-initial-value='2' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003emax level (symbols removed)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0' data-stop='3' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='ulZA-2' random-id='7933829f-c267-1d53-e5c5-988a16c81b70'><marimo-radio data-initial-value='&quot;CPT (all subsets)&quot;' data-label='null' data-options='[&quot;CPT (all subsets)&quot;,&quot;CPT+ (least frequent first)&quot;]' data-inline='true' data-disabled='false'></marimo-radio></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "bb02cedc8cbfaffdba53087f44eeabac",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>11 subqueries tried.</strong> Symbol frequencies (number of sequences containing it): A=3, E=0, B=5, C=3</span></span><marimo-ui-element object-id='ecfG-0' random-id='126d2477-831d-c87d-0236-69b22ea39144'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;level&#92;&quot;:0,&#92;&quot;subquery&#92;&quot;:&#92;&quot;A E B C&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;&#92;&#92;u2014&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;&#92;&#92;u2205&#92;&quot;},{&#92;&quot;level&#92;&quot;:1,&#92;&quot;subquery&#92;&quot;:&#92;&quot;A E B&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;&#92;&#92;u2014&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;&#92;&#92;u2205&#92;&quot;},{&#92;&quot;level&#92;&quot;:1,&#92;&quot;subquery&#92;&quot;:&#92;&quot;A E C&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;&#92;&#92;u2014&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;&#92;&#92;u2205&#92;&quot;},{&#92;&quot;level&#92;&quot;:1,&#92;&quot;subquery&#92;&quot;:&#92;&quot;A B C&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;S1, S3&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;&#92;&#92;u2205&#92;&quot;},{&#92;&quot;level&#92;&quot;:1,&#92;&quot;subquery&#92;&quot;:&#92;&quot;E B C&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;&#92;&#92;u2014&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;&#92;&#92;u2205&#92;&quot;},{&#92;&quot;level&#92;&quot;:2,&#92;&quot;subquery&#92;&quot;:&#92;&quot;A E&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;&#92;&#92;u2014&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;&#92;&#92;u2205&#92;&quot;},{&#92;&quot;level&#92;&quot;:2,&#92;&quot;subquery&#92;&quot;:&#92;&quot;A B&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;S1, S2, S3&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;C:2, D:1&#92;&quot;},{&#92;&quot;level&#92;&quot;:2,&#92;&quot;subquery&#92;&quot;:&#92;&quot;A C&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;S1, S3&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;&#92;&#92;u2205&#92;&quot;},{&#92;&quot;level&#92;&quot;:2,&#92;&quot;subquery&#92;&quot;:&#92;&quot;E B&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;&#92;&#92;u2014&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;&#92;&#92;u2205&#92;&quot;},{&#92;&quot;level&#92;&quot;:2,&#92;&quot;subquery&#92;&quot;:&#92;&quot;E C&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;&#92;&#92;u2014&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;&#92;&#92;u2205&#92;&quot;},{&#92;&quot;level&#92;&quot;:2,&#92;&quot;subquery&#92;&quot;:&#92;&quot;B C&#92;&quot;,&#92;&quot;matching&#92;&quot;:&#92;&quot;S1, S3, S4&#92;&quot;,&#92;&quot;count table&#92;&quot;:&#92;&quot;&#92;&#92;u2205&#92;&quot;}]&quot;' data-total-rows='11' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='11' data-field-types='[[&quot;level&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;subquery&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;matching&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;count table&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element><marimo-stat data-value='&quot;C&quot;' data-label='&quot;prediction&quot;' data-caption='&quot;aggregated count table {&#x27;C&#x27;: 2, &#x27;D&#x27;: 1}&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "030c6fdc8575e8c543d8eb0ae2104618",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.vegalite.v6+json": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v6.4.1.json\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 300\n    }\n  },\n  \"data\": {\n    \"name\": \"data-c60fb7c0f1edfc0cf2c382e20b6ee398\"\n  },\n  \"datasets\": {\n    \"data-c60fb7c0f1edfc0cf2c382e20b6ee398\": [\n      {\n        \"max level\": 0,\n        \"metric\": \"coverage\",\n        \"model\": \"CPT\",\n        \"value\": 0.42\n      },\n      {\n        \"max level\": 0,\n        \"metric\": \"accuracy\",\n        \"model\": \"CPT\",\n        \"value\": 0.42\n      },\n      {\n        \"max level\": 0,\n        \"metric\": \"coverage\",\n        \"model\": \"CPT+\",\n        \"value\": 0.42\n      },\n      {\n        \"max level\": 0,\n        \"metric\": \"accuracy\",\n        \"model\": \"CPT+\",\n        \"value\": 0.42\n      },\n      {\n        \"max level\": 1,\n        \"metric\": \"coverage\",\n        \"model\": \"CPT\",\n        \"value\": 0.8466666666666667\n      },\n      {\n        \"max level\": 1,\n        \"metric\": \"accuracy\",\n        \"model\": \"CPT\",\n        \"value\": 0.8266666666666667\n      },\n      {\n        \"max level\": 1,\n        \"metric\": \"coverage\",\n        \"model\": \"CPT+\",\n        \"value\": 0.7866666666666666\n      },\n      {\n        \"max level\": 1,\n        \"metric\": \"accuracy\",\n        \"model\": \"CPT+\",\n        \"value\": 0.78\n      },\n      {\n        \"max level\": 2,\n        \"metric\": \"coverage\",\n        \"model\": \"CPT\",\n        \"value\": 1.0\n      },\n      {\n        \"max level\": 2,\n        \"metric\": \"accuracy\",\n        \"model\": \"CPT\",\n        \"value\": 0.98\n      },\n      {\n        \"max level\": 2,\n        \"metric\": \"coverage\",\n        \"model\": \"CPT+\",\n        \"value\": 0.9533333333333334\n      },\n      {\n        \"max level\": 2,\n        \"metric\": \"accuracy\",\n        \"model\": \"CPT+\",\n        \"value\": 0.9333333333333333\n      },\n      {\n        \"max level\": 3,\n        \"metric\": \"coverage\",\n        \"model\": \"CPT\",\n        \"value\": 1.0\n      },\n      {\n        \"max level\": 3,\n        \"metric\": \"accuracy\",\n        \"model\": \"CPT\",\n        \"value\": 0.98\n      },\n      {\n        \"max level\": 3,\n        \"metric\": \"coverage\",\n        \"model\": \"CPT+\",\n        \"value\": 0.9866666666666667\n      },\n      {\n        \"max level\": 3,\n        \"metric\": \"accuracy\",\n        \"model\": \"CPT+\",\n        \"value\": 0.94\n      }\n    ]\n  },\n  \"encoding\": {\n    \"color\": {\n      \"field\": \"model\",\n      \"scale\": {\n        \"domain\": [\n          \"DG\",\n          \"PPM1\",\n          \"PPM2\",\n          \"AKOM\",\n          \"CPT\",\n          \"CPT+\"\n        ],\n        \"range\": [\n          \"#8c6bb1\",\n          \"#3b6fb6\",\n          \"#56a0d3\",\n          \"#f18f01\",\n          \"#2a9d8f\",\n          \"#e4572e\"\n        ]\n      },\n      \"type\": \"nominal\"\n    },\n    \"strokeDash\": {\n      \"field\": \"metric\",\n      \"type\": \"nominal\"\n    },\n    \"tooltip\": [\n      {\n        \"field\": \"model\",\n        \"type\": \"nominal\"\n      },\n      {\n        \"field\": \"metric\",\n        \"type\": \"nominal\"\n      },\n      {\n        \"field\": \"max level\",\n        \"type\": \"quantitative\"\n      },\n      {\n        \"field\": \"value\",\n        \"format\": \".1%\",\n        \"type\": \"quantitative\"\n      }\n    ],\n    \"x\": {\n      \"field\": \"max level\",\n      \"type\": \"ordinal\"\n    },\n    \"y\": {\n      \"axis\": {\n        \"format\": \"%\"\n      },\n      \"field\": \"value\",\n      \"scale\": {\n        \"domain\": [\n          0,\n          1\n        ]\n      },\n      \"type\": \"quantitative\"\n    }\n  },\n  \"height\": 240,\n  \"mark\": {\n    \"point\": true,\n    \"type\": \"line\"\n  },\n  \"title\": \"Noisy routes (25% noise), prefix 6: removing symbols raises coverage (and accuracy)\",\n  \"usermeta\": {\n    \"embedOptions\": {}\n  },\n  \"width\": \"container\"\n}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "afc37839f1a65cd3f4e57a0fee5092d6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='ZBYS-0' random-id='db3eb9d9-f3bd-9af9-4cc0-373833dd7d21'><marimo-slider data-initial-value='14' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003esplit length (keep only the last N symbols of each training sequence)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='2' data-stop='14' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "de2c3e03b0a31ea01597c7f031468d2c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-stat data-value='1587' data-label='&quot;tree nodes&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;89%&quot;' data-label='&quot;CPT+ accuracy&quot;' data-bordered='true' data-target_direction='&quot;increase&quot;'></marimo-stat></div><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-b265ee73489decdf8dbf8f8dac400515&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.10666666666666667,&#92;n        &#92;&quot;split length&#92;&quot;: 2,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 31&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.64,&#92;n        &#92;&quot;split length&#92;&quot;: 3,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 188&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.98,&#92;n        &#92;&quot;split length&#92;&quot;: 4,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 363&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.98,&#92;n        &#92;&quot;split length&#92;&quot;: 5,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 611&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.9333333333333333,&#92;n        &#92;&quot;split length&#92;&quot;: 6,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 930&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.9133333333333333,&#92;n        &#92;&quot;split length&#92;&quot;: 7,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 1207&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.9133333333333333,&#92;n        &#92;&quot;split length&#92;&quot;: 8,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 1450&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.9066666666666666,&#92;n        &#92;&quot;split length&#92;&quot;: 9,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 1505&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.8933333333333333,&#92;n        &#92;&quot;split length&#92;&quot;: 10,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 1563&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.8933333333333333,&#92;n        &#92;&quot;split length&#92;&quot;: 11,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 1579&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.8933333333333333,&#92;n        &#92;&quot;split length&#92;&quot;: 12,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 1583&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.8933333333333333,&#92;n        &#92;&quot;split length&#92;&quot;: 13,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 1587&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.8933333333333333,&#92;n        &#92;&quot;split length&#92;&quot;: 14,&#92;n        &#92;&quot;tree nodes&#92;&quot;: 1587&#92;n      }&#92;n    ],&#92;n    &#92;&quot;data-fc6b73b7302ae78dfed455eb603350d5&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;split length&#92;&quot;: 14&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;height&#92;&quot;: 240,&#92;n  &#92;&quot;layer&#92;&quot;: [&#92;n    {&#92;n      &#92;&quot;layer&#92;&quot;: [&#92;n        {&#92;n          &#92;&quot;data&#92;&quot;: {&#92;n            &#92;&quot;name&#92;&quot;: &#92;&quot;data-b265ee73489decdf8dbf8f8dac400515&#92;&quot;&#92;n          },&#92;n          &#92;&quot;encoding&#92;&quot;: {&#92;n            &#92;&quot;x&#92;&quot;: {&#92;n              &#92;&quot;field&#92;&quot;: &#92;&quot;split length&#92;&quot;,&#92;n              &#92;&quot;type&#92;&quot;: &#92;&quot;ordinal&#92;&quot;&#92;n            },&#92;n            &#92;&quot;y&#92;&quot;: {&#92;n              &#92;&quot;field&#92;&quot;: &#92;&quot;tree nodes&#92;&quot;,&#92;n              &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n            }&#92;n          },&#92;n          &#92;&quot;mark&#92;&quot;: {&#92;n            &#92;&quot;color&#92;&quot;: &#92;&quot;#2a9d8f&#92;&quot;,&#92;n            &#92;&quot;opacity&#92;&quot;: 0.6,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n          }&#92;n        },&#92;n        {&#92;n          &#92;&quot;data&#92;&quot;: {&#92;n            &#92;&quot;name&#92;&quot;: &#92;&quot;data-fc6b73b7302ae78dfed455eb603350d5&#92;&quot;&#92;n          },&#92;n          &#92;&quot;encoding&#92;&quot;: {&#92;n            &#92;&quot;x&#92;&quot;: {&#92;n              &#92;&quot;field&#92;&quot;: &#92;&quot;split length&#92;&quot;,&#92;n              &#92;&quot;type&#92;&quot;: &#92;&quot;ordinal&#92;&quot;&#92;n            }&#92;n          },&#92;n          &#92;&quot;mark&#92;&quot;: {&#92;n            &#92;&quot;color&#92;&quot;: &#92;&quot;#333&#92;&quot;,&#92;n            &#92;&quot;strokeDash&#92;&quot;: [&#92;n              4,&#92;n              3&#92;n            ],&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;rule&#92;&quot;&#92;n          }&#92;n        }&#92;n      ]&#92;n    },&#92;n    {&#92;n      &#92;&quot;data&#92;&quot;: {&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;data-b265ee73489decdf8dbf8f8dac400515&#92;&quot;&#92;n      },&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;split length&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;ordinal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;y&#92;&quot;: {&#92;n          &#92;&quot;axis&#92;&quot;: {&#92;n            &#92;&quot;format&#92;&quot;: &#92;&quot;%&#92;&quot;&#92;n          },&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;accuracy&#92;&quot;,&#92;n          &#92;&quot;scale&#92;&quot;: {&#92;n            &#92;&quot;domain&#92;&quot;: [&#92;n              0,&#92;n              1&#92;n            ]&#92;n          },&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: &#92;&quot;#e4572e&#92;&quot;,&#92;n        &#92;&quot;point&#92;&quot;: true,&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;line&#92;&quot;&#92;n      }&#92;n    }&#92;n  ],&#92;n  &#92;&quot;resolve&#92;&quot;: {&#92;n    &#92;&quot;scale&#92;&quot;: {&#92;n      &#92;&quot;y&#92;&quot;: &#92;&quot;independent&#92;&quot;&#92;n    }&#92;n  },&#92;n  &#92;&quot;title&#92;&quot;: &#92;&quot;Sequence splitting: a much smaller tree for about the same accuracy&#92;&quot;,&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  },&#92;n  &#92;&quot;width&#92;&quot;: &#92;&quot;container&#92;&quot;&#92;n}&quot;'></marimo-mime-renderer></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "3cc68a264cec9cf374ba382484237b53",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eWith the query &#92;u003cstrong&#92;u003eA E B C&#92;u003c/strong&#92;u003e and max level 0 there is no prediction, because E was never seen. At level 1 the subquery A B C still fails, and level 2 recovers the AB \u2192 C pattern.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eSwitch to &#92;u003cstrong&#92;u003eCPT+&#92;u003c/strong&#92;u003e. E has frequency 0, so it is removed first and far fewer subqueries are tried. On the route data in the chart,&#92;n   CPT+ explores a single &#92;&quot;least frequent first&#92;&quot; path, so its coverage rises a little more slowly than exhaustive CPT, but it tries only a handful of subqueries instead of &#92;u003cmarimo-tex class=&#92;&quot;arithmatex&#92;&quot;&#92;u003e||(&#92;&#92;binom{6}{k}||)&#92;u003c/marimo-tex&#92;u003e.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eDrag the &#92;u003cstrong&#92;u003esplit length&#92;u003c/strong&#92;u003e down. The tree shrinks a lot, while accuracy only collapses once you cut away the symbols that carry the dependency (the video saw ~4\u00d7 fewer nodes at 5 vs 40).&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "1b0f1117e83ed994d535b5f1c5b8dd63",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-cpt-compression-frequent-subsequences-and-simple-branches\">5 \u00b7 CPT+ compression: frequent subsequences and simple branches</h2>\n<span class=\"paragraph\">CPT+ (PAKDD 2015) makes the tree smaller <strong>without changing its predictions</strong>:</span>\n<ul>\n<li><strong>Frequent Subsequence Compression (FSC)</strong>: a subsequence that appears in many training sequences (here <strong>AB</strong>) is replaced by a single node <marimo-tex class=\"arithmatex\">||(X = AB||)</marimo-tex>.</li>\n<li><strong>Simple Branch Compression (SBC)</strong>: a <em>simple branch</em> is a chain in which every node has exactly one child (e.g. B\u2192C, or E\u2192X\u2192A in the video). The chain becomes one node (<strong>BC</strong>, <strong>EXA</strong>).\n  Here a chain is only merged when the node above is not the end of a training sequence, so every lookup pointer still lands on a node.</li>\n</ul>\n<span class=\"paragraph\">Toggle the two compressions and compare the trees.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "febbf0342fe9558540122c601f34195c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 2rem'><marimo-ui-element object-id='AjVT-0' random-id='8cfeb62e-d087-8c8e-f3e7-57991e6a902e'><marimo-switch data-initial-value='true' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eFrequent Subsequence Compression&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-disabled='false'></marimo-switch></marimo-ui-element><marimo-ui-element object-id='AjVT-1' random-id='a7c0d6a3-c1c5-cd40-25a4-c89609fc34cb'><marimo-switch data-initial-value='true' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eSimple Branch Compression&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-disabled='false'></marimo-switch></marimo-ui-element><marimo-ui-element object-id='AjVT-2' random-id='5c564770-f406-4e54-1447-5a3e9a85c88c'><marimo-slider data-initial-value='0.6' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eFSC min support (share of sequences)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0.2' data-stop='1.0' data-step='0.1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "d85d44c3101bb100197d0afc730ea3dc",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='pHFh-0' random-id='21e043bf-4b33-2526-c4e9-96a6265f01c1'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;63253da030c1435d9b4b8803a7a45033&quot;}' data-label='null' data-model-id='&quot;63253da030c1435d9b4b8803a7a45033&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "17fa0287a387fc73ff090e7a2ae049f4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.vegalite.v6+json": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v6.4.1.json\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 300\n    }\n  },\n  \"data\": {\n    \"name\": \"data-0cb1aee3df8ae0fe7812615ffa3d66b2\"\n  },\n  \"datasets\": {\n    \"data-0cb1aee3df8ae0fe7812615ffa3d66b2\": [\n      {\n        \"nodes\": 86,\n        \"noise\": 0.0,\n        \"variant\": \"CPT\"\n      },\n      {\n        \"nodes\": 86,\n        \"noise\": 0.0,\n        \"variant\": \"+ FSC\"\n      },\n      {\n        \"nodes\": 13,\n        \"noise\": 0.0,\n        \"variant\": \"+ SBC\"\n      },\n      {\n        \"nodes\": 13,\n        \"noise\": 0.0,\n        \"variant\": \"CPT+ (FSC+SBC)\"\n      },\n      {\n        \"nodes\": 1185,\n        \"noise\": 0.1,\n        \"variant\": \"CPT\"\n      },\n      {\n        \"nodes\": 1185,\n        \"noise\": 0.1,\n        \"variant\": \"+ FSC\"\n      },\n      {\n        \"nodes\": 257,\n        \"noise\": 0.1,\n        \"variant\": \"+ SBC\"\n      },\n      {\n        \"nodes\": 257,\n        \"noise\": 0.1,\n        \"variant\": \"CPT+ (FSC+SBC)\"\n      },\n      {\n        \"nodes\": 1844,\n        \"noise\": 0.2,\n        \"variant\": \"CPT\"\n      },\n      {\n        \"nodes\": 1844,\n        \"noise\": 0.2,\n        \"variant\": \"+ FSC\"\n      },\n      {\n        \"nodes\": 350,\n        \"noise\": 0.2,\n        \"variant\": \"+ SBC\"\n      },\n      {\n        \"nodes\": 350,\n        \"noise\": 0.2,\n        \"variant\": \"CPT+ (FSC+SBC)\"\n      },\n      {\n        \"nodes\": 2208,\n        \"noise\": 0.3,\n        \"variant\": \"CPT\"\n      },\n      {\n        \"nodes\": 2208,\n        \"noise\": 0.3,\n        \"variant\": \"+ FSC\"\n      },\n      {\n        \"nodes\": 374,\n        \"noise\": 0.3,\n        \"variant\": \"+ SBC\"\n      },\n      {\n        \"nodes\": 374,\n        \"noise\": 0.3,\n        \"variant\": \"CPT+ (FSC+SBC)\"\n      }\n    ]\n  },\n  \"encoding\": {\n    \"color\": {\n      \"field\": \"variant\",\n      \"legend\": null,\n      \"scale\": {\n        \"range\": [\n          \"#2a9d8f\",\n          \"#9fd3cb\",\n          \"#f4b183\",\n          \"#e4572e\"\n        ]\n      },\n      \"sort\": null,\n      \"type\": \"nominal\"\n    },\n    \"column\": {\n      \"field\": \"noise\",\n      \"title\": \"noise level of the route data\",\n      \"type\": \"ordinal\"\n    },\n    \"tooltip\": [\n      {\n        \"field\": \"variant\",\n        \"type\": \"nominal\"\n      },\n      {\n        \"field\": \"nodes\",\n        \"type\": \"quantitative\"\n      }\n    ],\n    \"x\": {\n      \"field\": \"variant\",\n      \"sort\": null,\n      \"title\": null,\n      \"type\": \"nominal\"\n    },\n    \"y\": {\n      \"field\": \"nodes\",\n      \"type\": \"quantitative\"\n    }\n  },\n  \"height\": 200,\n  \"mark\": {\n    \"type\": \"bar\"\n  },\n  \"title\": \"Tree size on 300 route sequences\",\n  \"usermeta\": {\n    \"embedOptions\": {}\n  },\n  \"width\": 130\n}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "7cb2caa36056949af142318623f2c8f3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eToggle &#92;u003cstrong&#92;u003eFSC&#92;u003c/strong&#92;u003e only: A\u2192B (shared by ABC, AB and ABDC) becomes one node &#92;u003cstrong&#92;u003eAB&#92;u003c/strong&#92;u003e, matching the video&#x27;s X node.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eToggle &#92;u003cstrong&#92;u003eSBC&#92;u003c/strong&#92;u003e only: A has a single child, so A\u2192B is merged into &#92;u003cstrong&#92;u003eAB&#92;u003c/strong&#92;u003e anyway, and the D\u2192C tail becomes &#92;u003cstrong&#92;u003eDC&#92;u003c/strong&#92;u003e. The B under the root keeps its two children C and D, so it is not a simple branch.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003ePrediction is unchanged: recovering a sequence still walks the same symbols, just packed into fewer nodes.&#92;n   The chart shows the savings are largest on clean data, where long chains are shared.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "13b201b903fcd6af2e602c56cc88880d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-experiment-race-all-models-on-synthetic-route-data\">6 \u00b7 Experiment: race all models on synthetic route data</h2>\n<span class=\"paragraph\">The paper races the models on real datasets (BMS, FIFA, Kosarak, SIGN, Bible). Here we use a seeded <strong>route model</strong>:\neach trip has a <em>start segment</em> (which identifies the route), then a shared <strong>corridor</strong> of <marimo-tex class=\"arithmatex\">||(d-1||)</marimo-tex> hub stops, then a <strong>destination</strong>.\nThe destination depends on what happened <strong><marimo-tex class=\"arithmatex\">||(d||)</marimo-tex> steps back</strong>, so a model has to look past the corridor to predict it. Noise inserts stray symbols (rare \"typos\" or common stops) and swaps neighbouring symbols.</span>\n<span class=\"paragraph\">The two measures from the video, for each test sequence (predict its last symbol from the rest):</span>\n<marimo-tex class=\"arithmatex\">||[\\text{accuracy}=\\frac{\\#\\text{correct predictions}}{\\#\\text{test sequences}}\\qquad \\text{coverage}=\\frac{\\#\\text{sequences with a prediction}}{\\#\\text{test sequences}}||]</marimo-tex></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "9e544195e78574884fdb1633ae0cffc4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='TXez-0' random-id='30b891e8-68d8-ede9-229c-33087d5d5d84'><marimo-slider data-initial-value='0.15' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003enoise&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0.0' data-stop='0.4' data-step='0.05' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='TXez-1' random-id='80b71fda-c4cc-aab0-416e-42b0be040974'><marimo-slider data-initial-value='3' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003edependency length d&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='5' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='TXez-2' random-id='4299381d-380d-9f72-7517-a1d759d1fb53'><marimo-slider data-initial-value='400' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003ch1 id=&#92;&quot;training-sequences&#92;&quot;&#92;u003etraining sequences&#92;u003c/h1&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='50' data-stop='800' data-step='50' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='TXez-3' random-id='4608d41d-94f1-4333-deee-54d933dd72cb'><marimo-slider data-initial-value='4' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eCPT prefix size&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='10' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='TXez-4' random-id='9e7c6a6d-45ac-ddb1-e1ec-9d4d627cb42c'><marimo-slider data-initial-value='2' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eAKOM K&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='5' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='TXez-5' random-id='ae29d1a5-3662-33ea-90c6-0964d4e4501a'><marimo-slider data-initial-value='2' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eCPT+ max level&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0' data-stop='3' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "836d7af3fddbb1ebcb67cc432df8e7dd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Example training sequence: <code>p33 p28 p38 p5 p23 p10 h2 h0 d3</code></span></span><marimo-mime-renderer data-mime='&quot;application/vnd.vegalite.v6+json&quot;' data-data='&quot;{&#92;n  &#92;&quot;&#36;schema&#92;&quot;: &#92;&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&#92;&quot;,&#92;n  &#92;&quot;config&#92;&quot;: {&#92;n    &#92;&quot;view&#92;&quot;: {&#92;n      &#92;&quot;continuousHeight&#92;&quot;: 300,&#92;n      &#92;&quot;continuousWidth&#92;&quot;: 300&#92;n    }&#92;n  },&#92;n  &#92;&quot;datasets&#92;&quot;: {&#92;n    &#92;&quot;data-10779f3e49710e4b18d88d597374e939&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.37,&#92;n        &#92;&quot;coverage&#92;&quot;: 1.0,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;DG&#92;&quot;,&#92;n        &#92;&quot;ms&#92;&quot;: 6.8727529996976955,&#92;n        &#92;&quot;size&#92;&quot;: 1287&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.185,&#92;n        &#92;&quot;coverage&#92;&quot;: 1.0,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;PPM1&#92;&quot;,&#92;n        &#92;&quot;ms&#92;&quot;: 0.6056050001461699,&#92;n        &#92;&quot;size&#92;&quot;: 828&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.46,&#92;n        &#92;&quot;coverage&#92;&quot;: 1.0,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;AKOM&#92;&quot;,&#92;n        &#92;&quot;ms&#92;&quot;: 0.3457729999354342,&#92;n        &#92;&quot;size&#92;&quot;: 2522&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.69,&#92;n        &#92;&quot;coverage&#92;&quot;: 0.71,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;CPT&#92;&quot;,&#92;n        &#92;&quot;ms&#92;&quot;: 7.319539000036457,&#92;n        &#92;&quot;size&#92;&quot;: 1871&#92;n      },&#92;n      {&#92;n        &#92;&quot;accuracy&#92;&quot;: 0.945,&#92;n        &#92;&quot;coverage&#92;&quot;: 1.0,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;CPT+&#92;&quot;,&#92;n        &#92;&quot;ms&#92;&quot;: 10.256100999868067,&#92;n        &#92;&quot;size&#92;&quot;: 367&#92;n      }&#92;n    ],&#92;n    &#92;&quot;data-85fdae595a1efdaee21bc77f1e1c45b9&#92;&quot;: [&#92;n      {&#92;n        &#92;&quot;metric&#92;&quot;: &#92;&quot;accuracy&#92;&quot;,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;DG&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 0.37&#92;n      },&#92;n      {&#92;n        &#92;&quot;metric&#92;&quot;: &#92;&quot;accuracy&#92;&quot;,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;PPM1&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 0.185&#92;n      },&#92;n      {&#92;n        &#92;&quot;metric&#92;&quot;: &#92;&quot;accuracy&#92;&quot;,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;AKOM&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 0.46&#92;n      },&#92;n      {&#92;n        &#92;&quot;metric&#92;&quot;: &#92;&quot;accuracy&#92;&quot;,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;CPT&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 0.69&#92;n      },&#92;n      {&#92;n        &#92;&quot;metric&#92;&quot;: &#92;&quot;accuracy&#92;&quot;,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;CPT+&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 0.945&#92;n      },&#92;n      {&#92;n        &#92;&quot;metric&#92;&quot;: &#92;&quot;coverage&#92;&quot;,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;DG&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 1.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;metric&#92;&quot;: &#92;&quot;coverage&#92;&quot;,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;PPM1&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 1.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;metric&#92;&quot;: &#92;&quot;coverage&#92;&quot;,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;AKOM&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 1.0&#92;n      },&#92;n      {&#92;n        &#92;&quot;metric&#92;&quot;: &#92;&quot;coverage&#92;&quot;,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;CPT&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 0.71&#92;n      },&#92;n      {&#92;n        &#92;&quot;metric&#92;&quot;: &#92;&quot;coverage&#92;&quot;,&#92;n        &#92;&quot;model&#92;&quot;: &#92;&quot;CPT+&#92;&quot;,&#92;n        &#92;&quot;value&#92;&quot;: 1.0&#92;n      }&#92;n    ]&#92;n  },&#92;n  &#92;&quot;hconcat&#92;&quot;: [&#92;n    {&#92;n      &#92;&quot;data&#92;&quot;: {&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;data-85fdae595a1efdaee21bc77f1e1c45b9&#92;&quot;&#92;n      },&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;model&#92;&quot;,&#92;n          &#92;&quot;legend&#92;&quot;: null,&#92;n          &#92;&quot;scale&#92;&quot;: {&#92;n            &#92;&quot;domain&#92;&quot;: [&#92;n              &#92;&quot;DG&#92;&quot;,&#92;n              &#92;&quot;PPM1&#92;&quot;,&#92;n              &#92;&quot;PPM2&#92;&quot;,&#92;n              &#92;&quot;AKOM&#92;&quot;,&#92;n              &#92;&quot;CPT&#92;&quot;,&#92;n              &#92;&quot;CPT+&#92;&quot;&#92;n            ],&#92;n            &#92;&quot;range&#92;&quot;: [&#92;n              &#92;&quot;#8c6bb1&#92;&quot;,&#92;n              &#92;&quot;#3b6fb6&#92;&quot;,&#92;n              &#92;&quot;#56a0d3&#92;&quot;,&#92;n              &#92;&quot;#f18f01&#92;&quot;,&#92;n              &#92;&quot;#2a9d8f&#92;&quot;,&#92;n              &#92;&quot;#e4572e&#92;&quot;&#92;n            ]&#92;n          },&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;opacity&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;metric&#92;&quot;,&#92;n          &#92;&quot;scale&#92;&quot;: {&#92;n            &#92;&quot;range&#92;&quot;: [&#92;n              1,&#92;n              0.4&#92;n            ]&#92;n          },&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;tooltip&#92;&quot;: [&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;model&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;metric&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;value&#92;&quot;,&#92;n            &#92;&quot;format&#92;&quot;: &#92;&quot;.1%&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          }&#92;n        ],&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;model&#92;&quot;,&#92;n          &#92;&quot;sort&#92;&quot;: [&#92;n            &#92;&quot;DG&#92;&quot;,&#92;n            &#92;&quot;PPM1&#92;&quot;,&#92;n            &#92;&quot;AKOM&#92;&quot;,&#92;n            &#92;&quot;CPT&#92;&quot;,&#92;n            &#92;&quot;CPT+&#92;&quot;&#92;n          ],&#92;n          &#92;&quot;title&#92;&quot;: null,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;xOffset&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;metric&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;y&#92;&quot;: {&#92;n          &#92;&quot;axis&#92;&quot;: {&#92;n            &#92;&quot;format&#92;&quot;: &#92;&quot;%&#92;&quot;&#92;n          },&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;value&#92;&quot;,&#92;n          &#92;&quot;scale&#92;&quot;: {&#92;n            &#92;&quot;domain&#92;&quot;: [&#92;n              0,&#92;n              1&#92;n            ]&#92;n          },&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;height&#92;&quot;: 230,&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n      },&#92;n      &#92;&quot;title&#92;&quot;: &#92;&quot;accuracy (solid) and coverage (faded)&#92;&quot;,&#92;n      &#92;&quot;width&#92;&quot;: 330&#92;n    },&#92;n    {&#92;n      &#92;&quot;data&#92;&quot;: {&#92;n        &#92;&quot;name&#92;&quot;: &#92;&quot;data-10779f3e49710e4b18d88d597374e939&#92;&quot;&#92;n      },&#92;n      &#92;&quot;encoding&#92;&quot;: {&#92;n        &#92;&quot;color&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;model&#92;&quot;,&#92;n          &#92;&quot;legend&#92;&quot;: null,&#92;n          &#92;&quot;scale&#92;&quot;: {&#92;n            &#92;&quot;domain&#92;&quot;: [&#92;n              &#92;&quot;DG&#92;&quot;,&#92;n              &#92;&quot;PPM1&#92;&quot;,&#92;n              &#92;&quot;PPM2&#92;&quot;,&#92;n              &#92;&quot;AKOM&#92;&quot;,&#92;n              &#92;&quot;CPT&#92;&quot;,&#92;n              &#92;&quot;CPT+&#92;&quot;&#92;n            ],&#92;n            &#92;&quot;range&#92;&quot;: [&#92;n              &#92;&quot;#8c6bb1&#92;&quot;,&#92;n              &#92;&quot;#3b6fb6&#92;&quot;,&#92;n              &#92;&quot;#56a0d3&#92;&quot;,&#92;n              &#92;&quot;#f18f01&#92;&quot;,&#92;n              &#92;&quot;#2a9d8f&#92;&quot;,&#92;n              &#92;&quot;#e4572e&#92;&quot;&#92;n            ]&#92;n          },&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;tooltip&#92;&quot;: [&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;model&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;size&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          },&#92;n          {&#92;n            &#92;&quot;field&#92;&quot;: &#92;&quot;ms&#92;&quot;,&#92;n            &#92;&quot;format&#92;&quot;: &#92;&quot;.1f&#92;&quot;,&#92;n            &#92;&quot;title&#92;&quot;: &#92;&quot;test time (ms)&#92;&quot;,&#92;n            &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n          }&#92;n        ],&#92;n        &#92;&quot;x&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;model&#92;&quot;,&#92;n          &#92;&quot;sort&#92;&quot;: [&#92;n            &#92;&quot;DG&#92;&quot;,&#92;n            &#92;&quot;PPM1&#92;&quot;,&#92;n            &#92;&quot;AKOM&#92;&quot;,&#92;n            &#92;&quot;CPT&#92;&quot;,&#92;n            &#92;&quot;CPT+&#92;&quot;&#92;n          ],&#92;n          &#92;&quot;title&#92;&quot;: null,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;nominal&#92;&quot;&#92;n        },&#92;n        &#92;&quot;y&#92;&quot;: {&#92;n          &#92;&quot;field&#92;&quot;: &#92;&quot;size&#92;&quot;,&#92;n          &#92;&quot;title&#92;&quot;: &#92;&quot;model size (nodes)&#92;&quot;,&#92;n          &#92;&quot;type&#92;&quot;: &#92;&quot;quantitative&#92;&quot;&#92;n        }&#92;n      },&#92;n      &#92;&quot;height&#92;&quot;: 230,&#92;n      &#92;&quot;mark&#92;&quot;: {&#92;n        &#92;&quot;type&#92;&quot;: &#92;&quot;bar&#92;&quot;&#92;n      },&#92;n      &#92;&quot;title&#92;&quot;: &#92;&quot;model size&#92;&quot;,&#92;n      &#92;&quot;width&#92;&quot;: 250&#92;n    }&#92;n  ],&#92;n  &#92;&quot;usermeta&#92;&quot;: {&#92;n    &#92;&quot;embedOptions&#92;&quot;: {}&#92;n  }&#92;n}&quot;'></marimo-mime-renderer><marimo-ui-element object-id='dNNg-0' random-id='ff255754-be8f-b18d-f146-8aaf3874cc90'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;model&#92;&quot;:&#92;&quot;DG&#92;&quot;,&#92;&quot;accuracy&#92;&quot;:0.37,&#92;&quot;coverage&#92;&quot;:1.0,&#92;&quot;size&#92;&quot;:1287,&#92;&quot;ms&#92;&quot;:6.873},{&#92;&quot;model&#92;&quot;:&#92;&quot;PPM1&#92;&quot;,&#92;&quot;accuracy&#92;&quot;:0.185,&#92;&quot;coverage&#92;&quot;:1.0,&#92;&quot;size&#92;&quot;:828,&#92;&quot;ms&#92;&quot;:0.606},{&#92;&quot;model&#92;&quot;:&#92;&quot;AKOM&#92;&quot;,&#92;&quot;accuracy&#92;&quot;:0.46,&#92;&quot;coverage&#92;&quot;:1.0,&#92;&quot;size&#92;&quot;:2522,&#92;&quot;ms&#92;&quot;:0.346},{&#92;&quot;model&#92;&quot;:&#92;&quot;CPT&#92;&quot;,&#92;&quot;accuracy&#92;&quot;:0.69,&#92;&quot;coverage&#92;&quot;:0.71,&#92;&quot;size&#92;&quot;:1871,&#92;&quot;ms&#92;&quot;:7.32},{&#92;&quot;model&#92;&quot;:&#92;&quot;CPT+&#92;&quot;,&#92;&quot;accuracy&#92;&quot;:0.945,&#92;&quot;coverage&#92;&quot;:1.0,&#92;&quot;size&#92;&quot;:367,&#92;&quot;ms&#92;&quot;:10.256}]&quot;' data-total-rows='5' data-total-columns='5' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='5' data-field-types='[[&quot;model&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;accuracy&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;coverage&quot;,[&quot;number&quot;,&quot;float64&quot;]],[&quot;size&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;ms&quot;,[&quot;number&quot;,&quot;float64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "0a07df20c33a130f7c07da03e29d3a5b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.vegalite.v6+json": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v6.4.1.json\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 300\n    }\n  },\n  \"datasets\": {\n    \"data-11b254867717bb4710502b8747700bef\": [\n      {\n        \"accuracy\": 0.515,\n        \"model\": \"CPT\",\n        \"prefix size\": 1\n      },\n      {\n        \"accuracy\": 0.515,\n        \"model\": \"CPT+\",\n        \"prefix size\": 1\n      },\n      {\n        \"accuracy\": 0.51,\n        \"model\": \"CPT\",\n        \"prefix size\": 2\n      },\n      {\n        \"accuracy\": 0.54,\n        \"model\": \"CPT+\",\n        \"prefix size\": 2\n      },\n      {\n        \"accuracy\": 0.765,\n        \"model\": \"CPT\",\n        \"prefix size\": 3\n      },\n      {\n        \"accuracy\": 0.875,\n        \"model\": \"CPT+\",\n        \"prefix size\": 3\n      },\n      {\n        \"accuracy\": 0.69,\n        \"model\": \"CPT\",\n        \"prefix size\": 4\n      },\n      {\n        \"accuracy\": 0.945,\n        \"model\": \"CPT+\",\n        \"prefix size\": 4\n      },\n      {\n        \"accuracy\": 0.63,\n        \"model\": \"CPT\",\n        \"prefix size\": 5\n      },\n      {\n        \"accuracy\": 0.965,\n        \"model\": \"CPT+\",\n        \"prefix size\": 5\n      },\n      {\n        \"accuracy\": 0.58,\n        \"model\": \"CPT\",\n        \"prefix size\": 6\n      },\n      {\n        \"accuracy\": 0.93,\n        \"model\": \"CPT+\",\n        \"prefix size\": 6\n      },\n      {\n        \"accuracy\": 0.51,\n        \"model\": \"CPT\",\n        \"prefix size\": 7\n      },\n      {\n        \"accuracy\": 0.895,\n        \"model\": \"CPT+\",\n        \"prefix size\": 7\n      },\n      {\n        \"accuracy\": 0.5,\n        \"model\": \"CPT\",\n        \"prefix size\": 8\n      },\n      {\n        \"accuracy\": 0.885,\n        \"model\": \"CPT+\",\n        \"prefix size\": 8\n      },\n      {\n        \"accuracy\": 0.475,\n        \"model\": \"CPT\",\n        \"prefix size\": 9\n      },\n      {\n        \"accuracy\": 0.87,\n        \"model\": \"CPT+\",\n        \"prefix size\": 9\n      },\n      {\n        \"accuracy\": 0.475,\n        \"model\": \"CPT\",\n        \"prefix size\": 10\n      },\n      {\n        \"accuracy\": 0.85,\n        \"model\": \"CPT+\",\n        \"prefix size\": 10\n      }\n    ],\n    \"data-e4fbabcfdbe25e7028b1e1d402030718\": [\n      {\n        \"prefix size\": 4\n      }\n    ]\n  },\n  \"height\": 240,\n  \"layer\": [\n    {\n      \"data\": {\n        \"name\": \"data-11b254867717bb4710502b8747700bef\"\n      },\n      \"encoding\": {\n        \"color\": {\n          \"field\": \"model\",\n          \"scale\": {\n            \"domain\": [\n              \"DG\",\n              \"PPM1\",\n              \"PPM2\",\n              \"AKOM\",\n              \"CPT\",\n              \"CPT+\"\n            ],\n            \"range\": [\n              \"#8c6bb1\",\n              \"#3b6fb6\",\n              \"#56a0d3\",\n              \"#f18f01\",\n              \"#2a9d8f\",\n              \"#e4572e\"\n            ]\n          },\n          \"type\": \"nominal\"\n        },\n        \"tooltip\": [\n          {\n            \"field\": \"model\",\n            \"type\": \"nominal\"\n          },\n          {\n            \"field\": \"prefix size\",\n            \"type\": \"quantitative\"\n          },\n          {\n            \"field\": \"accuracy\",\n            \"format\": \".1%\",\n            \"type\": \"quantitative\"\n          }\n        ],\n        \"x\": {\n          \"field\": \"prefix size\",\n          \"type\": \"ordinal\"\n        },\n        \"y\": {\n          \"axis\": {\n            \"format\": \"%\"\n          },\n          \"field\": \"accuracy\",\n          \"type\": \"quantitative\"\n        }\n      },\n      \"mark\": {\n        \"point\": true,\n        \"type\": \"line\"\n      }\n    },\n    {\n      \"data\": {\n        \"name\": \"data-e4fbabcfdbe25e7028b1e1d402030718\"\n      },\n      \"encoding\": {\n        \"x\": {\n          \"field\": \"prefix size\",\n          \"type\": \"ordinal\"\n        }\n      },\n      \"mark\": {\n        \"color\": \"#333\",\n        \"strokeDash\": [\n          4,\n          3\n        ],\n        \"type\": \"rule\"\n      }\n    }\n  ],\n  \"title\": \"How many past symbols should CPT use? (cf. the video's FIFA chart)\",\n  \"usermeta\": {\n    \"embedOptions\": {}\n  },\n  \"width\": \"container\"\n}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "75fe4ec6d4a76805f476be874b307421",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eWith noise 0 and d = 3: AKOM with K \u2265 3 and CPT are both near-perfect, while DG and PPM1 only see the corridor and guess. Then set &#92;u003cstrong&#92;u003eK = 2&#92;u003c/strong&#92;u003e: AKOM falls apart.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eRaise the &#92;u003cstrong&#92;u003enoise&#92;u003c/strong&#92;u003e. Strict-order AKOM decays, while CPT+ (order-free matching plus noise reduction) holds up better, at the cost of slower prediction.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eThe &#92;u003cstrong&#92;u003eprefix sweep&#92;u003c/strong&#92;u003e has a peak: too few symbols miss the dependency, and too many add noise that empties the intersection (plain CPT). As in the video&#x27;s FIFA chart, there is a best prefix size.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eLook at &#92;u003cstrong&#92;u003emodel size&#92;u003c/strong&#92;u003e: AKOM grows quickly with K. Raw CPT is big too, but CPT+ compression shrinks it.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "636f9acb74b3e94effab8b0068687764",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"7-sandbox-bring-your-own-sequences\">7 \u00b7 Sandbox: bring your own sequences</h2>\n<span class=\"paragraph\">One training sequence per line. Symbols are separated by spaces (<code>gym restaurant cinema</code>), or a line without spaces is read as single characters (<code>ABDC</code>).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": "f3943fcd4571f1c1c95f606f7a1222f0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='flex: 2'><marimo-ui-element object-id='wAgl-0' random-id='e895c0af-6213-e1db-cde7-55c7df51baeb'><marimo-text-area data-initial-value='&quot;ABC&#92;nAB&#92;nABDC&#92;nBC&#92;nBD&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003etraining sequences&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-placeholder='&quot;&quot;' data-disabled='false' data-debounce='true' data-full-width='true' data-rows='7'></marimo-text-area></marimo-ui-element></div><div style='flex: 1'><marimo-ui-element object-id='wAgl-1' random-id='cc2b1e0c-87bd-9faf-054e-21830b61ca9e'><marimo-text data-initial-value='&quot;A B&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003equery (space-separated)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-placeholder='&quot;&quot;' data-kind='&quot;text&quot;' data-full-width='false' data-disabled='false' data-debounce='true'></marimo-text></marimo-ui-element></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "rEll",
+      "code_hash": "a848a018c962b8fd519ec279047cb0ff",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">5 sequences, 13 symbols \u2192 CPT tree with <strong>8</strong> nodes (CPT+ compressed: <strong>5</strong>)</span></span><marimo-ui-element object-id='rEll-0' random-id='9b6926af-63ef-6b22-c94d-7c206351c6e0'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;model&#92;&quot;:&#92;&quot;DG (w=2)&#92;&quot;,&#92;&quot;prediction&#92;&quot;:&#92;&quot;C&#92;&quot;,&#92;&quot;scores&#92;&quot;:&#92;&quot;C:0.60, D:0.40&#92;&quot;},{&#92;&quot;model&#92;&quot;:&#92;&quot;PPM1&#92;&quot;,&#92;&quot;prediction&#92;&quot;:&#92;&quot;C&#92;&quot;,&#92;&quot;scores&#92;&quot;:&#92;&quot;C:0.40, D:0.40&#92;&quot;},{&#92;&quot;model&#92;&quot;:&#92;&quot;PPM2&#92;&quot;,&#92;&quot;prediction&#92;&quot;:&#92;&quot;C&#92;&quot;,&#92;&quot;scores&#92;&quot;:&#92;&quot;C:0.33, D:0.33&#92;&quot;},{&#92;&quot;model&#92;&quot;:&#92;&quot;AKOM (K=3)&#92;&quot;,&#92;&quot;prediction&#92;&quot;:&#92;&quot;C&#92;&quot;,&#92;&quot;scores&#92;&quot;:&#92;&quot;C:0.33, D:0.33&#92;&quot;},{&#92;&quot;model&#92;&quot;:&#92;&quot;CPT&#92;&quot;,&#92;&quot;prediction&#92;&quot;:&#92;&quot;C&#92;&quot;,&#92;&quot;scores&#92;&quot;:&#92;&quot;C:2, D:1&#92;&quot;},{&#92;&quot;model&#92;&quot;:&#92;&quot;CPT (+recursive divider, level 2)&#92;&quot;,&#92;&quot;prediction&#92;&quot;:&#92;&quot;C&#92;&quot;,&#92;&quot;scores&#92;&quot;:&#92;&quot;C:2, D:1&#92;&quot;},{&#92;&quot;model&#92;&quot;:&#92;&quot;CPT+ noise reduction (level 2)&#92;&quot;,&#92;&quot;prediction&#92;&quot;:&#92;&quot;C&#92;&quot;,&#92;&quot;scores&#92;&quot;:&#92;&quot;C:2, D:1&#92;&quot;}]&quot;' data-total-rows='7' data-total-columns='3' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='7' data-field-types='[[&quot;model&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;prediction&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;scores&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dGlV",
+      "code_hash": "ea08e72114e0c0e5210f2a341fe3a3a4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"8-quiz-predict-then-reveal\">8 \u00b7 Quiz: predict, then reveal</h2>\n<span class=\"paragraph\">Work each answer out on paper first. Q1 uses the video's <marimo-tex class=\"arithmatex\">||(S_1, S_2||)</marimo-tex>; Q2\u2013Q3 use the CPT training set ABC, AB, ABDC, BC, BD.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SdmI",
+      "code_hash": "b1081c2d87483f17886182efa149628f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='SdmI-10' random-id='f7f97b50-d278-d9e4-0179-cd3f0feae9e3'><marimo-dict data-initial-value='{&quot;q1&quot;:[],&quot;q2&quot;:[],&quot;q3&quot;:[],&quot;q4&quot;:[],&quot;q5&quot;:[]}' data-label='null' data-element-ids='{&quot;SdmI-5&quot;:&quot;q1&quot;,&quot;SdmI-6&quot;:&quot;q2&quot;,&quot;SdmI-7&quot;:&quot;q3&quot;,&quot;SdmI-8&quot;:&quot;q4&quot;,&quot;SdmI-9&quot;:&quot;q5&quot;}'><marimo-json-output data-json-data='{&quot;q1&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-5&#x27; random-id=&#x27;1655d2af-e45d-020f-1aa9-cd0f31be887c&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003eQ1. PPM order 1: P(B | A) = ?&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;1/4&amp;quot;,&amp;quot;2/4&amp;quot;,&amp;quot;2/3&amp;quot;,&amp;quot;3/4&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q2&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-6&#x27; random-id=&#x27;5bbca7c7-c870-c233-38d5-6af2ead3d550&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003eQ2. CPT prediction after query \u27e8B\u27e9?&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;A&amp;quot;,&amp;quot;B&amp;quot;,&amp;quot;C&amp;quot;,&amp;quot;D&amp;quot;,&amp;quot;no prediction&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q3&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-7&#x27; random-id=&#x27;03d7fffc-0291-d160-4a5f-0e60f0d07c60&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003eQ3. CPT (no noise reduction) after query \u27e8C A\u27e9?&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;A&amp;quot;,&amp;quot;B&amp;quot;,&amp;quot;C&amp;quot;,&amp;quot;D&amp;quot;,&amp;quot;no prediction&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q4&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-8&#x27; random-id=&#x27;f7061247-11fc-b954-53a3-153ad2a4b101&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003eQ4. Which model cannot predict after context BD (video data)?&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;DG&amp;quot;,&amp;quot;PPM1&amp;quot;,&amp;quot;PPM2&amp;quot;,&amp;quot;AKOM&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q5&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;SdmI-9&#x27; random-id=&#x27;bcd49c25-1076-bd40-0532-90167890852e&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003cspan class=&amp;#92;&amp;quot;paragraph&amp;#92;&amp;quot;&amp;#92;u003eQ5. CPT&amp;#x27;s key property vs PPM/DG?&amp;#92;u003c/span&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;it loses rare patterns&amp;quot;,&amp;quot;it is lossless&amp;quot;,&amp;quot;it is order-sensitive&amp;quot;,&amp;quot;it needs a lookahead window&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;}' data-value-types='&quot;python&quot;' data-name='&quot;dictionary&quot;'></marimo-json-output></marimo-dict></marimo-ui-element><marimo-ui-element object-id='SdmI-11' random-id='91255c50-87c9-679f-fa70-5c03533e31ed'><marimo-switch data-initial-value='false' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ereveal answers&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-disabled='false'></marimo-switch></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lgWD",
+      "code_hash": "b3c02508ccd7fb9183f6e25566884e80",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>Answered 0/5. Flip <strong>reveal answers</strong> when ready.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yOPj",
+      "code_hash": "896a1031184562f6fe9600ba0d8e17e6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"recap\">Recap</h2>\n<table>\n<thead>\n<tr>\n<th>model</th>\n<th>lossless?</th>\n<th>noise tolerant?</th>\n<th>size</th>\n<th>prediction speed</th>\n<th>uses how much context</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>DG</strong></td>\n<td>no</td>\n<td>a little (window)</td>\n<td>small</td>\n<td>very fast</td>\n<td>last symbol</td>\n</tr>\n<tr>\n<td><strong>PPM order k</strong></td>\n<td>no</td>\n<td>no (strict order)</td>\n<td>small\u2013medium</td>\n<td>very fast</td>\n<td>exactly k symbols, fails on unseen contexts</td>\n</tr>\n<tr>\n<td><strong>AKOM</strong></td>\n<td>no</td>\n<td>no</td>\n<td><strong>exponential</strong> in K</td>\n<td>fast</td>\n<td>up to K, with fallback</td>\n</tr>\n<tr>\n<td><strong>CPT</strong></td>\n<td><strong>yes</strong></td>\n<td>yes (order-free matching, recursive divider)</td>\n<td>large but prefix-shared</td>\n<td>slower (bit-vector AND + counting)</td>\n<td>any prefix size</td>\n</tr>\n<tr>\n<td><strong>CPT+</strong></td>\n<td>yes</td>\n<td>yes (removes least-frequent symbols first)</td>\n<td><strong>much smaller</strong> (FSC + SBC, splitting)</td>\n<td>slower than PPM</td>\n<td>any prefix size</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\"><strong>Take-aways</strong>: CPT keeps <em>all</em> the training data (tree + lookup table + inverted index) and predicts by intersecting bit-vectors and counting consequents.\nCPT+ adds compression and smarter noise reduction. The trade-off is accuracy against speed and size, and the best model depends on the data:\nwhen the order really matters (e.g. words in the Bible), AKOM can still win.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "fwwy",
+      "code_hash": "adbda249c7bf171d5bbf7200912f459b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "LJZf",
+      "code_hash": "3de8eebc6b5141de5c698d9f032bad46",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='LJZf-0' random-id='976aee2e-49b7-3593-8597-f428b72bd93d'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;996e6884a908491b80cb4e4f75e2291b&quot;}' data-label='null' data-model-id='&quot;996e6884a908491b80cb4e4f75e2291b&quot;'></marimo-anywidget></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

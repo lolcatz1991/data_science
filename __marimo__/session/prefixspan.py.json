@@ -1,0 +1,386 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.25.2",
+    "script_metadata_hash": "d984139c73ad4168375765932f34d611"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "ede56dae1b56c6c5cb545c32c394dc0b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "hxyk",
+      "code_hash": "4717ac1022ab5451c57580561712ae81",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"prefixspan-mining-sequential-patterns-by-growing-prefixes\">PrefixSpan: mining sequential patterns by growing prefixes</h1>\n<span class=\"paragraph\"><em>An interactive companion to Philippe Fournier-Viger's video <strong>\"The PrefixSpan algorithm\"</strong>.</em></span>\n<blockquote>\n<span class=\"paragraph\">Customers buy things over time: first <em>apple and bread</em>, then <em>cake</em>, then <em>apple</em> again.\n<strong>Which sub-sequences of purchases show up for many customers?</strong></span>\n</blockquote>\n<span class=\"paragraph\">PrefixSpan answers that by <strong>growing patterns one item at a time, depth-first</strong>, and by\nonly ever looking at a shrinking <strong>projected database</strong>, so it never wastes time on patterns\nthat don't exist in the data. Every section below has something to step through, click or slide.</span></span><marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eColour language used throughout&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003cul&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cspan style=&#92;&quot;color:#2a9d55&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003egreen&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e: frequent (support \u2265 minsup), a pattern we output&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cspan style=&#92;&quot;color:#999&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003egrey&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e / &#92;u003cspan style=&#92;&quot;color:#d1495b&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003ered \u2715&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e: infrequent, pruned&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cspan style=&#92;&quot;color:#f18f01&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eorange&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e: the current prefix / the step we are looking at&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cspan style=&#92;&quot;color:#3b6fb6&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eblue&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e: a pointer into the original database (pseudo-projection)&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003e&#92;u003cspan style=&#92;&quot;opacity:.45;text-decoration:line-through&#92;&quot;&#92;u003estruck-out grey text&#92;u003c/span&#92;u003e: the part of a sequence removed by projection&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ul&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;neutral&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "OuIe",
+      "code_hash": "8ce9018e1e182cf9d148cb3a04a95d85",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-sequences-itemsets-support\">1 \u00b7 Sequences, itemsets, support</h2>\n<span class=\"paragraph\">A <strong>sequence database</strong> is a list of sequences. Each sequence is an <em>ordered</em> list of\n<strong>itemsets</strong>; items inside one itemset happen <em>at the same time</em> (bought together), and\nitemsets later in the sequence happen <em>after</em>.</span>\n<span class=\"paragraph\">The video writes a sequence like \u27e8(a,b),(c),(a)\u27e9: <em>apple and bread together, then cake, then apple</em>.\nWe write it compactly as <strong>(a,b)(c)(a)</strong>.</span>\n<span class=\"paragraph\">Two ways a pattern can grow, and the video stresses not to confuse them:</span>\n<table>\n<thead>\n<tr>\n<th>notation</th>\n<th>meaning</th>\n<th>name</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>(a,b)</strong></td>\n<td>a and b <em>together</em> in the same itemset</td>\n<td>itemset-extension (the video's \"_b\")</td>\n</tr>\n<tr>\n<td><strong>(a)(b)</strong></td>\n<td>a, and <em>later</em> b</td>\n<td>sequence-extension</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">A pattern is <em>contained</em> in a sequence if its itemsets can be matched, in order, to itemsets\nof the sequence that are supersets of them. The <strong>support</strong> of a pattern is the number of\nsequences that contain it. With <strong>minsup = 3</strong>, we want every pattern contained in \u2265 3 sequences.</span>\n<span class=\"paragraph\"><strong>Why PrefixSpan?</strong> Earlier algorithms such as <strong>GSP</strong> generate candidate patterns by <em>joining</em>\nsmaller patterns without looking at the data, so they may waste time counting patterns that\nappear nowhere. PrefixSpan only extends a pattern with items it actually <em>sees</em> in the\n(projected) database.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RtPd",
+      "code_hash": "2e5b6e881dbb4245f421ba67202059fb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='RtPd-0' random-id='0d356702-b329-4d4a-ddab-7ebc05dba018'><marimo-table data-initial-value='[]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eSequence database (minsup = 3)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-data='&quot;[{&#92;&quot;SID&#92;&quot;:&#92;&quot;S1&#92;&quot;,&#92;&quot;sequence&#92;&quot;:&#92;&quot;(a,b)(c)(a)&#92;&quot;,&#92;&quot;shopping story&#92;&quot;:&#92;&quot;apple+bread &#92;&#92;u2192 cake &#92;&#92;u2192 apple&#92;&quot;},{&#92;&quot;SID&#92;&quot;:&#92;&quot;S2&#92;&quot;,&#92;&quot;sequence&#92;&quot;:&#92;&quot;(a,b)(b)(c)&#92;&quot;,&#92;&quot;shopping story&#92;&quot;:&#92;&quot;apple+bread &#92;&#92;u2192 bread &#92;&#92;u2192 cake&#92;&quot;},{&#92;&quot;SID&#92;&quot;:&#92;&quot;S3&#92;&quot;,&#92;&quot;sequence&#92;&quot;:&#92;&quot;(b)(c)(d)&#92;&quot;,&#92;&quot;shopping story&#92;&quot;:&#92;&quot;bread &#92;&#92;u2192 cake &#92;&#92;u2192 dates&#92;&quot;},{&#92;&quot;SID&#92;&quot;:&#92;&quot;S4&#92;&quot;,&#92;&quot;sequence&#92;&quot;:&#92;&quot;(b)(a,b)(c)&#92;&quot;,&#92;&quot;shopping story&#92;&quot;:&#92;&quot;bread &#92;&#92;u2192 apple+bread &#92;&#92;u2192 cake&#92;&quot;}]&quot;' data-total-rows='4' data-total-columns='3' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;SID&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;sequence&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;shopping story&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "uFSi",
+      "code_hash": "e386cc05626db0b109e43790c6b8534d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-the-algorithm\">2 \u00b7 The algorithm</h2>\n<span class=\"paragraph\">The video's simple version, as recursive pseudocode:</span>\n<div class=\"language-scdoc codehilite\"><pre><span></span><code>PrefixSpan(prefix s, projected DB D|s, minsup):\n    scan D|s once \u2192 support of every item that can extend s\n    for each item x with support \u2265 minsup:\n        output s' = s extended by x\n        build projected DB D|s'      # keep only what comes <span class=\"gs\">*after*</span> the first match\n        PrefixSpan(s', D|s', minsup)\n</code></pre></div>\n<span class=\"paragraph\"><strong>Projection.</strong> For a prefix, each sequence keeps only the part <strong>after the first occurrence</strong>\nof the prefix; sequences that don't contain the prefix are dropped. If the match ended in the\nmiddle of an itemset, the rest of that itemset stays as a <em>partial itemset</em>, written <strong>(_b)</strong>.</span>\n<span class=\"paragraph\"><strong>Counting extensions</strong> of a prefix whose last itemset is L:</span>\n<ul>\n<li><strong>itemset-extension</strong> x (x sorts after L's items): x appears in the partial itemset <code>(_x)</code>,\n  <em>or</em> in a later itemset that contains all of L plus x.</li>\n<li><strong>sequence-extension</strong> x: x appears in any later, complete itemset.</li>\n</ul>\n<span class=\"paragraph\">The implementation below works with <strong>pointers</strong> <code>(sequence, itemset, item)</code> into the original\ndatabase (the pseudo-projection of Section 4), and records a full <strong>trace</strong> of the depth-first search.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "geHJ",
+      "code_hash": "640db600de0474e31e05d885b816bfab",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e\u2705 Reproduces the video: item supports &#92;u003cstrong&#92;u003ea:3 b:4 c:4 d:1&#92;u003c/strong&#92;u003e, and the &#92;u003cstrong&#92;u003e7&#92;u003c/strong&#92;u003e sequential patterns &#92;u003cstrong&#92;u003e(a)&#92;u003c/strong&#92;u003e:3, &#92;u003cstrong&#92;u003e(a,b)&#92;u003c/strong&#92;u003e:3, &#92;u003cstrong&#92;u003e(a,b)(c)&#92;u003c/strong&#92;u003e:3, &#92;u003cstrong&#92;u003e(a)(c)&#92;u003c/strong&#92;u003e:3, &#92;u003cstrong&#92;u003e(b)&#92;u003c/strong&#92;u003e:4, &#92;u003cstrong&#92;u003e(b)(c)&#92;u003c/strong&#92;u003e:4, &#92;u003cstrong&#92;u003e(c)&#92;u003c/strong&#92;u003e:4&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;success&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xICK",
+      "code_hash": "8222156732f044a6989cd2ced59a7c1c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-watch-the-depth-first-search\">3 \u00b7 Watch the depth-first search</h2>\n<span class=\"paragraph\">Step through PrefixSpan on the video's database. <strong>Left:</strong> the search tree, exactly like the\nvideo's picture: the empty sequence at the root, each child is the prefix extended by one item.\nGreen nodes are frequent and get extended further; grey \u2715 nodes are counted once in the\nprojected database and then <strong>pruned</strong>: nothing that starts with them can be frequent.\nThe <strong>orange</strong> node is where the algorithm is right now.</span>\n<span class=\"paragraph\"><strong>Right:</strong> that node's projected database (struck-out grey = removed by projection,\n<code>_</code> marks a partial itemset) and the count table from a single scan, split into\n<strong>itemset-extensions</strong> (together, <code>(\u2026,x)</code>) and <strong>sequence-extensions</strong> (later, <code>(\u2026)(x)</code>).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "IVQQ",
+      "code_hash": "c34bd3bcf1f524d8fec97f47b13a3a43",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/json": "[8, 22]"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ImLE",
+      "code_hash": "f837750fde6a1bcf23c96060126f226c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "siyO",
+      "code_hash": "833ee2d80875151b86f8aec225df353f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='siyO-0' random-id='c4821204-bb95-fd26-3997-76bde1400a84'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;ec449fe87f8a46e89b4abbf8215f5e12&quot;}' data-label='null' data-model-id='&quot;ec449fe87f8a46e89b4abbf8215f5e12&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "EZJq",
+      "code_hash": "85ff92fe203ef86492bcbff5bbcc0d89",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 1rem'><marimo-stat data-value='5' data-label='&quot;patterns output so far&quot;' data-caption='&quot;of 7 in total&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;9 / 15&quot;' data-label='&quot;items left in projected DB&quot;' data-caption='&quot;60% of the original&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;4 / 4&quot;' data-label='&quot;sequences still alive&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='1' data-label='&quot;extensions kept here&quot;' data-caption='&quot;3 pruned&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat></div><marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eStep to &#92;u003cstrong&#92;u003e(a)&#92;u003c/strong&#92;u003e. Find the two different counts for b: &#92;u003cstrong&#92;u003e(a,b)&#92;u003c/strong&#92;u003e = 3 (together) vs &#92;u003cstrong&#92;u003e(a)(b)&#92;u003c/strong&#92;u003e = 1 (later). Same letters, different patterns!&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eWatch &#92;u003cem&#92;u003eitems left in projected DB&#92;u003c/em&#92;u003e as the prefix gets longer: the database keeps &#92;u003cstrong&#92;u003eshrinking&#92;u003c/strong&#92;u003e, which is why deep levels are cheap.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eNote that &#92;u003cstrong&#92;u003ed&#92;u003c/strong&#92;u003e is pruned at the root and never appears again, and that nobody ever counts a pattern like (d)(a): PrefixSpan only counts what it sees.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wQHF",
+      "code_hash": "671192faaa2e8eeb9da95733e9902bfa",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-optimization-1-pseudo-projection-pointers-instead-of-copies\">4 \u00b7 Optimization 1: pseudo-projection (pointers instead of copies)</h2>\n<span class=\"paragraph\">Copying the database for <em>every</em> prefix costs a lot of time and memory: there may be thousands\nof prefixes. The video's fix: <strong>don't copy, point</strong>. A projected database is just one\n<strong>pointer per sequence</strong> into the <em>original</em> database, marking where the prefix's first match ended.</span>\n<span class=\"paragraph\">Build a prefix yourself by clicking. Buttons show the <strong>support</strong> each extension would have\n(green if \u2265 minsup). Watch the <span style=\"color:#3b6fb6\"><strong>blue pointers</strong></span> slide right through the\noriginal sequences, consumed items turn grey, and sequences without a match fade out.</span>\n<span class=\"paragraph\">The toggle applies the video's second optimization: <strong>remove infrequent items</strong> (like d) from\nthe database once, after the first scan, so every later scan is shorter.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "QUSc",
+      "code_hash": "471e44872b7df9c8ef65035d3bff9adb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ARzu",
+      "code_hash": "90f1ea01f5541bac8c444f46dee38e36",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='ARzu-0' random-id='4d435a8f-d5ba-777d-ee4b-facdd4c62b8f'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;c4c9036e1746460bac422516d86b1393&quot;}' data-label='null' data-model-id='&quot;c4c9036e1746460bac422516d86b1393&quot;'></marimo-anywidget></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "tZBh",
+      "code_hash": "9d440c81e3bb54d8a123c7ff47bf281c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 1rem'><marimo-stat data-value='3' data-label='&quot;support of (a)&quot;' data-caption='&quot;frequent \u2713&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='8' data-label='&quot;items a real copy would store&quot;' data-caption='&quot;this projected DB&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='3' data-label='&quot;pointers needed instead&quot;' data-caption='&quot;one (itemset, item) pair per sequence&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;28 vs 24&quot;' data-label='&quot;whole run: copied items vs pointers&quot;' data-caption='&quot;over all 7 projections&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat></div><marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eClick &#92;u003cstrong&#92;u003e(a)&#92;u003c/strong&#92;u003e then &#92;u003cstrong&#92;u003e(a,b)&#92;u003c/strong&#92;u003e then &#92;u003cstrong&#92;u003e(a,b)(c)&#92;u003c/strong&#92;u003e: the pointer moves right each time, and S3 is dropped right away.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eCompare &#92;u003cstrong&#92;u003e(a)(b)&#92;u003c/strong&#92;u003e (support 1) with &#92;u003cstrong&#92;u003e(a,b)&#92;u003c/strong&#92;u003e (support 3). The pointer for (a,b) stays &#92;u003cem&#92;u003einside&#92;u003c/em&#92;u003e the first itemset.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eTick &#92;u003cem&#92;u003eremove infrequent items&#92;u003c/em&#92;u003e: &#92;u003cstrong&#92;u003ed&#92;u003c/strong&#92;u003e disappears, and the copy count for the whole run drops while the patterns stay the same.&#92;n   On a tiny DB the savings look small; on real data with millions of items the video quotes ~10\u00d7 time and memory.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Gubd",
+      "code_hash": "3c0483ca8e847a193b6d274e6303f990",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-what-makes-prefixspan-slow-lower-the-minimum-support\">5 \u00b7 What makes PrefixSpan slow? Lower the minimum support</h2>\n<span class=\"paragraph\">The video lists what drives the cost: <strong>minsup</strong> first (lower it and the time can grow\n<em>exponentially</em>), then the database: number of sequences, their length, how similar they are,\nand the number of distinct items.</span>\n<span class=\"paragraph\">Generate a random sequence database below (seeded, so it's reproducible). Item popularity follows a\nskewed (Zipf-like) law so some items are common, like real shopping data. The chart sweeps minsup\nfrom 60 % of the sequences down to your chosen floor. Runs are capped at 20 000 patterns so the\nnotebook stays responsive.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iygW",
+      "code_hash": "79fdf2bcec57792e0319f991bf3f99e7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='iygW-0' random-id='b3cc3c1c-9759-138a-503b-f803f32b3464'><marimo-slider data-initial-value='150' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003ch1 id=&#92;&quot;sequences&#92;&quot;&#92;u003esequences&#92;u003c/h1&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='20' data-stop='400' data-step='10' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='iygW-1' random-id='faa790c3-37ee-7e58-b6d8-1a52bd63e0a2'><marimo-slider data-initial-value='12' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003ch1 id=&#92;&quot;distinct-items&#92;&quot;&#92;u003edistinct items&#92;u003c/h1&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='4' data-stop='40' data-step='1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='iygW-2' random-id='8438a880-9c19-a35d-df74-5cf0349670e8'><marimo-slider data-initial-value='5' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eavg. # itemsets per sequence&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='2' data-stop='10' data-step='1' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='iygW-3' random-id='f2c279ef-75fe-1030-ab96-fb5cbd6e671c'><marimo-slider data-initial-value='0.08' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003elowest minsup (fraction)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0.02' data-stop='0.4' data-step='0.01' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='iygW-4' random-id='ae17ed6e-1e5c-8997-c317-f424e47f10a1'><marimo-number data-initial-value='7' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eseed&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='0' data-stop='999' data-debounce='false' data-full-width='false' data-disabled='false'></marimo-number></marimo-ui-element></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PVAp",
+      "code_hash": "948677673c9c6d20055d545682b4eb42",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Sample of the generated database:</strong> <code>(b,f)(a)(b)(c)(c,f,l)(a)</code> \u00b7 <code>(b)(b,d)</code> \u00b7 <code>(d)(b)</code> \u00b7 <code>(a)</code> \u00b7 <code>(b,c)(b)(a)(b,l)(c,d)(a,b)(b)</code> \u2026</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ACPv",
+      "code_hash": "b4bc609f89c7057d7989f5b84038ab71",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.vegalite.v6+json": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v6.4.1.json\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 300\n    }\n  },\n  \"datasets\": {\n    \"data-4d66cb1d3983f7e1de9267bf5a0d1cd0\": [\n      {\n        \"blind candidates (GSP-style)\": 84,\n        \"capped\": false,\n        \"extensions counted (PrefixSpan)\": 80,\n        \"minsup\": 90,\n        \"minsup_frac\": 0.6,\n        \"patterns\": 3,\n        \"projections\": 3,\n        \"runtime_ms\": 1.0416939999231545\n      },\n      {\n        \"blind candidates (GSP-style)\": 108,\n        \"capped\": false,\n        \"extensions counted (PrefixSpan)\": 101,\n        \"minsup\": 72,\n        \"minsup_frac\": 0.48,\n        \"patterns\": 4,\n        \"projections\": 4,\n        \"runtime_ms\": 0.9806109999317414\n      },\n      {\n        \"blind candidates (GSP-style)\": 204,\n        \"capped\": false,\n        \"extensions counted (PrefixSpan)\": 180,\n        \"minsup\": 57,\n        \"minsup_frac\": 0.383,\n        \"patterns\": 8,\n        \"projections\": 8,\n        \"runtime_ms\": 1.8272340000748954\n      },\n      {\n        \"blind candidates (GSP-style)\": 324,\n        \"capped\": false,\n        \"extensions counted (PrefixSpan)\": 286,\n        \"minsup\": 46,\n        \"minsup_frac\": 0.307,\n        \"patterns\": 13,\n        \"projections\": 13,\n        \"runtime_ms\": 2.829256000040914\n      },\n      {\n        \"blind candidates (GSP-style)\": 564,\n        \"capped\": false,\n        \"extensions counted (PrefixSpan)\": 466,\n        \"minsup\": 37,\n        \"minsup_frac\": 0.245,\n        \"patterns\": 23,\n        \"projections\": 23,\n        \"runtime_ms\": 4.086676000042644\n      },\n      {\n        \"blind candidates (GSP-style)\": 852,\n        \"capped\": false,\n        \"extensions counted (PrefixSpan)\": 678,\n        \"minsup\": 29,\n        \"minsup_frac\": 0.196,\n        \"patterns\": 35,\n        \"projections\": 35,\n        \"runtime_ms\": 8.077339000010397\n      },\n      {\n        \"blind candidates (GSP-style)\": 1020,\n        \"capped\": false,\n        \"extensions counted (PrefixSpan)\": 797,\n        \"minsup\": 24,\n        \"minsup_frac\": 0.157,\n        \"patterns\": 42,\n        \"projections\": 42,\n        \"runtime_ms\": 7.232588000078977\n      },\n      {\n        \"blind candidates (GSP-style)\": 1692,\n        \"capped\": false,\n        \"extensions counted (PrefixSpan)\": 1221,\n        \"minsup\": 19,\n        \"minsup_frac\": 0.125,\n        \"patterns\": 70,\n        \"projections\": 70,\n        \"runtime_ms\": 12.03078399998958\n      },\n      {\n        \"blind candidates (GSP-style)\": 2604,\n        \"capped\": false,\n        \"extensions counted (PrefixSpan)\": 1758,\n        \"minsup\": 15,\n        \"minsup_frac\": 0.1,\n        \"patterns\": 108,\n        \"projections\": 108,\n        \"runtime_ms\": 17.1368269998311\n      },\n      {\n        \"blind candidates (GSP-style)\": 3780,\n        \"capped\": false,\n        \"extensions counted (PrefixSpan)\": 2337,\n        \"minsup\": 12,\n        \"minsup_frac\": 0.08,\n        \"patterns\": 157,\n        \"projections\": 157,\n        \"runtime_ms\": 31.80303899989667\n      }\n    ],\n    \"data-c9fc5828252431723f098a9669ad92a0\": [\n      {\n        \"minsup_frac\": 0.6,\n        \"value\": 80,\n        \"variable\": \"extensions counted (PrefixSpan)\"\n      },\n      {\n        \"minsup_frac\": 0.48,\n        \"value\": 101,\n        \"variable\": \"extensions counted (PrefixSpan)\"\n      },\n      {\n        \"minsup_frac\": 0.383,\n        \"value\": 180,\n        \"variable\": \"extensions counted (PrefixSpan)\"\n      },\n      {\n        \"minsup_frac\": 0.307,\n        \"value\": 286,\n        \"variable\": \"extensions counted (PrefixSpan)\"\n      },\n      {\n        \"minsup_frac\": 0.245,\n        \"value\": 466,\n        \"variable\": \"extensions counted (PrefixSpan)\"\n      },\n      {\n        \"minsup_frac\": 0.196,\n        \"value\": 678,\n        \"variable\": \"extensions counted (PrefixSpan)\"\n      },\n      {\n        \"minsup_frac\": 0.157,\n        \"value\": 797,\n        \"variable\": \"extensions counted (PrefixSpan)\"\n      },\n      {\n        \"minsup_frac\": 0.125,\n        \"value\": 1221,\n        \"variable\": \"extensions counted (PrefixSpan)\"\n      },\n      {\n        \"minsup_frac\": 0.1,\n        \"value\": 1758,\n        \"variable\": \"extensions counted (PrefixSpan)\"\n      },\n      {\n        \"minsup_frac\": 0.08,\n        \"value\": 2337,\n        \"variable\": \"extensions counted (PrefixSpan)\"\n      },\n      {\n        \"minsup_frac\": 0.6,\n        \"value\": 84,\n        \"variable\": \"blind candidates (GSP-style)\"\n      },\n      {\n        \"minsup_frac\": 0.48,\n        \"value\": 108,\n        \"variable\": \"blind candidates (GSP-style)\"\n      },\n      {\n        \"minsup_frac\": 0.383,\n        \"value\": 204,\n        \"variable\": \"blind candidates (GSP-style)\"\n      },\n      {\n        \"minsup_frac\": 0.307,\n        \"value\": 324,\n        \"variable\": \"blind candidates (GSP-style)\"\n      },\n      {\n        \"minsup_frac\": 0.245,\n        \"value\": 564,\n        \"variable\": \"blind candidates (GSP-style)\"\n      },\n      {\n        \"minsup_frac\": 0.196,\n        \"value\": 852,\n        \"variable\": \"blind candidates (GSP-style)\"\n      },\n      {\n        \"minsup_frac\": 0.157,\n        \"value\": 1020,\n        \"variable\": \"blind candidates (GSP-style)\"\n      },\n      {\n        \"minsup_frac\": 0.125,\n        \"value\": 1692,\n        \"variable\": \"blind candidates (GSP-style)\"\n      },\n      {\n        \"minsup_frac\": 0.1,\n        \"value\": 2604,\n        \"variable\": \"blind candidates (GSP-style)\"\n      },\n      {\n        \"minsup_frac\": 0.08,\n        \"value\": 3780,\n        \"variable\": \"blind candidates (GSP-style)\"\n      }\n    ]\n  },\n  \"hconcat\": [\n    {\n      \"data\": {\n        \"name\": \"data-4d66cb1d3983f7e1de9267bf5a0d1cd0\"\n      },\n      \"height\": 240,\n      \"layer\": [\n        {\n          \"encoding\": {\n            \"tooltip\": [\n              {\n                \"field\": \"minsup\",\n                \"type\": \"quantitative\"\n              },\n              {\n                \"field\": \"patterns\",\n                \"type\": \"quantitative\"\n              },\n              {\n                \"field\": \"capped\",\n                \"type\": \"nominal\"\n              }\n            ],\n            \"x\": {\n              \"field\": \"minsup_frac\",\n              \"scale\": {\n                \"reverse\": true\n              },\n              \"title\": \"minsup (fraction of sequences)\",\n              \"type\": \"quantitative\"\n            },\n            \"y\": {\n              \"field\": \"patterns\",\n              \"scale\": {\n                \"type\": \"symlog\"\n              },\n              \"title\": \"# frequent patterns\",\n              \"type\": \"quantitative\"\n            }\n          },\n          \"mark\": {\n            \"color\": \"#2a9d55\",\n            \"point\": true,\n            \"type\": \"line\"\n          }\n        },\n        {\n          \"encoding\": {\n            \"tooltip\": [\n              {\n                \"field\": \"minsup\",\n                \"type\": \"quantitative\"\n              },\n              {\n                \"field\": \"runtime_ms\",\n                \"format\": \".1f\",\n                \"type\": \"quantitative\"\n              }\n            ],\n            \"x\": {\n              \"field\": \"minsup_frac\",\n              \"scale\": {\n                \"reverse\": true\n              },\n              \"title\": \"minsup (fraction of sequences)\",\n              \"type\": \"quantitative\"\n            },\n            \"y\": {\n              \"field\": \"runtime_ms\",\n              \"scale\": {\n                \"type\": \"symlog\"\n              },\n              \"title\": \"runtime (ms)\",\n              \"type\": \"quantitative\"\n            }\n          },\n          \"mark\": {\n            \"color\": \"#f18f01\",\n            \"point\": true,\n            \"type\": \"line\"\n          }\n        }\n      ],\n      \"resolve\": {\n        \"scale\": {\n          \"y\": \"independent\"\n        }\n      },\n      \"title\": \"patterns (green) and runtime (orange) explode as minsup drops\",\n      \"width\": 330\n    },\n    {\n      \"data\": {\n        \"name\": \"data-c9fc5828252431723f098a9669ad92a0\"\n      },\n      \"encoding\": {\n        \"color\": {\n          \"field\": \"variable\",\n          \"legend\": {\n            \"orient\": \"bottom\"\n          },\n          \"scale\": {\n            \"range\": [\n              \"#999\",\n              \"#2a9d55\"\n            ]\n          },\n          \"title\": null,\n          \"type\": \"nominal\"\n        },\n        \"strokeDash\": {\n          \"field\": \"variable\",\n          \"legend\": null,\n          \"type\": \"nominal\"\n        },\n        \"x\": {\n          \"field\": \"minsup_frac\",\n          \"scale\": {\n            \"reverse\": true\n          },\n          \"title\": \"minsup (fraction of sequences)\",\n          \"type\": \"quantitative\"\n        },\n        \"y\": {\n          \"field\": \"value\",\n          \"scale\": {\n            \"type\": \"symlog\"\n          },\n          \"title\": \"patterns looked at\",\n          \"type\": \"quantitative\"\n        }\n      },\n      \"height\": 240,\n      \"mark\": {\n        \"point\": true,\n        \"type\": \"line\"\n      },\n      \"title\": \"what gets counted\",\n      \"width\": 330\n    }\n  ],\n  \"usermeta\": {\n    \"embedOptions\": {}\n  }\n}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "KSSf",
+      "code_hash": "e54c071a5018d928cb95a104caae6b94",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 1rem'><marimo-stat data-value='157' data-label='&quot;patterns at minsup=12&quot;' data-caption='&quot;vs 3 at minsup=90&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;32 ms&quot;' data-label='&quot;runtime at lowest minsup&quot;' data-caption='&quot;31\u00d7 the highest minsup&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;1.6\u00d7&quot;' data-label='&quot;blind candidates / counted extensions&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat></div><marimo-callout-output data-html='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cem&#92;u003eBlind candidates&#92;u003c/em&#92;u003e = what a generator that never looks at the data would have to test: every&#92;nitem as an itemset- and as a sequence-extension of every frequent pattern. PrefixSpan only counts&#92;nthe items that actually occur in each projected database (green line). (Real GSP&#x27;s join is smarter&#92;nthan &#92;&quot;every item&#92;&quot;, but still creates candidates without checking the data.)&#92;u003c/span&#92;u003e&#92;n&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003e&#92;u003cstrong&#92;u003eTry this&#92;u003c/strong&#92;u003e&#92;u003c/span&#92;u003e&#92;n&#92;u003col&#92;u003e&#92;n&#92;u003cli&#92;u003eDrag &#92;u003cem&#92;u003elowest minsup&#92;u003c/em&#92;u003e down towards 0.02 and watch the curves bend upward: that&#x27;s the exponential blow-up.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eRaise &#92;u003cem&#92;u003e# distinct items&#92;u003c/em&#92;u003e with everything else fixed: more items \u2192 sparser data \u2192 fewer patterns, but more blind candidates.&#92;u003c/li&#92;u003e&#92;n&#92;u003cli&#92;u003eRaise &#92;u003cem&#92;u003eavg. # itemsets&#92;u003c/em&#92;u003e: longer sequences \u2192 more patterns and longer scans.&#92;u003c/li&#92;u003e&#92;n&#92;u003c/ol&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-kind='&quot;info&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ghPZ",
+      "code_hash": "7db916f2542a1a1807223e23ff882859",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-sandbox-mine-your-own-sequences\">6 \u00b7 Sandbox: mine your own sequences</h2>\n<span class=\"paragraph\">One sequence per line. Write itemsets in parentheses, <code>(ab)(c)(a)</code> or <code>(a,b)(c)(a)</code>, or\nseparate itemsets with spaces, <code>ab c a</code>. Single letters are items; use commas for longer item\nnames, e.g. <code>(milk,bread)(eggs)</code>.</span>\n<span class=\"paragraph\">The video notes PrefixSpan is <strong>easy to extend with constraints</strong>; here you can cap the\npattern length (number of items), a one-line check in the recursion.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "jKBu",
+      "code_hash": "a1bf8b290cd9cca6b5360198eb676bfc",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='jKBu-0' random-id='39a99281-0b4d-0d56-64ca-2cb39adee352'><marimo-text-area data-initial-value='&quot;(ab)(c)(a)&#92;n(ab)(b)(c)&#92;n(b)(c)(d)&#92;n(b)(ab)(c)&#92;n(a)(bc)(d)&quot;' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eSequence database&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-placeholder='&quot;&quot;' data-disabled='false' data-debounce='true' data-full-width='true' data-rows='7'></marimo-text-area></marimo-ui-element><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='jKBu-1' random-id='f6f0dc2a-a105-017e-0809-c187f274ec5c'><marimo-slider data-initial-value='2' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eminsup (absolute)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='10' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='jKBu-2' random-id='a18bdf56-f0b4-96c7-3436-c5c21a3029fb'><marimo-slider data-initial-value='8' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003emax pattern length (items)&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='8' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='true' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "LYfZ",
+      "code_hash": "d7f80a9e0224ea0bdc09e3255ad4dee5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Parsed <strong>5</strong> sequences: <code>(a,b)(c)(a)</code> \u00b7 <code>(a,b)(b)(c)</code> \u00b7 <code>(b)(c)(d)</code> \u00b7 <code>(b)(a,b)(c)</code> \u00b7 <code>(a)(b,c)(d)</code></span></span><div style='display: flex;flex: 1;flex-direction: row;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 1rem'><marimo-stat data-value='14' data-label='&quot;frequent patterns&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='15' data-label='&quot;prefixes explored (DFS nodes)&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat></div><marimo-ui-element object-id='LYfZ-0' random-id='7b712f64-3f89-63a6-09dd-a665283d7b82'><marimo-table data-initial-value='[]' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eFrequent sequential patterns&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-data='&quot;[{&#92;&quot;Index0&#92;&quot;:0,&#92;&quot;pattern&#92;&quot;:&#92;&quot;(a)&#92;&quot;,&#92;&quot;support&#92;&quot;:4,&#92;&quot;length&#92;&quot;:1,&#92;&quot;# itemsets&#92;&quot;:1},{&#92;&quot;Index0&#92;&quot;:5,&#92;&quot;pattern&#92;&quot;:&#92;&quot;(b)&#92;&quot;,&#92;&quot;support&#92;&quot;:5,&#92;&quot;length&#92;&quot;:1,&#92;&quot;# itemsets&#92;&quot;:1},{&#92;&quot;Index0&#92;&quot;:11,&#92;&quot;pattern&#92;&quot;:&#92;&quot;(c)&#92;&quot;,&#92;&quot;support&#92;&quot;:5,&#92;&quot;length&#92;&quot;:1,&#92;&quot;# itemsets&#92;&quot;:1},{&#92;&quot;Index0&#92;&quot;:13,&#92;&quot;pattern&#92;&quot;:&#92;&quot;(d)&#92;&quot;,&#92;&quot;support&#92;&quot;:2,&#92;&quot;length&#92;&quot;:1,&#92;&quot;# itemsets&#92;&quot;:1},{&#92;&quot;Index0&#92;&quot;:3,&#92;&quot;pattern&#92;&quot;:&#92;&quot;(a)(b)&#92;&quot;,&#92;&quot;support&#92;&quot;:2,&#92;&quot;length&#92;&quot;:2,&#92;&quot;# itemsets&#92;&quot;:2},{&#92;&quot;Index0&#92;&quot;:4,&#92;&quot;pattern&#92;&quot;:&#92;&quot;(a)(c)&#92;&quot;,&#92;&quot;support&#92;&quot;:4,&#92;&quot;length&#92;&quot;:2,&#92;&quot;# itemsets&#92;&quot;:2},{&#92;&quot;Index0&#92;&quot;:1,&#92;&quot;pattern&#92;&quot;:&#92;&quot;(a,b)&#92;&quot;,&#92;&quot;support&#92;&quot;:3,&#92;&quot;length&#92;&quot;:2,&#92;&quot;# itemsets&#92;&quot;:1},{&#92;&quot;Index0&#92;&quot;:6,&#92;&quot;pattern&#92;&quot;:&#92;&quot;(b)(a)&#92;&quot;,&#92;&quot;support&#92;&quot;:2,&#92;&quot;length&#92;&quot;:2,&#92;&quot;# itemsets&#92;&quot;:2},{&#92;&quot;Index0&#92;&quot;:7,&#92;&quot;pattern&#92;&quot;:&#92;&quot;(b)(b)&#92;&quot;,&#92;&quot;support&#92;&quot;:2,&#92;&quot;length&#92;&quot;:2,&#92;&quot;# itemsets&#92;&quot;:2},{&#92;&quot;Index0&#92;&quot;:9,&#92;&quot;pattern&#92;&quot;:&#92;&quot;(b)(c)&#92;&quot;,&#92;&quot;support&#92;&quot;:4,&#92;&quot;length&#92;&quot;:2,&#92;&quot;# itemsets&#92;&quot;:2}]&quot;' data-total-rows='14' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;pattern&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;support&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;length&quot;,[&quot;integer&quot;,&quot;int64&quot;]],[&quot;# itemsets&quot;,[&quot;integer&quot;,&quot;int64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[[&quot;Index0&quot;,[&quot;integer&quot;,&quot;int64&quot;]]]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Ycww",
+      "code_hash": "f7a41948eb4d84982fa7b05312c79992",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Step through your own database:</strong></span></span><marimo-ui-element object-id='Ycww-0' random-id='02726a58-96f5-2954-440a-694dab572c5f'><marimo-anywidget data-initial-value='{&quot;model_id&quot;:&quot;941695aaca1449298fc2b42cc825a173&quot;}' data-label='null' data-model-id='&quot;941695aaca1449298fc2b42cc825a173&quot;'></marimo-anywidget></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "UWrK",
+      "code_hash": "8aec56bf18cfecaa476ee9fff24c04be",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"7-check-yourself\">7 \u00b7 Check yourself</h2>\n<span class=\"paragraph\">Commit to your answers <strong>first</strong>, then flip the reveal switch. All answers are about the\nvideo's database (S1 (a,b)(c)(a), S2 (a,b)(b)(c), S3 (b)(c)(d), S4 (b)(a,b)(c)) unless stated.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "sWbV",
+      "code_hash": "4659ba0965c70be0fec386326a169579",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='sWbV-14' random-id='d3946b25-4df1-7c03-db91-23f8536037f3'><marimo-dict data-initial-value='{&quot;q1&quot;:[],&quot;q2&quot;:[],&quot;q3&quot;:[],&quot;q4&quot;:[],&quot;q5&quot;:[],&quot;q6&quot;:0,&quot;q7&quot;:[]}' data-label='null' data-element-ids='{&quot;sWbV-7&quot;:&quot;q1&quot;,&quot;sWbV-8&quot;:&quot;q2&quot;,&quot;sWbV-9&quot;:&quot;q3&quot;,&quot;sWbV-10&quot;:&quot;q4&quot;,&quot;sWbV-11&quot;:&quot;q5&quot;,&quot;sWbV-12&quot;:&quot;q6&quot;,&quot;sWbV-13&quot;:&quot;q7&quot;}'><marimo-json-output data-json-data='{&quot;q1&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;sWbV-7&#x27; random-id=&#x27;ab76ae84-775d-372c-a1a0-8ae3794745ec&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003col&amp;#92;u003e&amp;#92;n&amp;#92;u003cli&amp;#92;u003eSupport of (a)(c)?&amp;#92;u003c/li&amp;#92;u003e&amp;#92;n&amp;#92;u003c/ol&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;0&amp;quot;,&amp;quot;1&amp;quot;,&amp;quot;2&amp;quot;,&amp;quot;3&amp;quot;,&amp;quot;4&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q2&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;sWbV-8&#x27; random-id=&#x27;8388a50d-d94d-4354-0a46-ab6b25512adf&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003col start=&amp;#92;&amp;quot;2&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;n&amp;#92;u003cli&amp;#92;u003eSupport of (a)(b), a &amp;#92;u003cem&amp;#92;u003efollowed by&amp;#92;u003c/em&amp;#92;u003e b?&amp;#92;u003c/li&amp;#92;u003e&amp;#92;n&amp;#92;u003c/ol&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;0&amp;quot;,&amp;quot;1&amp;quot;,&amp;quot;2&amp;quot;,&amp;quot;3&amp;quot;,&amp;quot;4&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q3&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;sWbV-9&#x27; random-id=&#x27;a47278a7-991c-0f34-bf20-4db03297ca5f&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003col start=&amp;#92;&amp;quot;3&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;n&amp;#92;u003cli&amp;#92;u003eSupport of (a,b), a and b &amp;#92;u003cem&amp;#92;u003etogether&amp;#92;u003c/em&amp;#92;u003e?&amp;#92;u003c/li&amp;#92;u003e&amp;#92;n&amp;#92;u003c/ol&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;0&amp;quot;,&amp;quot;1&amp;quot;,&amp;quot;2&amp;quot;,&amp;quot;3&amp;quot;,&amp;quot;4&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q4&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;sWbV-10&#x27; random-id=&#x27;633b6e9f-415d-3fbb-1c37-dfacc0492176&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003col start=&amp;#92;&amp;quot;4&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;n&amp;#92;u003cli&amp;#92;u003eSupport of (b)(a)?&amp;#92;u003c/li&amp;#92;u003e&amp;#92;n&amp;#92;u003c/ol&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;0&amp;quot;,&amp;quot;1&amp;quot;,&amp;quot;2&amp;quot;,&amp;quot;3&amp;quot;,&amp;quot;4&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q5&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;sWbV-11&#x27; random-id=&#x27;40fff949-8e8f-f265-270a-4a7ed7011969&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003col start=&amp;#92;&amp;quot;5&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;n&amp;#92;u003cli&amp;#92;u003eWhich sequences survive in the projected DB of (a,b)?&amp;#92;u003c/li&amp;#92;u003e&amp;#92;n&amp;#92;u003c/ol&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;S1, S2, S4&amp;quot;,&amp;quot;S1, S2&amp;quot;,&amp;quot;S1, S2, S3, S4&amp;quot;,&amp;quot;S2, S4&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q6&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;sWbV-12&#x27; random-id=&#x27;f81b6dfc-38d5-1a87-4362-2757f812159f&#x27;&#92;u003e&#92;u003cmarimo-number data-initial-value=&#x27;0&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003col start=&amp;#92;&amp;quot;6&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;n&amp;#92;u003cli&amp;#92;u003eMini DB (a)(b)(c) / (a,c)(b) / (b)(c), minsup 2: how many frequent patterns?&amp;#92;u003c/li&amp;#92;u003e&amp;#92;n&amp;#92;u003c/ol&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-start=&#x27;0&#x27; data-stop=&#x27;20&#x27; data-debounce=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-number&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;,&quot;q7&quot;:&quot;text/html:&#92;u003cmarimo-ui-element object-id=&#x27;sWbV-13&#x27; random-id=&#x27;ab57d1d7-4160-07a9-f14e-2bdb3cc62802&#x27;&#92;u003e&#92;u003cmarimo-dropdown data-initial-value=&#x27;[]&#x27; data-label=&#x27;&amp;quot;&amp;#92;u003cspan class=&amp;#92;&amp;quot;markdown prose dark:prose-invert contents&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;u003col start=&amp;#92;&amp;quot;7&amp;#92;&amp;quot;&amp;#92;u003e&amp;#92;n&amp;#92;u003cli&amp;#92;u003eCan PrefixSpan ever count a pattern that occurs in 0 sequences?&amp;#92;u003c/li&amp;#92;u003e&amp;#92;n&amp;#92;u003c/ol&amp;#92;u003e&amp;#92;u003c/span&amp;#92;u003e&amp;quot;&#x27; data-options=&#x27;[&amp;quot;yes&amp;quot;,&amp;quot;no&amp;quot;]&#x27; data-allow-select-none=&#x27;true&#x27; data-searchable=&#x27;false&#x27; data-full-width=&#x27;false&#x27; data-disabled=&#x27;false&#x27;&#92;u003e&#92;u003c/marimo-dropdown&#92;u003e&#92;u003c/marimo-ui-element&#92;u003e&quot;}' data-value-types='&quot;python&quot;' data-name='&quot;dictionary&quot;'></marimo-json-output></marimo-dict></marimo-ui-element><marimo-ui-element object-id='sWbV-15' random-id='82564b46-3b0d-038f-a7d8-bdfcd04be5a2'><marimo-switch data-initial-value='false' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ereveal answers&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-disabled='false'></marimo-switch></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "XrfL",
+      "code_hash": "0c57734c0f5dd30c96352cf5e588da41",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>Answer all questions, then flip <strong>reveal answers</strong>.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bHJT",
+      "code_hash": "38409d0f33b5fd1cf12e8d7f3119809a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"recap\">Recap</h2></span><span class=\"markdown prose dark:prose-invert contents\"><table>\n<thead>\n<tr>\n<th>idea</th>\n<th>what to remember</th>\n<th>where you played with it</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>sequence DB &amp; support</td>\n<td>ordered itemsets; support = # sequences containing the pattern</td>\n<td>\u00a71 table</td>\n</tr>\n<tr>\n<td>itemset- vs sequence-extension</td>\n<td><strong>(a,b)</strong> together \u2260 <strong>(a)(b)</strong> later; counted separately (\"_b\")</td>\n<td>\u00a73 count tables, \u00a74 buttons</td>\n</tr>\n<tr>\n<td>database projection</td>\n<td>keep only what follows the first match of the prefix; drop non-matching sequences</td>\n<td>\u00a73 right panel</td>\n</tr>\n<tr>\n<td>depth-first search</td>\n<td>extend one frequent prefix all the way down, then backtrack</td>\n<td>\u00a73 search tree</td>\n</tr>\n<tr>\n<td>pruning (anti-monotonicity)</td>\n<td>an infrequent prefix can't have frequent extensions (d, (a)(b), \u2026)</td>\n<td>\u00a73 grey \u2715 nodes</td>\n</tr>\n<tr>\n<td>only real patterns</td>\n<td>candidates come from the data, never from blind joins (vs GSP)</td>\n<td>\u00a75 right chart</td>\n</tr>\n<tr>\n<td>pseudo-projection</td>\n<td>one pointer per sequence instead of a copy, ~10\u00d7 less memory</td>\n<td>\u00a74</td>\n</tr>\n<tr>\n<td>remove infrequent items</td>\n<td>drop d once after the first scan; every later scan is shorter</td>\n<td>\u00a74 toggle</td>\n</tr>\n<tr>\n<td>performance</td>\n<td>minsup \u2193 \u21d2 patterns &amp; time \u2191 (exponentially); DB size, length, #items matter</td>\n<td>\u00a75 sliders</td>\n</tr>\n<tr>\n<td>constraints</td>\n<td>easy to add, e.g. max length, max gap</td>\n<td>\u00a76</td>\n</tr>\n</tbody>\n</table></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>Source: Philippe Fournier-Viger, \u201cThe PrefixSpan algorithm\u201d (video). A fast Java implementation is in the open-source SPMF library.</em></span></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "LTYg",
+      "code_hash": "be6fa0e523db713387db585a273eb54d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
